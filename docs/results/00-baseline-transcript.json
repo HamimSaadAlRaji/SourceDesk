@@ -1,0 +1,107 @@
+[
+  {
+    "question": "Does FastAPI have built-in rate limiting, and if so what's the default limit?",
+    "answer": "No, the context does not mention built-in rate limiting in FastAPI. However, it does mention a `limit` parameter that is an `int` and defaults to `100`, but this appears to be a custom parameter in an example, not a built-in rate limiting feature.",
+    "retrieved": [
+      {
+        "doc_id": "tutorial/query-params.md",
+        "score": 0.73895943,
+        "text": "the URL\n* `limit=10`: because that was the default value\n\n## Optional parameters { #optional-parameters }\n\nThe same way, you can declare optional query parameters, by setting their default to `None`:\n\n{* ../../docs_src/query_params/tutorial002_py310.py hl[7] *}\n\nIn this case, the function parameter `q` will be optional, and will be `None` by default.\n\n/// tip\n\nAlso notice that **FastAPI** is smart enough to notice that the path parameter `item_id` is a path parameter and `q` is not, so, it's a q"
+      },
+      {
+        "doc_id": "tutorial/dependencies/index.md",
+        "score": 0.7344954,
+        "text": " `limit` that is an `int`, and by default is `100`.\n\nAnd then it just returns a `dict` containing those values.\n\n/// note\n\nFastAPI added support for `Annotated` (and started recommending it) in version 0.95.0.\n\nIf you have an older version, you would get errors when trying to use `Annotated`.\n\nMake sure you [Upgrade the FastAPI version](../../deployment/versions.md#upgrading-the-fastapi-versions) to at least 0.95.1 before using `Annotated`.\n\n///\n\n### Import `Depends` { #import-depends }\n\n{* ../."
+      },
+      {
+        "doc_id": "tutorial/encoder.md",
+        "score": 0.7281883,
+        "text": " is actually used by **FastAPI** internally to convert data. But it is useful in many other scenarios.\n\n///\n"
+      }
+    ]
+  },
+  {
+    "question": "What is the default request timeout in FastAPI?",
+    "answer": "The context provided does not mention the default request timeout in FastAPI. However, according to the Starlette documentation, which FastAPI is built on top of, the default request timeout is not explicitly defined. But you can set a timeout using the `timeout` parameter when creating a `Request` object or a `Client` session. \n\nIf you're looking to set a timeout for your entire FastAPI application, you might need to use a middleware or a library that provides this functionality. \n\nFor example, you can use the `TimeoutMiddleware` from the `slowapi` library or `TimeoutMiddleware` from `slowapi.ext.fastapi` to set a timeout for your FastAPI application. \n\nHere is an example:\n```python\nfrom fastapi import FastAPI\nfrom slowapi import Limiter, _rate_limit_exceeded\nfrom slowapi.util import get_remote_address\nfrom slowapi.errors import RateLimitExceeded\n\nlimiter = Limiter(key_func=get_remote_address)\napp = FastAPI()\napp.state.limiter = limiter\napp.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded)\n\n@app.middleware(\"http\")\nasync def add_process_time_header(request, call_next):\n    import time\n    start_time = time.time()\n    response = await call_next(request)\n    process_time = time.time() - start_time\n    if process_time > 10: # 10 seconds timeout\n        raise HTTPException(status_code=408, detail=\"Request timed out\")\n    return response\n```\nIn this example, any request that takes longer than 10 seconds will raise an `HTTPException` with a 408 status code. \n\nPlease note that this is just an example and might need to be adapted to your specific use case. \n\nAlso, note that the context does not provide information about the default request timeout, so this answer is based on general knowledge of FastAPI and Starlette.",
+    "retrieved": [
+      {
+        "doc_id": "advanced/using-request-directly.md",
+        "score": 0.7384758,
+        "text": "# Using the Request Directly { #using-the-request-directly }\n\nUp to now, you have been declaring the parts of the request that you need with their types.\n\nTaking data from:\n\n* The path as parameters.\n* Headers.\n* Cookies.\n* etc.\n\nAnd by doing so, **FastAPI** is validating that data, converting it and generating documentation for your API automatically.\n\nBut there are situations where you might need to access the `Request` object directly.\n\n## Details about the `Request` object { #details-about-t"
+      },
+      {
+        "doc_id": "tutorial/query-params-str-validations.md",
+        "score": 0.73524904,
+        "text": "idate** the data making sure that the max length is 50 characters\n* Show a **clear error** for the client when the data is not valid\n* **Document** the parameter in the OpenAPI schema *path operation* (so it will show up in the **automatic docs UI**)\n\n## Alternative (old): `Query` as the default value { #alternative-old-query-as-the-default-value }\n\nPrevious versions of FastAPI (before <dfn title=\"before 2023-03\">0.95.0</dfn>) required you to use `Query` as the default value of your parameter, i"
+      },
+      {
+        "doc_id": "advanced/using-request-directly.md",
+        "score": 0.72306824,
+        "text": "he-request-object }\n\nAs **FastAPI** is actually **Starlette** underneath, with a layer of several tools on top, you can use Starlette's [`Request`](https://starlette.dev/requests/) object directly when you need to.\n\nIt would also mean that if you get data from the `Request` object directly (for example, read the body) it won't be validated, converted or documented (with OpenAPI, for the automatic API user interface) by FastAPI.\n\nAlthough any other parameter declared normally (for example, the bo"
+      }
+    ]
+  },
+  {
+    "question": "How do you define a path parameter with a regex constraint in FastAPI?",
+    "answer": "To define a path parameter with a regex constraint in FastAPI, you can use the `path` function parameter with a regular expression. \n\nHere's an example:\n```python\nfrom fastapi import FastAPI\n\napp = FastAPI()\n\n@app.get(\"/items/{item_id}\")\nasync def read_item(item_id: str = Path(..., regex=\"^\\\\d{1,5}$\")):\n    return {\"item_id\": item_id}\n```\nIn this example, `item_id` is a path parameter that must match the regex `^\\\\d{1,5}$`, which means it must be a digit (`\\\\d`) that appears between 1 and 5 times (`{1,5}`). \n\nIf the `item_id` does not match this regex, FastAPI will return a 404 error. \n\nYou can adjust the regex to fit your specific needs. \n\nNote that the `Path` function is used to add additional validation or metadata to the path parameter. The `...` is used to indicate that the parameter is required. \n\nAlso, note that the regex is a string, so backslashes need to be escaped with another backslash (`\\\\`).",
+    "retrieved": [
+      {
+        "doc_id": "tutorial/query-params.md",
+        "score": 0.7955375,
+        "text": "/foo?short=yes\n```\n\nor any other case variation (uppercase, first letter in uppercase, etc), your function will see the parameter `short` with a `bool` value of `True`. Otherwise as `False`.\n\n\n## Multiple path and query parameters { #multiple-path-and-query-parameters }\n\nYou can declare multiple path parameters and query parameters at the same time, **FastAPI** knows which is which.\n\nAnd you don't have to declare them in any specific order.\n\nThey will be detected by name:\n\n{* ../../docs_src/quer"
+      },
+      {
+        "doc_id": "tutorial/path-params.md",
+        "score": 0.791509,
+        "text": "upport }\n\nOpenAPI doesn't support a way to declare a *path parameter* to contain a *path* inside, as that could lead to scenarios that are difficult to test and define.\n\nNevertheless, you can still do it in **FastAPI**, using one of the internal tools from Starlette.\n\nAnd the docs would still work, although not adding any documentation telling that the parameter should contain a path.\n\n### Path convertor { #path-convertor }\n\nUsing an option directly from Starlette you can declare a *path paramet"
+      },
+      {
+        "doc_id": "tutorial/query-params.md",
+        "score": 0.7716774,
+        "text": "the URL\n* `limit=10`: because that was the default value\n\n## Optional parameters { #optional-parameters }\n\nThe same way, you can declare optional query parameters, by setting their default to `None`:\n\n{* ../../docs_src/query_params/tutorial002_py310.py hl[7] *}\n\nIn this case, the function parameter `q` will be optional, and will be `None` by default.\n\n/// tip\n\nAlso notice that **FastAPI** is smart enough to notice that the path parameter `item_id` is a path parameter and `q` is not, so, it's a q"
+      }
+    ]
+  },
+  {
+    "question": "What decorator should I use today to run code when the app shuts down?",
+    "answer": "To run code when the app shuts down, you should use the `@app.on_event(\"shutdown\")` decorator, or more simply, the `@app.shutdown_event` decorator,  along with an `async def` or normal `def` function declaration for the event handler.",
+    "retrieved": [
+      {
+        "doc_id": "advanced/events.md",
+        "score": 0.7449019,
+        "text": "l events, not both.\n\nYou can probably skip this part.\n\n///\n\nThere's an alternative way to define this logic to be executed during *startup* and during *shutdown*.\n\nYou can define event handlers (functions) that need to be executed before the application starts up, or when the application is shutting down.\n\nThese functions can be declared with `async def` or normal `def`.\n\n### `startup` event { #startup-event }\n\nTo add a function that should be run before the application starts, declare it with t"
+      },
+      {
+        "doc_id": "advanced/testing-events.md",
+        "score": 0.7398821,
+        "text": "own` events, you can use the `TestClient` as follows:\n\n{* ../../docs_src/app_testing/tutorial003_py310.py hl[9:12,20:24] *}\n"
+      },
+      {
+        "doc_id": "advanced/events.md",
+        "score": 0.7310629,
+        "text": "he event `\"startup\"`:\n\n{* ../../docs_src/events/tutorial001_py310.py hl[8] *}\n\nIn this case, the `startup` event handler function will initialize the items \"database\" (just a `dict`) with some values.\n\nYou can add more than one event handler function.\n\nAnd your application won't start receiving requests until all the `startup` event handlers have completed.\n\n### `shutdown` event { #shutdown-event }\n\nTo add a function that should be run when the application is shutting down, declare it with the e"
+      }
+    ]
+  },
+  {
+    "question": "What's the maximum number of path operations allowed in a single FastAPI app?",
+    "answer": "There is no maximum number of path operations allowed in a single FastAPI app. You can define as many path operations as needed using the various decorators such as `@app.get()`, `@app.post()`, `@app.put()`, `@app.delete()`, and others, as well as using `APIRouter` to organize them into separate modules. FastAPI does not enforce any specific limit on the number of path operations.",
+    "retrieved": [
+      {
+        "doc_id": "advanced/path-operation-advanced-configuration.md",
+        "score": 0.7794465,
+        "text": "t of the specific *path operation* too:\n\n```JSON hl_lines=\"22\"\n{\n    \"openapi\": \"3.1.0\",\n    \"info\": {\n        \"title\": \"FastAPI\",\n        \"version\": \"0.1.0\"\n    },\n    \"paths\": {\n        \"/items/\": {\n            \"get\": {\n                \"summary\": \"Read Items\",\n                \"operationId\": \"read_items_items__get\",\n                \"responses\": {\n                    \"200\": {\n                        \"description\": \"Successful Response\",\n                        \"content\": {\n                      "
+      },
+      {
+        "doc_id": "tutorial/first-steps.md",
+        "score": 0.7756892,
+        "text": "case, this decorator tells **FastAPI** that the function below corresponds to the **path** `/` with an **operation** `get`.\n\nIt is the \"**path operation decorator**\".\n\n///\n\nYou can also use the other operations:\n\n* `@app.post()`\n* `@app.put()`\n* `@app.delete()`\n\nAnd the more exotic ones:\n\n* `@app.options()`\n* `@app.head()`\n* `@app.patch()`\n* `@app.trace()`\n\n/// tip\n\nYou are free to use each operation (HTTP method) as you wish.\n\n**FastAPI** doesn't enforce any specific meaning.\n\nThe information h"
+      },
+      {
+        "doc_id": "tutorial/bigger-applications.md",
+        "score": 0.7659565,
+        "text": "eparated from the rest of the code, to keep it organized.\n\nBut it's still part of the same **FastAPI** application/web API (it's part of the same \"Python Package\").\n\nYou can create the *path operations* for that module using `APIRouter`.\n\n### Import `APIRouter` { #import-apirouter }\n\nYou import it and create an \"instance\" the same way you would with the class `FastAPI`:\n\n{* ../../docs_src/bigger_applications/app_an_py310/routers/users.py hl[1,3] title[\"app/routers/users.py\"] *}\n\n### *Path operat"
+      }
+    ]
+  }
+]

@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+
+# uv
+uv.lock.bak
+
+# Data (raw corpus is fetched, not committed; processed is regenerated)
+data/raw/
+data/processed/
+
+# Models / caches
+.cache/
+*.faiss
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Docker volumes
+qdrant_storage/
+langfuse_data/
