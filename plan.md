@@ -305,7 +305,12 @@ A phase is not done until exit criteria are checked *and* its design record exis
 **Measure.** Counts by type. Token distribution (p50/p95/max) — this sets your chunk sizing. Count of issues with an identifiable resolution — this is the ceiling on your golden set.
 
 **Exit criteria**
-- [ ] `documents.jsonl` with ≥ 300 docs and ≥ 2,000 issues
+- [ ] `documents.jsonl` with ≥ 125 docs and ≥ 2,000 issues (revised 2026-07-29: the
+      English FastAPI docs tree is 155 files total; 131 excluding auto-generated
+      `reference/` mkdocstrings stubs; 129 after also dropping `_llm-test.md` (a test
+      fixture for FastAPI's own translation-LLM prompts, not documentation) and
+      `translation-banner.md` (a transclusion snippet, no real content, no H1). ≥300
+      was an estimate made without checking the repo. See `progress.md` Decision Log.)
 - [ ] All metadata fields populated
 - [ ] Re-running ingestion produces identical hashes
 - [ ] Ten randomly sampled parsed docs manually verified — **actually open them**

@@ -1,8 +1,8 @@
 # Aegis — Progress Log
 
 **Last updated:** 2026-07-29
-**Current phase:** Phase 1 — Corpus Acquisition & Ingestion
-**Status:** 🟢 Phase 0 complete — naive baseline built, run, and caught hallucinating twice
+**Current phase:** Phase 2 — Chunking Laboratory
+**Status:** 🟢 Phase 1 complete — 129 docs + 3,530 issues ingested to `documents.jsonl`
 
 > This file is the state of the world. It is updated at the end of every phase and
 > whenever something significant lands. If you return after a gap, read this first —
@@ -14,9 +14,9 @@
 
 | | |
 |---|---|
-| **Day** | 1 of 21 (complete) |
-| **Phase** | 1 of 19 (starting) |
-| **Design records written** | 1 of 20 |
+| **Day** | 2 of 21 (complete) |
+| **Phase** | 2 of 19 (starting) |
+| **Design records written** | 2 of 20 |
 | **Golden set** | not built (Phase 4) |
 | **Definition of Done** | 0 of 10 criteria met |
 | **Blockers** | none |
@@ -30,7 +30,7 @@ Legend: ⬜ not started · 🟡 in progress · ✅ complete · ⏭️ cut
 | # | Phase | Day | Status | Key output |
 |---|---|---|---|---|
 | 0 | Foundations & failing baseline | 1 | ✅ | Naive RAG that hallucinates, on purpose |
-| 1 | Corpus acquisition & ingestion | 2 | ⬜ | `documents.jsonl` |
+| 1 | Corpus acquisition & ingestion | 2 | ✅ | `documents.jsonl` |
 | 2 | Chunking laboratory | 3 | ⬜ | 4 strategies, one interface |
 | 3 | Embeddings, distance & vector store | 4 | ⬜ | ANN recall/latency curve |
 | 4 | **Golden evaluation set** ⚑ | 5 | ⬜ | 180 queries + 40 negatives, frozen |
@@ -64,6 +64,10 @@ Legend: ⬜ not started · 🟡 in progress · ✅ complete · ⏭️ cut
 | Baseline subset size | 121,553 tok (85 tutorial/advanced docs, 486,214 chars) | 0 | `src/aegis/baseline.py` | 2026-07-29 |
 | Cost: full-subset-stuffing vs. retrieval, per query (input tokens only) | $0.0717 vs. ~$0.0002 (~300× cheaper) | 0 | top_k=3, 500-char chunks, Groq $0.59/M input | 2026-07-29 |
 | Confident hallucinations recorded | 3 of 5 questions, 2 independent runs | 0 | `docs/results/00-baseline-transcript.json` | 2026-07-29 |
+| Documentation pages ingested | 129 (of 155 English `.md` files; 131 excl. `reference/`, 129 after excluding 2 non-content files) | 1 | `data/processed/documents.jsonl` | 2026-07-29 |
+| Closed issues ingested (PRs excluded) | 3,530 | 1 | GitHub REST API, `fastapi/fastapi` | 2026-07-29 |
+| Issues with identifiable maintainer resolution | 2,204 / 3,530 (62.4%) — ceiling for Phase 4 golden set | 1 | `author_association` in {OWNER,MEMBER,COLLABORATOR} | 2026-07-29 |
+| Token distribution (docs / issues), chars/4 estimate | docs p50=1,436 p95=6,609 max=171,510; issues p50=470 p95=1,444 max=48,397 | 1 | `documents.jsonl` | 2026-07-29 |
 
 ### Definition of Done tracker
 
@@ -108,6 +112,14 @@ Every non-obvious choice, its alternatives, and why. Append-only.
 | 2026-07-29 | Baseline embedding model: `BAAI/bge-small-en-v1.5` via `fastembed` (ONNX) | `sentence-transformers` + MPS | No torch install, no MPS setup, for a component that's thrown away at the end of this phase. Real bake-off (bge-large vs BGE-M3) is Phase 3 and will decide the model actually used going forward. |
 | 2026-07-29 | Baseline corpus = 85 files (`tutorial/` + `advanced/` only), not the full 155-file docs tree | Ingest everything now | Phase 0's job is a fast, deliberately-bad demo, not real corpus acquisition — that's Phase 1's structure-preserving parser. The subset was large enough (121,553 tokens) to produce real, reproducible hallucinations on the first run. |
 | 2026-07-29 | Generation LLM for the baseline: Groq `llama-3.3-70b-versatile` only (no Gemini fallback yet) | Wire up the fallback now | Fallback logic is a production concern (Phase 9+); Phase 0 only needs one call path to prove the architecture fails. |
+| 2026-07-29 | Phase 1 exit criterion revised: ≥300 docs → ≥125 docs (final: 129 loaded) | Keep ≥300 and pad the corpus (all locales, or include `reference/`) | Measured: English `docs/en/docs/` is 155 `.md` files total, 131 excluding `reference/` (24 files of `::: fastapi.ClassName` mkdocstrings auto-doc stubs — no renderable prose without the mkdocstrings plugin actually running against the installed package), 129 after also dropping `_llm-test.md` (FastAPI's own translation-LLM prompt test fixture — not documentation, would inject meaningless filler text into retrieval) and `translation-banner.md` (no H1, a transclusion snippet with no standalone content). 300 was an estimate made without checking the repo; padding with other-language locales or content-free stub pages would hit an arbitrary number without adding real signal — the measurement wins. |
+| 2026-07-29 | `product_area` derived from a shared keyword table (path-based for docs, title+body text for issues), not from GitHub labels | Derive issue `product_area` from labels, as plan.md sketched | Measured: fetched the live label list for `fastapi/fastapi` — it's all process/triage labels (`bug`, `p1`-`p5`, `lang-*`, `approved-N`, `dependencies`). No topical labels exist (no `security`, `async`, `cors`, etc.), and the one label that looks topical (`dependencies`) is dependency-version-bump tooling, not the FastAPI DI feature. Labels can't carry the signal the router (Phase 8) needs; text keyword matching can, and using the same taxonomy for both doc types (rather than two incompatible schemes) is what a router actually needs. |
+| 2026-07-29 | `{* path *}` include directives resolve relative to `docs/en/` (the mkdocs.yml directory), a fixed base for every file — not relative to each markdown file's own directory | Resolve relative to each file's own parent directory (standard filesystem-relative semantics) | Measured: the literal include text `../../docs_src/...` is identical across files at different nesting depths (`tutorial/query-params-str-validations.md`, 1 level deep, and `tutorial/security/first-steps.md`, 2 levels deep, both use the exact same `../../docs_src/...` prefix). Standard per-file relative resolution would require a longer `../` prefix for deeper files; it doesn't vary, so FastAPI's own mkdocs plugin must resolve these against a fixed base equal to the mkdocs.yml directory, confirmed by resolving against `docs/en/` and checking the target file exists. |
+| 2026-07-29 | Also resolve `{!path!}`/`{!> path!}` (pymdownx.snippets syntax) | Ship with `{* *}` support only | Found by manually opening `advanced/templates.md`'s parsed output (the exit-criterion-mandated step, not an automated check) — 3 files use this alternate include syntax instead of `{* *}`, and every automated leftover-syntax check I'd written passed cleanly despite the content being missing. Direct validation of why "actually open them" is a hard requirement, not a nice-to-have. |
+| 2026-07-29 | Excluded `_llm-test.md` and `translation-banner.md` from the doc corpus (131 → 129) | Include everything under `docs/en/docs/*.md` | Both are non-content: `_llm-test.md` is FastAPI's own test fixture for their translation-LLM prompts (495 lines of test scaffolding, not documentation); `translation-banner.md` is a transclusion snippet with no H1 and no standalone content. Including either would inject meaningless filler into retrieval. |
+| 2026-07-29 | Ingested all 3,530 closed issues (not capped at 2,000–3,000), tagging which have a resolution comment rather than pre-filtering | Filter down to only resolved issues before ingesting, to match the plan's target range | Filtering first would have thrown away the actual required measurement (Phase 1's Measure step: "count of issues with an identifiable resolution — the ceiling on your golden set"). Ingesting everything and reporting the resolved fraction (2,204/3,530, 62.4%) makes that number a fact instead of a choice. |
+| 2026-07-29 | `product_area` for issues strips fenced code blocks and a specific issue-template boilerplate line before keyword matching | Match keywords against raw issue text directly | Measured via manual sampling: raw-text matching classified `async` on 695/3,530 issues (20%) — nearly every issue includes an `async def` repro snippet regardless of topic. Worse: FastAPI's old issue template's checklist literally says "I already checked if it is not related to FastAPI but to [Pydantic]/[Swagger UI]/[ReDoc]" on 1,416/3,530 issues (40%), which was silently dominating the `pydantic`/`openapi` categories from boilerplate, not content. Both fixed by stripping before matching (verified with regression tests that fail without the fix). A third, narrower source (canned maintainer replies, e.g. "template" in a stock "open a Discussion" response) was found but not chased further — documented as a residual limitation instead, since cataloging every canned reply is open-ended. |
+| 2026-07-29 | Verified hash-reproducibility via `content_hash` as a pure function on fixed input, not by re-running the live GitHub fetch twice | Re-run `aegis.ingest.run` twice and diff the output, as originally planned | Running the full ~3,630-request fetch twice in one session hit GitHub's 5,000/hour core rate limit on the second run's 3,530th call. Recovered by reprocessing the already-fetched raw data locally (saved before the second run) instead of re-fetching — which is also the methodologically correct test: the live issue API is a mutable source (comments can be added between two real fetches), unlike the frozen git-cloned docs corpus, so two live fetches aren't expected to be byte-identical regardless of code correctness. |
 
 ---
 
@@ -116,7 +128,7 @@ Every non-obvious choice, its alternatives, and why. Append-only.
 | # | Doc | Phase | Status |
 |---|---|---|---|
 | 00 | `the-baseline-that-fails.md` | 0 | ✅ |
-| 01 | `ingestion-and-parsing.md` | 1 | ⬜ |
+| 01 | `ingestion-and-parsing.md` | 1 | ✅ |
 | 02 | `chunking-strategies.md` | 2 | ⬜ |
 | 03 | `embeddings-distance-and-ann.md` | 3 | ⬜ |
 | 04 | `building-a-golden-set.md` | 4 | ⬜ |
@@ -146,9 +158,9 @@ Every non-obvious choice, its alternatives, and why. Append-only.
 **Module 2 (8):** ⬜⬜⬜⬜⬜⬜⬜⬜
 **Module 3 (6):** ⬜⬜⬜⬜⬜⬜
 **Module 4 (9):** ⬜⬜⬜⬜⬜⬜⬜⬜⬜
-**Module 5 (9):** ⬜⬜⬜⬜⬜⬜⬜⬜⬜
+**Module 5 (9):** ✅⬜⬜⬜⬜⬜⬜⬜⬜ — topic 29 (what makes production challenging) exercised at P1: GitHub API rate limits, a second undocumented include syntax, boilerplate text poisoning a keyword classifier.
 
-**Progress: 2 / 37**
+**Progress: 3 / 37**
 
 ---
 
@@ -179,7 +191,7 @@ Tracks what's actually implemented from scratch vs. imported, so the ratio state
 | # | Question | Raised | Needed by | Resolution |
 |---|---|---|---|---|
 | 1 | Which LLM for the judge? Free tier may not clear κ ≥ 0.6 | 2026-07-28 | Phase 11 | Open — decide from the agreement test |
-| 2 | Do FastAPI closed issues yield ≥ 500 with clear resolutions? | 2026-07-28 | Phase 4 | Open — verify in Phase 1 |
+| 2 | Do FastAPI closed issues yield ≥ 500 with clear resolutions? | 2026-07-28 | Phase 4 | **Resolved 2026-07-29** — 2,204 of 3,530 closed issues (62.4%) have an identifiable maintainer resolution comment, well above 500 |
 | 3 | Deploy target: HF Spaces vs Render? Free-tier terms shift | 2026-07-28 | Phase 18 | Open — reverify terms at Phase 18 |
 | 4 | Groq `llama-3.3-70b-versatile` at temperature=0.0 is not fully deterministic across runs — two Phase 0 baseline runs against the same index produced different fabricated answers to the same question | 2026-07-29 | Phase 6 (eval harness), Phase 11 (judge validation) | Open — decide whether to accept as a property of the system under test, cache generations for reproducibility, or something else |
 
@@ -188,6 +200,66 @@ Tracks what's actually implemented from scratch vs. imported, so the ratio state
 ## Session Log
 
 Newest first. One entry per working session.
+
+### 2026-07-29 — Phase 1: Corpus acquisition & ingestion
+
+**Context.** Same session as Phase 0, continued directly. Goal: turn Phase 0's
+concrete, reproduced hallucination (missing `pattern=` content because raw
+`.read_text()` never followed FastAPI's `{* *}` includes) into a fixed, tested
+pipeline, plus acquire the closed-issue half of the corpus for the first time.
+
+**Done**
+- TDD'd a structure-preserving markdown parser (`src/aegis/ingest/markdown.py`):
+  resolves `{* path *}` and `{!path!}`/`{!> path!}` includes (two syntaxes, only found
+  the second by manually opening parsed output — automated leftover-syntax checks
+  missed it entirely), flattens `///`/`////` admonitions and tabs including ones
+  nested inside list items, strips decorative HTML wrappers
+- Discovered (not assumed) that FastAPI's own plugin resolves includes against a
+  fixed base directory (`docs/en/`) regardless of a file's nesting depth — confirmed
+  by comparing identical include prefixes across files at different depths
+- Built the docs loader: 129 pages (revised down from plan.md's ≥300 estimate after
+  measuring the real corpus size — see Decision Log), stress-tested against the full
+  corpus, 10 samples manually opened and verified
+- Authenticated `gh` (needed a live debugging round — `gh auth status` kept failing
+  from the tool's shell even after the user logged in; resolved on the user's end,
+  cause not fully diagnosed)
+- Built the GitHub issues loader: fetched all 3,530 closed issues (PRs excluded) +
+  comments via the authenticated REST API, concurrent `httpx` with rate-limit backoff.
+  Resolution-comment heuristic: most recent comment from an OWNER/MEMBER/COLLABORATOR
+  author. 2,204/3,530 (62.4%) have one
+- Found and fixed two systematic `product_area` classifier bugs via manual sampling,
+  not automated checks: raw-text keyword matching fired on `async` in ~20% of issues
+  from pasted code snippets, and on `openapi`/`pydantic` in 40% of issues from a
+  literal old issue-template checklist line naming Pydantic/Swagger UI/ReDoc. Both
+  fixed (code-block stripping + boilerplate-line stripping) with regression tests
+- Hit GitHub's 5,000/hour rate limit re-running the full fetch a second time to apply
+  the fix; recovered by reprocessing already-fetched raw data locally instead of
+  re-fetching — see Decision Log, this also changed how hash-reproducibility got
+  verified (pure-function check, not live-refetch diff)
+- 10 issue documents manually sampled and opened; all structurally correct
+- Wrote `data/processed/documents.jsonl`: 3,659 documents (129 docs + 3,530 issues)
+- Design record: `docs/explainers/01-ingestion-and-parsing.md`
+
+**Exit criteria — all met** (criterion revised from ≥300 to ≥125 docs, see Decision
+Log; 129 docs / 3,530 issues actual)
+- `documents.jsonl` with ≥125 docs and ≥2,000 issues
+- All metadata fields populated (verified programmatically, zero missing)
+- Re-running ingestion produces identical hashes (verified as a pure-function
+  property of `content_hash`, not a live re-fetch — see Decision Log)
+- Ten randomly sampled parsed docs manually verified, actually opened (done for both
+  doc types — 20 total, not just the required 10)
+
+**Surprised by:** the `{!path!}` include syntax that no automated check caught: found
+only by reading actual output. Two rounds of boilerplate text (not real content)
+dominating a keyword classifier — the issue-template checklist alone affected 40% of
+the corpus. `release-notes.md` (686K chars) and issue #2266 (a 193K-char pasted build
+log) are both legitimate long-tail content, not bugs, and will pressure-test Phase 2's
+chunk-size choice directly.
+
+**Next**
+- Phase 2: chunking laboratory. `release-notes.md` and issue #2266 are concrete stress
+  cases for whatever chunking strategies get compared. Four strategies (fixed,
+  recursive, heading-aware, semantic), one interface, benchmarked against each other.
 
 ### 2026-07-29 — Phase 0: Foundations & the baseline that fails
 
