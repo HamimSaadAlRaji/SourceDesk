@@ -48,6 +48,14 @@ class Chunk(BaseModel):
     content_hash: str
     token_count: int
 
+    # What actually gets embedded. Equal to `text` unless contextual
+    # enrichment is on (Phase 2), in which case it's `text` prefixed with
+    # `{doc_title} > {heading_path} > {version}` — kept separate so citations
+    # and UI display always show the reader the real source text, never the
+    # synthetic prefix. No default: every chunker must set it explicitly
+    # rather than silently falling back to an empty embedding input.
+    embedding_text: str
+
 
 class Query(BaseModel):
     id: str

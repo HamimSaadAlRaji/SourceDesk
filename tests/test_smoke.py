@@ -14,5 +14,6 @@ def test_chunk_roundtrip():
         doc_type=DocType.DOCUMENTATION,
         content_hash="abc",
         token_count=1,
+        embedding_text="hello",
     )
     assert chunk.doc_type is DocType.DOCUMENTATION
