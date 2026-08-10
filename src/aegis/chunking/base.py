@@ -20,7 +20,16 @@ class Chunker(Protocol):
 
 
 def enrichment_prefix(document: Document, heading_path: list[str]) -> str:
-    parts = [document.title, " > ".join(heading_path) if heading_path else None, document.doc_version]
+    # aegis.ingest.github_issues prepends the issue title as the
+    # document's own H1 ("# {title}\n\n{body}"), so heading_aware's
+    # heading_path for every issue chunk literally starts with
+    # document.title. Docs frequently have the same structure (the page's
+    # own H1 restates its title). Including document.title again would
+    # duplicate it verbatim in the embedded prefix -- measured to cost
+    # real retrieval quality (Phase 6: recall@10 0.4193 -> 0.1364 with
+    # the duplication present, on a corpus that's 83% issues).
+    title = None if heading_path and heading_path[0] == document.title else document.title
+    parts = [title, " > ".join(heading_path) if heading_path else None, document.doc_version]
     return " > ".join(p for p in parts if p)
 
 

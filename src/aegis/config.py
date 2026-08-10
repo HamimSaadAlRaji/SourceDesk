@@ -100,6 +100,65 @@ class RetrievalSettings(BaseSettings):
 
     baseline_top_k: int = 3
 
+    # Phase 5: bm25s defaults (Lucene's own defaults, per bm25s's `method`
+    # parameter). Starting point for the Phase 5/6 k1/b sweep -- not yet
+    # tuned against the golden set.
+    bm25_k1: float = 1.5
+    bm25_b: float = 0.75
+
+    # Phase 5: RRF's rank-damping constant (plan.md's `k` in
+    # `score(d) = sum(weight_r / (k + rank_r(d)))`). 60 is the value from
+    # the original Cormack et al. RRF paper and the common default;
+    # Phase 6 tunes it on the training slice.
+    rrf_k: int = 60
+    rrf_dense_weight: float = 1.0
+    rrf_sparse_weight: float = 1.0
+
+    # Phase 5: how many candidates each side (dense, sparse) contributes to
+    # a hybrid fusion before truncating to the caller's requested `top_k`.
+    # Must exceed top_k or fusion has no breadth to find cross-method
+    # overlap in (retrieval/fusion.py's whole premise). Phase 7's reranker
+    # pool-size sweep is a related but separate question (how many fused
+    # results to *rerank*, not how many each retriever contributes here).
+    hybrid_candidate_pool_size: int = 50
+
+
+class GoldenSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="GOLDEN_", env_file=".env", extra="ignore")
+
+    # 6 strata x 30 = 180 (plan.md exit criterion: 180 total, >= 20/stratum).
+    # Holding out 5/stratum leaves 25/stratum in the dev split, still >= 20 --
+    # the invariant Phase 6's per-stratum reporting actually needs.
+    target_per_stratum: int = 30
+    holdout_per_stratum: int = 5
+    n_negatives: int = 40
+
+    # Not every harvested candidate survives human labeling -- some
+    # "resolutions" are non-answers the low-signal filter didn't catch
+    # (a meta-discussion, a redirect with unusual phrasing). Harvest more
+    # than the target and let the labeling CLI stop accepting once a
+    # stratum hits `target_per_stratum`, rather than chasing a perfect
+    # algorithmic pre-filter (same bounded-residual-limitation call as
+    # Phase 1/2's canned-reply and unclosed-fence handling).
+    harvest_buffer_multiplier: float = 2.0
+
+    # "Permissive config" (plan.md step 2): dense retrieval over one of the
+    # two real bake-off encoders -- not bge-small, which Phase 3 only ever
+    # used as the fast dev workhorse. Split by doc_type rather than one
+    # flat top-20: measured on the real corpus (see docs/explainers/
+    # 04-building-a-golden-set.md) that a single unfiltered top-20 is
+    # 83.6% issue chunks and misses documentation entirely for 30.9% of
+    # candidates -- an artifact of the shared GitHub issue-template
+    # checklist boilerplate dominating similarity scores, not genuine
+    # topical closeness (the same boilerplate-pollution failure mode
+    # Phases 1-3 each independently hit). A doc_type-filtered search for
+    # the same query surfaces the actually-correct doc chunk instead.
+    permissive_model_key: str = "bge_large"
+    permissive_top_k_docs: int = 12
+    permissive_top_k_issues: int = 8
+
+    random_seed: int = 20260802
+
 
 class GroqSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="GROQ_", env_file=".env", extra="ignore")
@@ -118,6 +177,7 @@ class Settings(BaseSettings):
     embedding: EmbeddingSettings = EmbeddingSettings()
     chunking: ChunkingSettings = ChunkingSettings()
     retrieval: RetrievalSettings = RetrievalSettings()
+    golden: GoldenSettings = GoldenSettings()
     groq: GroqSettings = GroqSettings()
 
 

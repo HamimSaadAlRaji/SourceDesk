@@ -1,0 +1,68 @@
+{
+  "config": {
+    "name": "retrieval=hybrid_linear-excl",
+    "chunking_strategy": "heading_aware",
+    "contextual_enrichment": false,
+    "retrieval_strategy": "hybrid_linear",
+    "encoder": "bge_large",
+    "top_k": 10,
+    "rrf_k": 60,
+    "rrf_dense_weight": 1.0,
+    "rrf_sparse_weight": 1.0,
+    "bm25_k1": 1.5,
+    "bm25_b": 0.75
+  },
+  "config_hash": "4c686787292e3c29",
+  "overall": {
+    "precision@10": 0.47066666666666673,
+    "recall@10": 0.3081982634954771,
+    "mrr": 0.8381111111111111,
+    "map@10": 0.22271760706685242,
+    "ndcg@10": 0.5201355154218953
+  },
+  "per_stratum": {
+    "ambiguous": {
+      "precision@10": 0.484,
+      "recall@10": 0.28433741215784564,
+      "mrr": 0.8233333333333333,
+      "map@10": 0.2197523724889566,
+      "ndcg@10": 0.5323323295283998
+    },
+    "conceptual": {
+      "precision@10": 0.564,
+      "recall@10": 0.3635395974854178,
+      "mrr": 1.0,
+      "map@10": 0.29144427266183126,
+      "ndcg@10": 0.632347490756967
+    },
+    "error_debugging": {
+      "precision@10": 0.408,
+      "recall@10": 0.28545238095238096,
+      "mrr": 0.82,
+      "map@10": 0.20513295078265226,
+      "ndcg@10": 0.46988167056536256
+    },
+    "how_to": {
+      "precision@10": 0.46399999999999997,
+      "recall@10": 0.2829071989242268,
+      "mrr": 0.796,
+      "map@10": 0.19155941528037757,
+      "ndcg@10": 0.5021209229535376
+    },
+    "multi_hop": {
+      "precision@10": 0.488,
+      "recall@10": 0.2815985419808949,
+      "mrr": 0.8613333333333334,
+      "map@10": 0.20551787747187647,
+      "ndcg@10": 0.5316334408119127
+    },
+    "version_specific": {
+      "precision@10": 0.4159999999999999,
+      "recall@10": 0.35135444947209654,
+      "mrr": 0.728,
+      "map@10": 0.22289875371542034,
+      "ndcg@10": 0.45249723791519214
+    }
+  },
+  "n_queries": 150
+}

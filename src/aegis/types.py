@@ -74,3 +74,45 @@ class Answer(BaseModel):
     retrieved: list[Retrieved]
     citations: list[str] = Field(default_factory=list)
     abstained: bool = False
+
+
+class Stratum(StrEnum):
+    """plan.md Phase 4 step 3 — the six categories the golden set is
+    reported per-stratum against, so an aggregate score can't hide that
+    the system is excellent at how-to and hopeless at multi-hop."""
+
+    HOW_TO = "how_to"
+    ERROR_DEBUGGING = "error_debugging"
+    CONCEPTUAL = "conceptual"
+    VERSION_SPECIFIC = "version_specific"
+    MULTI_HOP = "multi_hop"
+    AMBIGUOUS = "ambiguous"
+
+
+class NegativeCategory(StrEnum):
+    """plan.md Phase 4 step 4 — the four negative-set categories, each with
+    its own expected system behavior."""
+
+    OUT_OF_CORPUS = "out_of_corpus"
+    BILLING_LEGAL = "billing_legal"
+    UNANSWERABLE = "unanswerable"
+    ADVERSARIAL_INJECTION = "adversarial_injection"
+
+
+class GoldenQuery(BaseModel):
+    """One row of the golden evaluation set. Positives (`is_negative=False`)
+    carry a `stratum` and human-confirmed `ground_truth_chunk_ids`; negatives
+    carry a `negative_category` and `expected_behavior` instead — they have
+    no correct chunk to retrieve, only a correct refusal/escalation behavior.
+    """
+
+    id: str
+    text: str
+    is_negative: bool
+    stratum: Stratum | None = None
+    negative_category: NegativeCategory | None = None
+    expected_behavior: str | None = None
+    source_issue: str | None = None
+    resolution_hint: str | None = None
+    ground_truth_chunk_ids: list[str] = Field(default_factory=list)
+    split: str = "dev"

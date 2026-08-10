@@ -25,8 +25,11 @@ _TEMPLATE_BOILERPLATE_RE = re.compile(
     r"- ?\[[xX ]\] I already checked if it is not related to FastAPI but to \[[^\]]*\]\([^)]*\)\.?"
 )
 
-# Order matters: first match wins, most specific first.
-_KEYWORDS: list[tuple[str, str]] = [
+# Order matters: first match wins, most specific first. Public (no leading
+# underscore) because aegis.eval.strata reuses it for multi-hop detection
+# (a query touching >= 2 distinct areas), not just this module's own
+# first-match derivation.
+PRODUCT_AREA_KEYWORDS: list[tuple[str, str]] = [
     ("security", "security"),
     ("oauth2", "security"),
     ("dependencies", "dependencies"),
@@ -80,7 +83,7 @@ _TOP_LEVEL_FALLBACK = {"tutorial": "core"}
 
 def derive_product_area_from_doc_path(rel_path: str) -> str:
     lowered = rel_path.lower()
-    for keyword, area in _KEYWORDS:
+    for keyword, area in PRODUCT_AREA_KEYWORDS:
         if keyword in lowered:
             return area
     top = PurePosixPath(rel_path).parts[0]
@@ -89,15 +92,30 @@ def derive_product_area_from_doc_path(rel_path: str) -> str:
     return _TOP_LEVEL_FALLBACK.get(top, top)
 
 
+def strip_code_and_boilerplate(body: str) -> str:
+    """Strip fenced code blocks and the old issue-template checklist line —
+    both pollute keyword matching against free text (see module docstring
+    and `derive_product_area_from_text`). Shared with `aegis.eval.strata`,
+    which hits the same boilerplate on the same corpus."""
+    body_without_code = _CODE_BLOCK_RE.sub(" ", body)
+    return _TEMPLATE_BOILERPLATE_RE.sub(" ", body_without_code)
+
+
 def derive_product_area_from_text(title: str, body: str) -> str:
     """Code blocks are stripped before matching: almost every FastAPI issue
     includes a repro snippet using `async def`, which made `async` fire on
     ~20% of all issues regardless of topic when matched against raw text —
     caught by manually reviewing a sample of `async`-classified issues."""
-    body_without_code = _CODE_BLOCK_RE.sub(" ", body)
-    body_without_code = _TEMPLATE_BOILERPLATE_RE.sub(" ", body_without_code)
-    lowered = f"{title}\n{body_without_code}".lower()
-    for keyword, area in _KEYWORDS:
+    lowered = f"{title}\n{strip_code_and_boilerplate(body)}".lower()
+    for keyword, area in PRODUCT_AREA_KEYWORDS:
         if keyword in lowered:
             return area
     return "general"
+
+
+def matched_areas(title: str, body: str) -> set[str]:
+    """All distinct areas touched by the text, not just the first match —
+    `aegis.eval.strata` uses this to detect multi-hop queries (a query
+    whose answer plausibly spans >= 2 product areas)."""
+    lowered = f"{title}\n{strip_code_and_boilerplate(body)}".lower()
+    return {area for keyword, area in PRODUCT_AREA_KEYWORDS if keyword in lowered}

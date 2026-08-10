@@ -1,3 +1,5 @@
+from concurrent.futures import ThreadPoolExecutor
+
 import numpy as np
 
 from aegis.embedding.cache import EmbeddingCache
@@ -68,3 +70,34 @@ def test_overwriting_a_key_replaces_the_vector(tmp_path):
 
     result = cache.get("model-a", "hash1")
     np.testing.assert_array_almost_equal(result, np.array([2.0, 2.0]))
+
+
+def test_get_many_is_safe_from_a_worker_thread(tmp_path):
+    # The eval harness (Phase 6) parallelizes retrieval across queries with
+    # a ThreadPoolExecutor; DenseIndex.search -> Encoder.encode -> this
+    # cache gets called from a worker thread, not the thread that
+    # constructed the cache. A plain single sqlite3.Connection raises
+    # "SQLite objects created in a thread can only be used in that same
+    # thread" the moment that happens -- reproduced here directly.
+    cache = EmbeddingCache(tmp_path / "cache.sqlite")
+    cache.set("model-a", "hash1", np.array([1.0, 2.0], dtype=np.float32))
+
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        results = list(pool.map(lambda _: cache.get_many("model-a", ["hash1"]), range(8)))
+
+    for result in results:
+        np.testing.assert_array_almost_equal(result["hash1"], np.array([1.0, 2.0]))
+
+
+def test_set_many_is_safe_from_worker_threads(tmp_path):
+    cache = EmbeddingCache(tmp_path / "cache.sqlite")
+
+    def write(i: int) -> None:
+        cache.set_many("model-a", {f"hash{i}": np.array([float(i)], dtype=np.float32)})
+
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        list(pool.map(write, range(8)))
+
+    for i in range(8):
+        result = cache.get("model-a", f"hash{i}")
+        np.testing.assert_array_almost_equal(result, np.array([float(i)]))

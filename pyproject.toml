@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "bm25s>=0.3.10",
     "fastembed>=0.8.0",
     "groq>=1.6.0",
     "matplotlib>=3.11.1",
@@ -12,6 +13,7 @@ dependencies = [
     "pydantic-settings>=2.14.2",
     "python-dotenv>=1.2.2",
     "qdrant-client>=1.18.0",
+    "ranx>=0.3.21",
     "sentence-transformers>=5.6.1",
     "tiktoken>=0.13.0",
     "torch>=2.13.0",
