@@ -1,8 +1,8 @@
 # Aegis — Progress Log
 
-**Last updated:** 2026-08-04
-**Current phase:** Phase 6 — Retrieval Evaluation & the Ablation Grid
-**Status:** 🟢 Phase 6 complete — `ranx` verified, eval harness built, full 4-axis ablation grid run against the golden set. Winning config: heading-aware chunking, contextual enrichment off, dense retrieval, `bge-large-en-v1.5` (Recall@10 0.4288, MRR 0.8640). Found and fixed three real bugs during measurement (thread-unsafe cache, an enrichment title-duplication bug, and a self-match leak that had been silently inflating every early measurement in this phase)
+**Last updated:** 2026-08-11
+**Current phase:** Phase 7 — Reranking
+**Status:** 🟢 Phase 7 complete — cross-encoder reranker (`bge-reranker-v2-m3`) built, tested, and wired behind a toggleable pipeline; pool-size sweep (10/20/50/100) run against the golden set. Result: reranking makes NDCG@5 **worse** at every pool size (−9.0% to −55.8%), and every pool size's own p95 latency already exceeds the full pipeline's 3s budget. Reranking is **off by default**. Root cause investigated and confirmed: the golden set's ground truth (Phase 4's token-overlap auto-labeling) is a "broadly on-topic" standard (median 17 ground-truth chunks across 12 docs/query) that a fuzzy bi-encoder satisfies better than a sharp cross-encoder — a labeling-methodology finding, not a reranker defect. Local M1 hardware couldn't run the sweep (MPS hung twice, CPU projected ~5.7h on real-length text); moved to a free Kaggle T4 GPU, which also hit a CUDA OOM once before a batch-size fix
 
 > This file is the state of the world. It is updated at the end of every phase and
 > whenever something significant lands. If you return after a gap, read this first —
@@ -14,9 +14,9 @@
 
 | | |
 |---|---|
-| **Day** | 7 of 21 (complete) |
-| **Phase** | 6 of 19 (complete) |
-| **Design records written** | 7 of 20 |
+| **Day** | 8 of 21 (complete) |
+| **Phase** | 7 of 19 (complete) |
+| **Design records written** | 8 of 20 |
 | **Golden set** | 180 dev + 40 holdout, frozen and hashed (Phase 4) |
 | **Definition of Done** | 1 of 10 criteria met (#1: Recall@10 + MRR lift, measured) |
 | **Blockers** | none |
@@ -36,7 +36,7 @@ Legend: ⬜ not started · 🟡 in progress · ✅ complete · ⏭️ cut
 | 4 | **Golden evaluation set** ⚑ | 5 | ✅ | 180 queries + 40 negatives, frozen, hashed |
 | 5 | Retrieval core (analyzer, BM25, dense, RRF) | 6 | ✅ | Custom analyzer + fusion |
 | 6 | **Retrieval eval & ablation grid** ⚑ | 7 | ✅ | The evidence table |
-| 7 | Reranking | 8 | ⬜ | Pool-size vs latency curve |
+| 7 | Reranking | 8 | ✅ | Pool-size vs latency curve |
 | 8 | Agentic router & query understanding | 9–10 | ⬜ | Routing confusion matrix |
 | 9 | Grounded generation & citations | 11 | ⬜ | Citation validator |
 | 10 | **Calibrated abstention** ⚑ | 12 | ⬜ | The escalation confusion matrix |
@@ -103,6 +103,11 @@ Legend: ⬜ not started · 🟡 in progress · ✅ complete · ⏭️ cut
 | Semantic chunking, full 3,659-doc corpus (first full-corpus run — Phase 2 only sampled) | 723s to chunk + 640s to embed (9,168 chunks) | 6 | `experiments/06a_prepare_ablation_indexes.py semantic` | 2026-08-04 |
 | Self-match leak effect (before vs. after `exclude_doc_id` fix), dense/heading-aware/bge-large | recall@10 0.4193→0.4288, MRR 0.6161→0.8640 | 6 | Every golden query's own source issue was a trivial near-verbatim top-1 hit, wasting a top-10 slot; affected every measurement in this phase's first pass | 2026-08-04 |
 | Full test suite after Phase 6 | 272/272 passed | 6 | `uv run pytest -q` | 2026-08-04 |
+| Reranking NDCG@5 vs. Phase 6's winning config, all 4 swept pool sizes | no-rerank 0.7550 · pool=10 0.6873 (−9.0%) · pool=20 0.5344 (−29.2%) · pool=50 0.4072 (−46.1%) · pool=100 0.3340 (−55.8%) | 7 | `bge-reranker-v2-m3`, Kaggle T4, 150 dev positives, `docs/results/rerank-tradeoff.md` | 2026-08-11 |
+| Reranking latency (p95), all 4 swept pool sizes | pool=10 5,227ms · pool=20 12,362ms · pool=50 33,936ms · pool=100 57,563ms | 7 | Kaggle T4, same run | 2026-08-11 |
+| Golden set ground-truth breadth (median across 150 dev positives) | 17 ground-truth chunks spanning 12 distinct documents per query | 7 | Root-cause check for the reranking regression; token-overlap auto-labeling (`auto_label.py`) is "biased toward inclusion" by design | 2026-08-11 |
+| Local CPU cross-encoder throughput: synthetic short text vs. real corpus-length text | ~30.5ms/pair (synthetic, ~15 words) vs. ~780ms/pair (real chunks, up to ~400 tokens) — 25x | 7 | Benchmarked before the abandoned local CPU sweep attempt | 2026-08-11 |
+| Full test suite after Phase 7 | 283/283 passed | 7 | `uv run pytest -q` | 2026-08-11 |
 
 ### Definition of Done tracker
 
@@ -175,6 +180,9 @@ Every non-obvious choice, its alternatives, and why. Append-only.
 | 2026-08-04 | Added `exclude_doc_id` as a first-class parameter on `SparseIndex.search`/`DenseIndex.search`/`HybridRetriever.search` | Wrap it as an eval-only post-hoc filter outside the retrieval interfaces | Golden queries' self-match leak (their own source issue is a trivial near-verbatim hit) is not just a Phase 6 concern — every future eval-dependent phase (7, 10, 11, 16, 17) calls the same retrieval interfaces against the same golden set and would hit the identical bug. Native `must_not` filtering (dense) / over-fetch-then-filter (sparse, no native filter API) belongs in the interface, not duplicated per script. |
 | 2026-08-04 | "Lift from baseline" (Phase 6 exit criterion) computed as worst-vs-best **within** the controlled ablation grid (sparse-only vs. winning config), not against Phase 0's literal `aegis_baseline` collection | Use the real historical Phase 0 baseline, since it's the literal artifact plan.md's DoD seems to reference | Checked the actual collection: it indexed 85 of 129 doc pages, raw 500-char slices, and zero of the 3,530 issues — the golden set is mostly issue-sourced. Scoring it would measure "wrong corpus," not "worse retrieval config," a confound rather than a fair, controlled comparison. |
 | 2026-08-04 | Contextual enrichment set to **off** in the winning config, reversing plan.md's stated expectation ("usually the cheapest large win") | Ship enrichment on since it's the documented default recommendation | Measured, twice (before and after fixing a real title-duplication bug): enrichment costs 0.4288 → 0.1751 recall@10. Root cause confirmed by inspecting real embedding text: GitHub issue-template boilerplate headings (`Description`, `Question`, `How to do it`) are near-identical across thousands of unrelated issues, and prepending them compresses dense retrieval's discriminative signal — the same boilerplate-pollution failure mode Phases 1-4 each independently hit, here inside enrichment specifically. |
+| 2026-08-11 | **Reranking set to off** in the default config, reversing the entire premise of Phase 7 | Ship it on at the "least bad" pool size (10) for the portfolio narrative | Measured: every swept pool size (10/20/50/100) makes NDCG@5 *worse* than the no-rerank baseline (−9.0% to −55.8%, monotonic), and every pool size's own p95 latency alone already exceeds the full pipeline's 3s budget. Root cause investigated directly (not just accepted): the golden set's ground truth (`auto_label.py`, token-overlap ≥15%, "biased toward inclusion") has a median of 17 chunks across 12 documents per query — a broad-topic standard a fuzzy bi-encoder satisfies better than a sharp cross-encoder. Kept as a tested, toggleable component rather than removed. See `docs/explainers/07-reranking-and-encoder-architectures.md`. |
+| 2026-08-11 | Moved the Phase 7 pool-size sweep's compute to a free Kaggle T4 GPU, off this project's own M1 Pro | Keep all compute local, per the project's established pattern everywhere else | Measured, not assumed: MPS hit macOS's "stuck" scheduler state twice under this session's real memory pressure (once from two large transformer models MPS-resident at once, once again after fixing that). CPU inference was stable but real corpus-length text (~400 tokens/chunk) benchmarked at ~780ms/pair vs. ~30.5ms/pair on short synthetic text used for the initial estimate — projecting ~5.7 hours, infeasible in-session. Kaggle's free T4 tier sidesteps the local 16GB ceiling entirely. |
+| 2026-08-11 | Kaggle sweep script fixed to `BATCH_SIZE=16` + `torch.cuda.empty_cache()` between pool sizes + incremental per-pool-size result writes, after a first GPU attempt crashed | Retry the original `BATCH_SIZE=64` script as-is on the assumption the OOM was a fluke | `BATCH_SIZE=64` exceeded every swept pool size, so each query's entire candidate pool was scored as one un-chunked batch; at pool=50 (50 pairs, up to ~400 tokens each) that, stacked on fragmented memory from ~300 prior forward passes with no cache-clearing, exhausted the T4's ~14.56GB (CUDA OOM: 3.54GiB requested, 2.95GiB free, 11.61GiB already resident). Incremental writes meant the pool=10/20/50 data already collected before the crash was never lost. |
 
 ---
 
@@ -189,7 +197,7 @@ Every non-obvious choice, its alternatives, and why. Append-only.
 | 04 | `building-a-golden-set.md` | 4 | ✅ |
 | 05 | `lexical-dense-and-fusion.md` | 5 | ✅ |
 | 06 | `retrieval-metrics-and-ablation.md` | 6 | ✅ |
-| 07 | `reranking-and-encoder-architectures.md` | 7 | ⬜ |
+| 07 | `reranking-and-encoder-architectures.md` | 7 | ✅ |
 | 08 | `agentic-routing-and-query-understanding.md` | 8 | ⬜ |
 | 09 | `generation-prompting-and-citations.md` | 9 | ⬜ |
 | 10 | `calibrated-abstention.md` | 10 | ⬜ |
@@ -211,11 +219,11 @@ Every non-obvious choice, its alternatives, and why. Append-only.
 
 **Module 1 (5):** ✅✅⬜✅✅ — topics 1 & 4 done at P0 (baseline demo; cost/latency measurement). Topic 2 (the RAG loop) and topic 5 (IR basics) both land at P5 now that a real retrieval pipeline exists end to end.
 **Module 2 (8):** ✅✅✅✅✅✅✅✅ — topics 7, 9, 10, 11 done at P3 (metadata filtering; semantic search & embeddings; distance metrics; contrastive training). Topics 6, 8, 12 done at P5: three retrieval techniques (dense + BM25 + metadata prefiltering, one interface), bag-of-words→TF-IDF→BM25 (`bm25s` + the custom analyzer), hybrid search & RRF (built, tested, compared against linear fusion). Topic 13 (retrieval eval metrics — Precision/Recall/MAP@k/MRR) done at P6: `ranx`, verified against a hand-computed example, then used for the full ablation grid. **Module 2 complete.**
-**Module 3 (6):** ✅✅✅⬜⬜⬜ — topics 14, 15 done at P3 (KNN→ANN→HNSW: brute-force ground truth + 36-config recall/latency sweep; vector databases: Qdrant, named vectors, payload indexes). Topic 16 done at P2.
-**Module 4 (9):** ⬜⬜⬜⬜⬜⬜⬜⬜⬜
-**Module 5 (9):** ✅⬜⬜⬜⬜⬜⬜⬜⬜ — topic 29 (what makes production challenging) exercised at P1, reinforced at P6: three real production bugs (thread-unsafe cache, an enrichment-prefix bug, a self-match eval leak) found only by running the full pipeline against real golden-set queries, none catchable by unit tests alone.
+**Module 3 (6):** ✅✅✅⬜✅✅ — topics 14, 15 done at P3 (KNN→ANN→HNSW: brute-force ground truth + 36-config recall/latency sweep; vector databases: Qdrant, named vectors, payload indexes). Topic 16 done at P2. Topics 18, 19 done at P7: bi-encoders/cross-encoders/ColBERT (built and measured the first two, ColBERT design-record-only per plan.md's cut list) and reranking (pool-size sweep, measured net negative on this corpus). Topic 17 (query parsing) still open — Phase 8's job.
+**Module 4 (9):** ✅⬜⬜⬜⬜⬜⬜⬜⬜ — topic 20 (transformer architecture: attention) done at P7, load-bearing for explaining why cross-encoders can't replace retrieval (O(n) joint forward passes, no precomputable index) and why they out-discriminate bi-encoders (full self-attention over query+passage jointly vs. two independent encodings).
+**Module 5 (9):** ✅⬜⬜⬜⬜⬜⬜⬜⬜ — topic 29 (what makes production challenging) exercised at P1, reinforced at P6: three real production bugs (thread-unsafe cache, an enrichment-prefix bug, a self-match eval leak) found only by running the full pipeline against real golden-set queries, none catchable by unit tests alone. P7 added a fourth instance of the same pattern in a different form: real hardware/memory constraints (MPS hangs, CUDA OOM) that no unit test surfaces, only a real run against real data volume.
 
-**Progress: 16 / 37**
+**Progress: 19 / 37**
 
 ---
 
@@ -230,7 +238,7 @@ Tracks what's actually implemented from scratch vs. imported, so the ratio state
 | Heading-aware chunker | Build | Build (132 lines, matches the ~150-line estimate) | 2 |
 | RRF fusion | Build | Build (83 lines, `fusion.py` — RRF + linear fusion together) | 5 |
 | Retrieval metrics | Import (`ranx`) | Import (`ranx`, verified against a hand-computed 5-doc example) | 6 |
-| Cross-encoder reranker | Import | — | 7 |
+| Cross-encoder reranker | Import | Import (`sentence-transformers` `CrossEncoder`, `bge-reranker-v2-m3`) + Build (~120 lines, `rerank/cross_encoder.py` + `rerank/pipeline.py` — toggleable composition) | 7 |
 | Confidence scorer | Build | — | 10 |
 | Citation validator | Build | — | 9 |
 | Routing policy | Build | — | 8 |
@@ -252,12 +260,39 @@ Tracks what's actually implemented from scratch vs. imported, so the ratio state
 | 5 | Semantic chunking costs ~211–248s to embed a single large document's sentences (measured on `release-notes.md`, confirmed compute-bound) — does it clear a large enough retrieval-quality bar in the Phase 6 ablation to justify that cost, or does it join the cut list? | 2026-07-30 | Phase 6 | **Resolved 2026-08-04** — measured on the full corpus for the first time: 723s to chunk + 640s to embed, and doc-level recall@10 of 0.2571 vs. recursive's 0.2436 (a ~5% relative gain for materially more compute) — both dwarfed by heading-aware's 0.5470. Semantic chunking is cut from the winning config. |
 | 6 | 39.7% of the corpus's embeddings are exact duplicates of another chunk's, the largest group being 1,354 issues whose entire chunk text is the GitHub issue-template placeholder `_No response_` (Phase 3). Degenerate/near-empty chunks like these could surface as noisy near-duplicate results for many unrelated queries. Should they be filtered out of the indexed corpus, or does the confidence scorer (Phase 10) / reranker (Phase 7) handle it downstream without special-casing? | 2026-08-02 | Phase 4 (golden set shouldn't be built from these) / Phase 6 | Open — Phase 6 confirmed the broader pattern (GitHub issue-template boilerplate headings actively hurting contextual enrichment, see Decision Log 2026-08-04) but didn't specifically check this duplicate-chunk question; still open for Phase 7/10 |
 | 7 | The eval harness's cache key (`config_hash + queries_hash`) doesn't capture "the underlying Qdrant collection for this config was regenerated" — re-running an unchanged `RetrievalConfig` after rebuilding its index silently serves the stale cached result (hit once in Phase 6 after fixing the enrichment-prefix bug; worked around by manually deleting the affected cache file, not fixed generally). | 2026-08-04 | Phase 7+ (any phase that rebuilds an index without changing a config field) | Open — add a data-version field to `RetrievalConfig` if this recurs, or document "clear `data/cache/eval/` after any index rebuild" as a standing rule |
+| 8 | The golden set's ground truth (`auto_label.py`, Phase 4, token-overlap ≥15%, "biased toward inclusion") has a median of 17 chunks spanning 12 documents per query — a broad "on-topic" bar, not "directly answers this question." Phase 7 found this causes a genuinely better relevance judge (a cross-encoder) to score *worse* than a fuzzier one (a bi-encoder) against this ground truth, purely as a labeling-methodology artifact, not a real quality difference. Does this same permissiveness distort Phase 6's absolute recall/NDCG numbers too (not just Phase 7's reranking comparison)? | 2026-08-11 | Phase 11 (LLM-judge validation, Cohen's κ vs. Opus) | Open — Phase 6's *relative* comparisons (config vs. config, same ground truth throughout) stay valid regardless; only absolute numbers and any technique whose strength is precision over recall (like reranking) are at risk. Phase 11's judge-agreement measurement is the natural place to quantify this directly. |
 
 ---
 
 ## Session Log
 
 Newest first. One entry per working session.
+
+### 2026-08-11 — Phase 7: Reranking
+
+**Context.** New session, continued from Phase 6. Goal: cross-encoder reranker on top of Phase 6's winning config, pool-size-vs-latency sweep (10/20/50/100), and a direct measurement of the bi-encoder-vs-cross-encoder gap, per plan.md's Phase 7.
+
+**Done**
+- Added `RerankSettings` to `config.py` (model, device, batch size, swept pool sizes, `final_top_k`, latency budget reference, and — added at the end of the phase — `enabled: bool = False`).
+- TDD'd `CrossEncoderReranker` (`rerank/cross_encoder.py`, 74 lines, 6 tests) and `RerankedRetriever` (`rerank/pipeline.py`, 46 lines, 5 tests) — same dependency-injection/composition patterns as `Encoder` and `HybridRetriever`.
+- **Local hardware could not run the sweep.** MPS hit macOS's "stuck" scheduler state twice (first from two large transformer models MPS-resident simultaneously — the bi-encoder never freed before the reranker loaded, echoing a Phase 3 decision-log warning almost exactly; then again after fixing that, under this session's broader system-wide memory pressure). Pivoted to CPU, which was stable but — benchmarked on short synthetic text at ~30.5ms/pair, not real corpus-length text — turned out to actually run at ~780ms/pair on real ~400-token chunks, projecting a ~5.7 hour sweep after 19 real minutes of a doomed run. Killed it.
+- **Moved compute to a free Kaggle T4 GPU.** Built `experiments/07a_export_rerank_candidates.py` (local dense retrieval only, cheap, exports each query's top-100 candidate pool with real chunk text) and `experiments/07b_kaggle_rerank_sweep.py` (standalone, no `aegis` import, runs on Kaggle). First Kaggle attempt also failed: `BATCH_SIZE=64` exceeded every swept pool size, so each query's whole pool was scored as one un-chunked batch; at pool=50 that, stacked on ~300 prior forward passes' worth of fragmented GPU memory with no cache-clearing, produced a real CUDA OOM (3.54GiB requested, 2.95GiB free, 11.61GiB resident, T4's ~14.56GB total). Fixed with `BATCH_SIZE=16`, `torch.cuda.empty_cache()` between pool sizes, `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`, and incremental per-pool-size result writes (so a second crash couldn't cost already-collected data again). Re-run completed all 4 pool sizes.
+- **The result contradicted the phase's premise, so investigated rather than reported blind.** Every pool size made NDCG@5 *worse* than the no-rerank baseline (−9.0% at pool=10 to −55.8% at pool=100), monotonically. Pulled one real query's top-20 reranked output locally and confirmed the model itself is not broken — it correctly ranked the single most on-point passage #1. Root cause: `auto_label.py`'s ground-truth labeling (token-overlap ≥15%, explicitly "biased toward inclusion") produces a median of 17 ground-truth chunks spanning 12 documents per query — a broad-topic bar a bi-encoder's fuzzy similarity clustering happens to satisfy better than a cross-encoder's sharp, specific relevance judgment.
+- Wrote `docs/results/rerank-tradeoff.md` (full table + plot) and the design record, covering bi-encoder/cross-encoder/ColBERT attention patterns, why reranking can't replace retrieval (O(n) scoring, no precomputable index), and the full measured curve.
+- Set `RerankSettings.enabled = False` as the shipped default, with the measured reasoning in both `config.py` and the design record.
+
+**Exit criteria — all met**
+- `docs/results/rerank-tradeoff.md` with the pool-size curve ✓
+- Pool size chosen against the latency budget, with reasoning ✓ (none clears the budget; recommended starting point if reranking is revisited is pool=10, documented as the least-bad, not a good, option)
+- NDCG@5 improvement over Phase 6's best, as a number ✓ (negative: −0.0677 absolute / −9.0% relative at best)
+- Reranking toggleable ✓ (`RerankedRetriever(..., enabled=...)`, tested)
+
+**Surprised by:** the hardware saga repeating the exact same mistake twice in two different forms — benchmarking cross-encoder throughput on short synthetic text and extrapolating to real ~400-token corpus chunks, first on CPU (25x underestimate) then again on a GPU via too-large a fixed batch size (OOM instead of just "slow," but the same root cause: not validating a resource assumption against real data length before committing to a long run). The larger surprise was that reranking *hurt*, and that the reason traced cleanly back to Phase 4's golden-set labeling methodology rather than anything about the reranker or this phase's own code — a genuinely better relevance judge losing to a noisier ground truth is a real, reportable finding, not a failed experiment, and it's the kind of result CLAUDE.md explicitly wants surfaced rather than buried under a "reranking didn't help, moving on."
+
+**Next**
+- Phase 8: agentic router & query understanding (topic 17, query parsing — the one Module 3 topic Phase 7 didn't touch). Router, routing policy (billing/legal hard-escalates, never reaches generation), query rewriting, multi-query expansion, HyDE, iterative retrieval — each A/B'd honestly per plan.md step 7.
+- Open Question #8 (this phase): does the golden set's permissive token-overlap labeling distort Phase 6's absolute numbers too, not just Phase 7's reranking comparison? Natural checkpoint is Phase 11's Cohen's κ measurement against an Opus judge.
+- Open Questions #6 and #7 (duplicate `_No response_` chunks; harness cache not detecting index regeneration) remain open, unchanged this phase.
 
 ### 2026-08-04 — Phase 6: Retrieval Evaluation & the Ablation Grid
 

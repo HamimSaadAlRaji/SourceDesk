@@ -123,6 +123,44 @@ class RetrievalSettings(BaseSettings):
     hybrid_candidate_pool_size: int = 50
 
 
+class RerankSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="RERANK_", env_file=".env", extra="ignore")
+
+    # Cross-encoder (plan.md Phase 7, step 1) -- scores (query, chunk_text)
+    # jointly instead of independently encoding each side, catching
+    # interactions a bi-encoder's cosine similarity can't (design record
+    # 07 has the attention-pattern mechanism). Loaded via
+    # sentence-transformers.CrossEncoder, same MPS/batching treatment as
+    # aegis.embedding.encoder.Encoder.
+    model_name: str = "BAAI/bge-reranker-v2-m3"
+    device: str = "mps"
+    batch_size: int = 32
+
+    # Candidate pool sizes swept (plan.md Phase 7, step 2) -- the axis
+    # being measured: how many bi-encoder candidates to rerank before
+    # truncating to the system's real top_k. Reranking more costs O(n)
+    # cross-encoder calls; the sweep finds where NDCG@5 plateaus against
+    # that cost.
+    pool_sizes: list[int] = [10, 20, 50, 100]
+    final_top_k: int = 10
+
+    # Off by default -- measured (docs/results/rerank-tradeoff.md): every
+    # swept pool size makes NDCG@5 *worse* than the no-rerank baseline
+    # (-9.0% at pool=10, worsening monotonically to -55.8% at pool=100),
+    # and every pool size's own p95 latency alone already exceeds the full
+    # pipeline's 3s budget. Root cause is in the golden set's labeling
+    # methodology, not the reranker (design record 07 §6) -- kept as a
+    # tested, toggleable component (RerankedRetriever.enabled) rather than
+    # removed, in case Phase 11's judge-agreement measurement changes this.
+    enabled: bool = False
+
+    # Not a reranking-only budget -- Phase 13's full end-to-end p95 target
+    # (plan.md exit criterion). Used here only as the bar the pool-size
+    # choice is weighed against, since Phase 13's other stages (generation,
+    # etc.) don't exist yet to measure the real remaining headroom.
+    pipeline_latency_budget_ms: int = 3000
+
+
 class GoldenSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="GOLDEN_", env_file=".env", extra="ignore")
 
@@ -177,6 +215,7 @@ class Settings(BaseSettings):
     embedding: EmbeddingSettings = EmbeddingSettings()
     chunking: ChunkingSettings = ChunkingSettings()
     retrieval: RetrievalSettings = RetrievalSettings()
+    rerank: RerankSettings = RerankSettings()
     golden: GoldenSettings = GoldenSettings()
     groq: GroqSettings = GroqSettings()
 
