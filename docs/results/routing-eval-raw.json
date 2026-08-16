@@ -1,0 +1,334 @@
+{
+  "n_queries": 58,
+  "accuracy": 0.6896551724137931,
+  "confusion": {
+    "docs_howto": {
+      "docs_howto": 20,
+      "known_issue": 4,
+      "billing_account_legal": 1
+    },
+    "known_issue": {
+      "known_issue": 12,
+      "docs_howto": 11,
+      "billing_account_legal": 2
+    },
+    "billing_account_legal": {
+      "billing_account_legal": 8
+    }
+  },
+  "per_class": {
+    "docs_howto": {
+      "tp": 20,
+      "fn": 5,
+      "fp": 11,
+      "precision": 0.6451612903225806,
+      "recall": 0.8
+    },
+    "known_issue": {
+      "tp": 12,
+      "fn": 13,
+      "fp": 4,
+      "precision": 0.75,
+      "recall": 0.48
+    },
+    "billing_account_legal": {
+      "tp": 8,
+      "fn": 0,
+      "fp": 3,
+      "precision": 0.7272727272727273,
+      "recall": 1.0
+    }
+  },
+  "rows": [
+    {
+      "query_id": "golden::issue::604",
+      "true_route": "docs_howto",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::257",
+      "true_route": "docs_howto",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::882",
+      "true_route": "docs_howto",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::1781",
+      "true_route": "docs_howto",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::2467",
+      "true_route": "docs_howto",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::1996",
+      "true_route": "docs_howto",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::3212",
+      "true_route": "docs_howto",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::5532",
+      "true_route": "docs_howto",
+      "predicted_route": "known_issue"
+    },
+    {
+      "query_id": "golden::issue::959",
+      "true_route": "docs_howto",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::4860",
+      "true_route": "docs_howto",
+      "predicted_route": "known_issue"
+    },
+    {
+      "query_id": "golden::issue::78",
+      "true_route": "docs_howto",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::58",
+      "true_route": "docs_howto",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::5045",
+      "true_route": "docs_howto",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::3563",
+      "true_route": "docs_howto",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::923",
+      "true_route": "docs_howto",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::129",
+      "true_route": "docs_howto",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::758",
+      "true_route": "docs_howto",
+      "predicted_route": "billing_account_legal"
+    },
+    {
+      "query_id": "golden::issue::4478",
+      "true_route": "docs_howto",
+      "predicted_route": "known_issue"
+    },
+    {
+      "query_id": "golden::issue::1491",
+      "true_route": "docs_howto",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::602",
+      "true_route": "docs_howto",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::1005",
+      "true_route": "docs_howto",
+      "predicted_route": "known_issue"
+    },
+    {
+      "query_id": "golden::issue::527",
+      "true_route": "docs_howto",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::3",
+      "true_route": "docs_howto",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::2300",
+      "true_route": "docs_howto",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::3947",
+      "true_route": "docs_howto",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::2934",
+      "true_route": "known_issue",
+      "predicted_route": "known_issue"
+    },
+    {
+      "query_id": "golden::issue::12965",
+      "true_route": "known_issue",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::1125",
+      "true_route": "known_issue",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::2618",
+      "true_route": "known_issue",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::4236",
+      "true_route": "known_issue",
+      "predicted_route": "known_issue"
+    },
+    {
+      "query_id": "golden::issue::5387",
+      "true_route": "known_issue",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::744",
+      "true_route": "known_issue",
+      "predicted_route": "known_issue"
+    },
+    {
+      "query_id": "golden::issue::12402",
+      "true_route": "known_issue",
+      "predicted_route": "known_issue"
+    },
+    {
+      "query_id": "golden::issue::1779",
+      "true_route": "known_issue",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::4391",
+      "true_route": "known_issue",
+      "predicted_route": "known_issue"
+    },
+    {
+      "query_id": "golden::issue::1490",
+      "true_route": "known_issue",
+      "predicted_route": "billing_account_legal"
+    },
+    {
+      "query_id": "golden::issue::1719",
+      "true_route": "known_issue",
+      "predicted_route": "known_issue"
+    },
+    {
+      "query_id": "golden::issue::23",
+      "true_route": "known_issue",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::763",
+      "true_route": "known_issue",
+      "predicted_route": "known_issue"
+    },
+    {
+      "query_id": "golden::issue::950",
+      "true_route": "known_issue",
+      "predicted_route": "known_issue"
+    },
+    {
+      "query_id": "golden::issue::1195",
+      "true_route": "known_issue",
+      "predicted_route": "known_issue"
+    },
+    {
+      "query_id": "golden::issue::1732",
+      "true_route": "known_issue",
+      "predicted_route": "known_issue"
+    },
+    {
+      "query_id": "golden::issue::2657",
+      "true_route": "known_issue",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::4816",
+      "true_route": "known_issue",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::1264",
+      "true_route": "known_issue",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::1320",
+      "true_route": "known_issue",
+      "predicted_route": "known_issue"
+    },
+    {
+      "query_id": "golden::issue::1743",
+      "true_route": "known_issue",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::3021",
+      "true_route": "known_issue",
+      "predicted_route": "known_issue"
+    },
+    {
+      "query_id": "golden::issue::2735",
+      "true_route": "known_issue",
+      "predicted_route": "docs_howto"
+    },
+    {
+      "query_id": "golden::issue::1631",
+      "true_route": "known_issue",
+      "predicted_route": "billing_account_legal"
+    },
+    {
+      "query_id": "negative::billing_legal::6",
+      "true_route": "billing_account_legal",
+      "predicted_route": "billing_account_legal"
+    },
+    {
+      "query_id": "negative::billing_legal::9",
+      "true_route": "billing_account_legal",
+      "predicted_route": "billing_account_legal"
+    },
+    {
+      "query_id": "negative::billing_legal::2",
+      "true_route": "billing_account_legal",
+      "predicted_route": "billing_account_legal"
+    },
+    {
+      "query_id": "negative::billing_legal::7",
+      "true_route": "billing_account_legal",
+      "predicted_route": "billing_account_legal"
+    },
+    {
+      "query_id": "negative::billing_legal::1",
+      "true_route": "billing_account_legal",
+      "predicted_route": "billing_account_legal"
+    },
+    {
+      "query_id": "negative::billing_legal::8",
+      "true_route": "billing_account_legal",
+      "predicted_route": "billing_account_legal"
+    },
+    {
+      "query_id": "negative::billing_legal::3",
+      "true_route": "billing_account_legal",
+      "predicted_route": "billing_account_legal"
+    },
+    {
+      "query_id": "negative::billing_legal::4",
+      "true_route": "billing_account_legal",
+      "predicted_route": "billing_account_legal"
+    }
+  ]
+}

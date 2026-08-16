@@ -201,6 +201,8 @@ It is the recovery mechanism. If the user returns after two weeks or a session e
 **Vector store:** Qdrant in Docker, named dense + sparse vectors.
 **Docker:** installed.
 
+**Compute budget:** If a run is projected to take more than 10 minutes of this machine's CPU time, it does not run locally — it moves to Kaggle (free GPU notebooks) instead. Benchmark the real per-unit cost on real project data (not short placeholder text) before projecting total runtime, so the 10-minute call is made on a real number, not a guess. Kaggle is not connected to this session: shipping a job there means preparing a self-contained script plus any data export it needs, and then **explicitly telling the user they must paste the script into a Kaggle notebook and run it themselves** — this is a manual handoff, never something to imply happens automatically. Say so plainly every time a job is handed off this way.
+
 **The recursion is intentional:** this system is built with FastAPI and answers questions about FastAPI. When retrieval is wrong the user can often tell immediately from their own knowledge — a genuine evaluation advantage, and part of why this corpus was chosen.
 
 **The North Star:** the Air Canada failure mode. Every design decision should trace back to preventing a confident, uncited, unescalated wrong answer. When a tradeoff is unclear, ask: _which choice makes it harder for this system to confidently mislead a user?_

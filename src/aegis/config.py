@@ -207,6 +207,64 @@ class GroqSettings(BaseSettings):
     max_tokens: int = 1024
 
 
+class RouterSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="ROUTER_", env_file=".env", extra="ignore")
+
+    # Phase 8, step 1: "a *small* LLM classifier" -- deliberately not the
+    # same 70B model used for generation (Phase 9 hasn't even bake-off'd
+    # that yet). Classification into 3 labels is a cheap task; paying
+    # 70B-model latency for it on every query would eat into the 3s
+    # end-to-end budget (RerankSettings.pipeline_latency_budget_ms) for no
+    # accuracy this task needs.
+    model: str = "llama-3.1-8b-instant"
+    temperature: float = 0.0
+    # 20 was too tight -- measured: Groq's JSON-mode grammar constraint
+    # occasionally emits a few tokens of formatting/whitespace before the
+    # closing brace and hit `json_validate_failed` (truncated mid-document)
+    # on real golden-set queries during the Phase 8 router eval. 50 gives
+    # headroom; the real output is `{"route": "..."}`, ~8-12 tokens.
+    max_tokens: int = 50
+
+
+class QuerySettings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="QUERY_", env_file=".env", extra="ignore")
+
+    # Same "small model" reasoning as RouterSettings -- rewriting and
+    # expansion are short generation tasks, not the main answer.
+    rewrite_model: str = "llama-3.1-8b-instant"
+    expansion_model: str = "llama-3.1-8b-instant"
+    # HyDE's hypothetical answer is embedded, not shown to the user, but
+    # its *content* directly determines retrieval quality (plan.md step 6)
+    # -- kept on the larger model since a thin/wrong hypothetical answer
+    # would corrupt every downstream dense score, not just look worse.
+    hyde_model: str = "llama-3.3-70b-versatile"
+    temperature: float = 0.0
+
+    n_expansions: int = 3
+
+    # Measured (docs/results/query-understanding-ablation.md, 150-query dev
+    # set + 24-item synthetic multi-turn set): only rewriting pays for
+    # itself. Expansion and HyDE both regress hard (NDCG@5 -49.4% and
+    # -23.6%) and are off, same "off until proven" convention as
+    # RerankSettings.enabled and ChunkingSettings.contextual_enrichment.
+    rewrite_enabled: bool = True
+    expansion_enabled: bool = False
+    hyde_enabled: bool = False
+    iterative_retrieval_enabled: bool = False
+
+    # Plan.md step 8: "capped at one" retry.
+    iterative_retrieval_max_retries: int = 1
+    # Provisional proxy for "low confidence" -- Phase 10 hasn't built the
+    # real confidence scorer yet. Top-1 fused score below this triggers one
+    # reformulate-and-retry. Calibrated as the 25th percentile of the real
+    # baseline top-1 score distribution over the 150-query dev set
+    # (docs/results/query-understanding-ablation.md) -- not an arbitrary
+    # default; replaced by Phase 10's scorer once it exists (same
+    # provisional-then-superseded pattern as Phase 3 persisting
+    # heading-aware chunks before Phase 6 picked it).
+    low_confidence_score_threshold: float = 0.7747
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
@@ -218,6 +276,8 @@ class Settings(BaseSettings):
     rerank: RerankSettings = RerankSettings()
     golden: GoldenSettings = GoldenSettings()
     groq: GroqSettings = GroqSettings()
+    router: RouterSettings = RouterSettings()
+    query: QuerySettings = QuerySettings()
 
 
 settings = Settings()
