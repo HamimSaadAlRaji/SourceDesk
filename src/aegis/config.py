@@ -25,6 +25,11 @@ class PathSettings(BaseSettings):
     data_golden: Path = REPO_ROOT / "data" / "golden"
     embedding_cache: Path = REPO_ROOT / "data" / "cache" / "embeddings.sqlite"
 
+    # Phase 12 Unit 4 -- one manifest per collection records exactly which
+    # chunk_id/content_hash pairs are indexed, so the next reindex can diff
+    # against it (aegis.ingest.delta) instead of re-embedding everything.
+    index_manifest_dir: Path = REPO_ROOT / "data" / "processed" / "manifests"
+
 
 class QdrantSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="QDRANT_", env_file=".env", extra="ignore")
@@ -513,6 +518,23 @@ class EvalSettings(BaseSettings):
     generation_batch_raw_path: Path = REPO_ROOT / "docs" / "results" / "judge-agreement-batch-raw.json"
 
 
+class CacheSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="CACHE_", env_file=".env", extra="ignore")
+
+    exact_match_db_path: Path = REPO_ROOT / "data" / "cache" / "exact_match.sqlite"
+
+    # Real sweep against 15 real hardest-similarity distinct-query pairs
+    # (negatives) vs. 15 hand-written real-query paraphrases (positives),
+    # bge-large encoder -- same asymmetric-cost logic as Phase 10's tau:
+    # the lowest threshold in the sweep with zero false positives on the
+    # real negative set (0.88), not the one maximizing hit rate. A false
+    # positive here serves a confidently wrong cached answer; a false
+    # negative just costs one extra real pipeline call.
+    # docs/results/semantic-cache-threshold.md
+    semantic_similarity_threshold: float = 0.88
+    semantic_cache_db_path: Path = REPO_ROOT / "data" / "cache" / "semantic_cache.sqlite"
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
@@ -532,6 +554,7 @@ class Settings(BaseSettings):
     confidence: ConfidenceSettings = ConfidenceSettings()
     judge: JudgeSettings = JudgeSettings()
     eval: EvalSettings = EvalSettings()
+    cache: CacheSettings = CacheSettings()
 
 
 settings = Settings()

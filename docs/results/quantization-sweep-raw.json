@@ -1,0 +1,100 @@
+{
+  "n_queries": 150,
+  "sweep": {
+    "1024_float32": {
+      "dim": 1024,
+      "precision": "float32",
+      "bytes_per_vector": 4096,
+      "metrics": {
+        "recall@10": 0.3194183972202548,
+        "ndcg@10": 0.532365154217528
+      },
+      "latency_ms_per_query": 0.2720211132934007
+    },
+    "1024_int8": {
+      "dim": 1024,
+      "precision": "int8",
+      "bytes_per_vector": 1024,
+      "metrics": {
+        "recall@10": 0.30848446012764896,
+        "ndcg@10": 0.5237346620698361
+      },
+      "latency_ms_per_query": 9.152184726650981
+    },
+    "1024_binary": {
+      "dim": 1024,
+      "precision": "binary",
+      "bytes_per_vector": 128,
+      "metrics": {
+        "recall@10": 0.22912065471508195,
+        "ndcg@10": 0.39764728965396606
+      },
+      "latency_ms_per_query": 1.3118238866445608
+    },
+    "512_float32": {
+      "dim": 512,
+      "precision": "float32",
+      "bytes_per_vector": 2048,
+      "metrics": {
+        "recall@10": 0.2933535980130407,
+        "ndcg@10": 0.5016433062504079
+      },
+      "latency_ms_per_query": 0.2304286133342733
+    },
+    "512_int8": {
+      "dim": 512,
+      "precision": "int8",
+      "bytes_per_vector": 512,
+      "metrics": {
+        "recall@10": 0.28432442377024414,
+        "ndcg@10": 0.49429380596695466
+      },
+      "latency_ms_per_query": 4.731933613365982
+    },
+    "512_binary": {
+      "dim": 512,
+      "precision": "binary",
+      "bytes_per_vector": 64,
+      "metrics": {
+        "recall@10": 0.17624642339657817,
+        "ndcg@10": 0.32387023416638955
+      },
+      "latency_ms_per_query": 0.687363886681851
+    },
+    "256_float32": {
+      "dim": 256,
+      "precision": "float32",
+      "bytes_per_vector": 1024,
+      "metrics": {
+        "recall@10": 0.24945024253925183,
+        "ndcg@10": 0.438327890083905
+      },
+      "latency_ms_per_query": 0.2366683333336065
+    },
+    "256_int8": {
+      "dim": 256,
+      "precision": "int8",
+      "bytes_per_vector": 256,
+      "metrics": {
+        "recall@10": 0.2480045997747236,
+        "ndcg@10": 0.4369942673799738
+      },
+      "latency_ms_per_query": 2.577126946610709
+    },
+    "256_binary": {
+      "dim": 256,
+      "precision": "binary",
+      "bytes_per_vector": 32,
+      "metrics": {
+        "recall@10": 0.12033907902096755,
+        "ndcg@10": 0.22266330014118155
+      },
+      "latency_ms_per_query": 0.5044311066740192
+    }
+  },
+  "live_vs_brute_force": {
+    "mean_overlap": 0.5780000000000001,
+    "gt_only_bf": 95,
+    "gt_only_live": 348
+  }
+}

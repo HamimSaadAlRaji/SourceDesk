@@ -1,7 +1,157 @@
 # Aegis — Progress Log
 
 **Last updated:** 2026-09-26
-**Current phase:** Phase 11 — Generation Eval, RAGAS & Judging the Judge (🟡 **wrapped up for this session** — every unit, fix, and root-cause investigation that could be done without waiting on quota is done and documented; exactly 2 real measurements are left, both **explicitly deferred to the user** to run themselves whenever quota allows, not queued as a future session's task; see "Phase 11 wrap-up" note below). **Phase 12 (Caching, Delta Indexing & Cost) is next.**
+**Current phase:** Phase 12 — Caching, Delta Indexing & Cost (🟢 complete — all 6 units, exit criteria met). Phase 11 — Generation Eval, RAGAS & Judging the Judge (🟡 **wrapped up for this session** — every unit, fix, and root-cause investigation that could be done without waiting on quota is done and documented; exactly 2 real measurements are left, both **explicitly deferred to the user** to run themselves whenever quota allows, not queued as a future session's task; see "Phase 11 wrap-up" note below).
+
+## Phase 12 — Caching, Delta Indexing & Cost
+
+**Scope** (plan.md, Day 14, topics 33-34): 6 units — (1) exact-match cache, (2) semantic cache (similarity
+threshold tuned on the golden set, with an explicit near-miss test), (3) hit-rate simulation against a
+Zipfian query distribution, (4) delta indexing (content-hash change detection, purge deleted docs, a test
+proving a deleted doc becomes unretrievable — the Air Canada failure mode as a regression test), (5)
+quantization (int8/binary/Matryoshka truncation, recall vs. size/latency), (6) a cost-per-query model.
+Fully unblocked by today's Groq/Gemini quota state — none of these 6 build items call an LLM.
+
+**Unit 1 complete as of 2026-09-26** (design record 12, `src/aegis/cache/exact_match.py`, 10 new tests).
+`ExactMatchCache` — sqlite-backed, keyed on a normalized-query hash folded together with an opaque
+`corpus_version` string (so a reindex automatically orphans stale entries rather than needing an explicit
+purge). Stores a purpose-built `CachedAnswer` (text, cited chunk ids, provider), not the full
+`GenerationResult` — deliberately decoupled from `PackedContext`'s full `Chunk` payload, which is already
+durably stored elsewhere and would bloat the cache for no serving benefit. `corpus_version` itself is
+accepted as a parameter, not computed here — that's Unit 4's (delta indexing) job. Same sqlite
+thread-safety pattern as `EmbeddingCache` (Phase 3). TDD'd (10 tests: normalization, case/whitespace
+insensitivity, corpus-version scoping, persistence across instances). `uv run pytest -q`: 430/430 passed
+(+10 new).
+
+**Unit 2 complete as of 2026-09-26** (design record 12b, `src/aegis/cache/semantic.py`,
+`experiments/12a_semantic_cache_threshold_sweep.py`, `docs/results/semantic-cache-threshold.md`, 10 new
+tests). Real, local, zero-LLM-cost threshold tuning: computed the 15 highest-similarity pairs among
+genuinely *different* real dev-positive golden queries (real negatives, up to 0.8694 similarity) and 15
+hand-written paraphrases of real golden queries (positives, 0.744-0.948 similarity) against `bge-large`.
+**Found real overlap between the two populations** — no threshold perfectly separates "same question,
+different words" from "different question, same topic" on this corpus. Chose 0.88 (lowest threshold with
+zero real false positives), same asymmetric-cost logic as Phase 10's tau — a false positive here serves a
+confidently wrong cached answer, a false negative just costs one extra real pipeline call. Real hit rate at
+that threshold: 9/15 (60%) paraphrases caught — a disclosed, moderate ceiling, not inflated. `SemanticCache`
+(brute-force cosine, sqlite-persisted, same `corpus_version`/`CachedAnswer` shape as Unit 1) TDD'd with a
+fake deterministic encoder (9 tests) plus one real integration test using the actual shipped threshold
+against the real hardest near-miss pair found (`golden::issue::1320` vs. `332`, real 0.8694 similarity,
+correctly does not hit) — the explicit near-miss test plan.md's exit criteria ask for. `uv run pytest -q`:
+440/440 passed (+10 new).
+
+**Unit 3 complete as of 2026-09-26** (design record 12c, `experiments/12b_hit_rate_simulation.py`,
+`docs/results/cache-hit-rate-simulation.md`). Zero LLM cost: real `ExactMatchCache`/`SemanticCache`
+classes (Units 1-2, unmodified) driven by a simulated Zipfian-distributed stream of up to 9,000 requests
+over the 150 real dev-positive golden intents, cache-miss cost bootstrapped from the 4 real
+`(latency_ms, completion_tokens)` samples already on disk (`experiments/11b_qwen_reasoning_check.py`'s raw
+output) rather than fresh live generations -- spending quota to measure how much caching avoids spending
+quota would defeat the point. Real `bge-large` embeddings decide every semantic-tier hit/miss (165 real
+encode calls total, memoized by exact text since a deterministic encoder gives identical vectors for
+identical strings). **No real production traffic log exists (never deployed)**, so the Zipf skew itself is
+swept (0.8/1.2/1.6), not asserted, and only 15/150 intents have a real known paraphrase (Unit 2's set), so
+the semantic-tier share here is a disclosed conservative lower bound. **Real, load-bearing finding: traffic
+volume dominates skew once N is large relative to the intent pool.** All three skews converge to ~98% hit
+rate / ~98% latency+token reduction by N=9,000 (60 requests/intent), but diverge sharply at a cold start
+(N=150, 1 request/intent): 56.7% (skew=0.8) vs. 86.7% (skew=1.6). Because this golden set only has 150
+real unique intents, the measured ~98% ceiling is a property of this evaluation set's intent diversity, not
+a general real-world hit-rate claim -- a production deployment facing a much larger real question space
+would sit further down this same curve until its own traffic volume caught up, explicitly disclosed rather
+than reported as a flat headline number. Reconciled an apparent tension, not a real one: semantic-tier hit
+share here is small (0.2-1.6% of all traffic) despite Unit 2's 60% real paraphrase catch rate, because only
+10% of intents can ever produce a cross-phrasing repeat at all -- the two numbers measure different
+populations. `uv run pytest -q`: 440/440 passed (no new tests -- I/O-bound experiment script, same
+convention as Phase 9/10's sweep scripts).
+
+**Unit 4 complete as of 2026-09-26** (design record 12d, `src/aegis/ingest/delta.py`,
+`src/aegis/embedding/vector_store.py`, `tests/test_delta_indexing.py`, 15 new tests). `IndexManifest`
+(chunk_id -> content_hash, persisted/diffable), `diff()` (added/changed/deleted/unchanged against a prior
+manifest), `corpus_version()` (a real hash over the manifest -- finally a real value for the placeholder
+string Units 1-3's caches were handed), `apply_delta()` (embeds only what changed, deletes what's gone,
+touches nothing else). **Found and fixed a real, previously-latent bug before delta indexing could work
+safely at all**: `embedding/vector_store.py`'s `upsert_chunks` assigned each Qdrant point ID from its
+position in the chunks list (`id=i`), which only ever worked because every real call site
+(`embedding/run.py`) also fully wipes and rebuilds the collection every time
+(`create_collection`->`recreate_collection`) -- one deletion anywhere shifts every later chunk's position,
+and therefore its point ID, silently corrupting any future incremental upsert/delete. Verified directly,
+live against the local Qdrant instance: an arbitrary chunk_id string (Qdrant point IDs must be an unsigned
+int or UUID) is rejected outright. Fixed with `chunk_point_id()` (deterministic `uuid.uuid5` over the real
+chunk_id) plus non-destructive `ensure_collection`/`delete_chunks` primitives (never call
+`recreate_collection` on the delta path). **Real integration test proves the literal plan.md exit
+criterion** (a throwaway `_test_delta_indexing` Qdrant collection, never the real `aegis_chunks_*`
+collections other phases' results depend on): indexes 2 fake documents (4 chunks), deletes one document,
+asserts *both* the real Qdrant point count drops 4->2 (checked directly, not just through
+`DenseIndex` -- its in-memory safety net could otherwise mask an actually-broken delete) and a rebuilt
+`DenseIndex` no longer surfaces that document's chunks while the surviving document's chunks stay fully
+retrievable. TDD'd (15 tests: manifest round-trip, `corpus_version` determinism/sensitivity, all four
+`diff()` categories, then the one real Qdrant integration test). **Explicitly not done, flagged rather than
+silently skipped:** the live production collections (`aegis_chunks_bge_large`/`_small`/`_m3`) still carry
+the old positional point IDs from their last full rebuild -- harmless as-is (nothing reads point IDs
+directly, and Phase 6/7's results are unaffected), but a first real delta operation against any of them
+would need one full re-upsert under the new stable-ID scheme first; and Units 1-3's cache call sites still
+pass a placeholder `corpus_version` string, not yet wired to `IndexManifest.corpus_version()`. `uv run
+pytest -q`: 455/455 passed (+15 new).
+
+**Unit 5 complete as of 2026-09-26** (design record 12e, `experiments/12c_quantization_sweep.py`,
+`docs/results/quantization-tradeoff.md`/`.png`). Zero new corpus embedding calls -- brute-force cosine/int8/
+Hamming search over the real, already-computed `vectors_bge_large.npy` (19,236 chunks, Phase 3), swept
+across 3 dims (1024/512/256, Matryoshka-style truncation) x 3 precisions (float32/int8/binary). Real,
+consistent pattern: **int8 is nearly free** (4x smaller, costs 1.1-3.4 points of recall@10 at every dim);
+**binary is not** (32x smaller, costs 9-13 points at a given dim, compounding with truncation down to
+recall@10=0.1203 at 256d/binary vs. 0.3194 at 1024d/float32). **Real, load-bearing side-finding, investigated
+rather than shipped past (CLAUDE.md: stop on a contradicted expectation):** this sweep's own float32/1024/
+no-quantization baseline (recall@10=0.3194) does not match `docs/results/rerank-tradeoff.md`'s already-
+published no-rerank baseline (0.4324) for the identical queries/encoder/exclude-doc-id rule. Ruled out
+query-vector differences, corpus-vector staleness, and a top-k-selection bug directly (all confirmed
+byte-identical / reproducible). **Real cause: live Qdrant HNSW search and exact brute-force cosine agree on
+only 57.8% of top-10 results on average**, and of real ground-truth chunks either search finds, 348 are
+found only by the live index vs. 95 found only by brute force (~3.6x asymmetry) -- most likely because this
+golden set's ground truth (Phase 4) was labeled from candidates the live index itself surfaced, so labels
+are structurally biased toward that specific approximate index rather than true nearest-neighbor-by-cosine.
+Doesn't invalidate Phase 6/7's numbers (correctly measuring the system as actually served) but means this
+golden set's recall is partly measuring agreement with the labeling mechanism, not embedding quality alone
+-- flagged as context for Phase 16/19, not chased further here. Also disclosed: binary search measured
+*slower* than float32 here (unoptimized NumPy popcount loop vs. BLAS matmul, not a real property of binary
+quantization -- a real SIMD-accelerated index would invert this), and `bge-large-en-v1.5` was never trained
+with a Matryoshka objective, so the truncation numbers measure a real, harder, non-MRL cost. `uv run
+pytest -q`: 455/455 passed (unchanged -- I/O-bound sweep script, no new tests, same convention as Phase 9's
+sampling sweep).
+
+**Unit 6 complete as of 2026-09-26 — Phase 12 build list done, all 6 units** (design record 12f,
+`experiments/12d_cost_model.py`, `docs/results/cost-per-query.md`, `docs/results/cache-performance.md`).
+Zero new measurements -- assembles real numbers already published across this project (retrieval latency,
+Phase 3; rerank latency, Phase 7; confidence-scoring latency, Phase 10; generation latency/tokens, Phase
+9/11; cache-hit latency, Phase 12 Units 1-3) into 5 real per-query cost profiles. Real result: cache miss
+(shipped, no rerank) = 12,787.5 ms / 254.7 completion tokens; with rerank (pool=10, not shipped) = 14,347.5
+ms / 254.7 tokens; semantic hit = 0.8 ms / 0 tokens; exact hit = 0.0 ms / 0 tokens; escalation (partial,
+see below) = 4,095.5 ms / 0 tokens. **Real, non-obvious finding:** confidence scoring runs unconditionally
+on every non-cache-hit query (before the escalate-vs-generate fork), so escalation isn't free -- but it's
+still ~3x faster than generating an answer and the only non-cache-hit path with zero LLM token cost, since
+it never reaches the generation call. Used the real full 180-query dev-sweep confidence-scoring wall time
+(design record 10 §6: 736s/180 queries = 4,088.9 ms/query) rather than a smaller per-pair estimate that
+design record 10 already found undersells the real number by ~4x -- caught this almost being repeated
+while drafting this unit. Deliberately reports tokens/latency, not dollars: this project has never left
+Groq/Gemini free tiers, so no real dollar figure exists to report (inventing one would violate CLAUDE.md's
+never-invent-a-metric rule). Escalation's cost is explicitly flagged as a partial lower bound --
+`escalate_fn` itself (the real human-handoff mechanism) doesn't exist anywhere in this codebase yet
+(Phase 14's job); only its payload construction (already counted in confidence-scoring cost) is built.
+`docs/results/cache-performance.md` written as the phase-level synthesis doc the exit criteria ask for,
+tying together Units 1-6's real results and the two required regression tests. `uv run pytest -q`:
+455/455 passed (unchanged -- pure assembly of already-measured numbers, no new logic to guard).
+
+**Phase 12 exit criteria: all 5 met** -- `docs/results/cache-performance.md` (written), the deleted-doc
+regression test (Unit 4), the semantic-cache near-miss test (Unit 2), `docs/results/quantization-
+tradeoff.md` (Unit 5), the cost-per-query table (Unit 6, above).
+
+**Open items carried forward, not silently dropped:** (1) the live production Qdrant collections still
+carry the old positional point-ID scheme (design record 12d §7) -- harmless as shipped, but a real delta
+operation against them needs one full re-upsert first; (2) `corpus_version` at the cache call sites is
+still a placeholder string, not yet wired to `IndexManifest.corpus_version()` (design record 12d); (3)
+escalation's real handler doesn't exist yet (Phase 14).
+
+**Next action:** Phase 13 (Observability & the Latency Budget) -- Langfuse tracing, per-stage latency
+attribution, and the p95 < 3s budget gate. Its own per-stage measurements will be the first place to check
+Unit 6's assembled cost-model numbers against real traced requests instead of numbers stitched together
+from separate experiments run at different times.
 
 ### Phase 11 wrap-up (2026-09-26)
 
@@ -62,8 +212,8 @@ either. Open Questions #1 and #16 and the DoD tracker rows below reflect this ex
 | | |
 |---|---|
 | **Day** | 13 of 21 (in progress) |
-| **Phase** | 11 of 19 wrapped up (all 6 units + rubric fix + faithfulness root cause done; real paired κ deferred to the user, pending Gemini quota) · Phase 12 up next. Phase 9's sampling-sweep grid re-scoped and half-completed (2 of 4 configs real), remaining 2 also deferred to the user |
-| **Design records written** | 18 of 20 |
+| **Phase** | 12 of 19 (in progress, Unit 1 of 6 complete). Phase 11 wrapped up (all 6 units + rubric fix + faithfulness root cause done; real paired κ deferred to the user, pending Gemini quota). Phase 9's sampling-sweep grid re-scoped and half-completed (2 of 4 configs real), remaining 2 also deferred to the user |
+| **Design records written** | 20 files across phases 0-12 (lettered sub-records inflate this past a literal 1-per-phase count; phases 13-19 have none yet) |
 | **Golden set** | 180 dev + 40 holdout, frozen and hashed (Phase 4) |
 | **Definition of Done** | 3 of 10 criteria met (#1: Recall@10 + MRR lift; #3: escalation confusion matrix; #8: LLM-judge agreement, measured — real result is **not met**, κ≈0 vs. ≥0.6 target, itself a valid, reported outcome). `make eval` (Unit 6) now surfaces this and the faithfulness miss automatically, in one command. |
 | **Blockers** | Both providers re-exhausted again as of 2026-09-26 running the real N=26 rubric-fix re-score: `openai/gpt-oss-120b` (TPD) and `gemini-3.5-flash` (20/day, which did not clear even across the calendar-day rollover — its quota-day boundary doesn't align with local midnight). Gemini has now returned **zero** real scores under the fixed rubric across two separate attempts — real inter-judge κ is still completely unmeasured. `qwen/qwen3.8-27b` (generation) is now *also* TPD-exhausted (200,000/day, newly discovered running the sampling sweep re-run) — 2 of 4 sweep configs got real data before the wall. Not currently blocking: Units 5 and 6 (custom metrics, scorecard — both zero LLM cost) shipped regardless, and both the groq-side refusal fix (N=26) and the temperature=0.0 sweep configs (N=20 each) are real-verified. |
@@ -88,7 +238,7 @@ Legend: ⬜ not started · 🟡 in progress · ✅ complete · ⏭️ cut
 | 9 | Grounded generation & citations | 11 | 🟡 | Citation validator |
 | 10 | **Calibrated abstention** ⚑ | 12 | ✅ | The escalation confusion matrix |
 | 11 | **Generation eval + judge validation** ⚑ | 13 | 🟡 | RAGAS + Cohen's κ |
-| 12 | Caching, delta indexing & cost | 14 | ⬜ | Cache hit rate, cost table |
+| 12 | Caching, delta indexing & cost | 14 | 🟡 | Cache hit rate, cost table |
 | 13 | Observability & latency budget | 15 | ⬜ | p95 < 3s, per-stage breakdown |
 | 14 | API, streaming & UI | 16–17 | ⬜ | Working demo w/ visible escalation |
 | 15 | Security hardening | 18½ | ⬜ | Adversarial suite |
@@ -213,6 +363,9 @@ Legend: ⬜ not started · 🟡 in progress · ✅ complete · ⏭️ cut
 | Faithfulness root cause: correlation between real RAGAS faithfulness and `valid_citation_rate`, n=20 | Pearson r=0.3083 -- weak, not zero | 11 | `experiments/11h_faithfulness_root_cause.py`, `docs/results/faithfulness-root-cause.md` | 2026-09-26 |
 | Faithfulness root cause, case 1: `golden::issue::219` (lowest real score, 0.077) | Genuine hallucination -- cited chunk [2] is a real, completely unrelated GitHub issue; caught by RAGAS (0.077), only partially by the citation validator (valid_citation_rate=0.667), missed entirely by the pre-fix LLM judge (5/5) | 11 | Same analysis | 2026-09-26 |
 | Faithfulness root cause, case 2: `golden::issue::15764` (an honest refusal, 0.250) | Verified-accurate -- its one positive claim (`route.tags` is a valid attribute) is directly confirmed by the real cited context; low score is a metric-structural blind spot (NLI can't credit a correct negative/absence claim), not a real grounding failure | 11 | Same analysis | 2026-09-26 |
+| Full test suite after Phase 12 Unit 1 | 430/430 passed (+10 new: `test_exact_match_cache.py`) | 12 | `uv run pytest -q` | 2026-09-26 |
+| Semantic cache threshold sweep: 15 real hardest distinct-query pairs (negatives) vs. 15 real hand-written paraphrases (positives), bge-large | Real overlap found -- negatives up to 0.8694, positives range 0.7441-0.9481; chosen threshold 0.88 (lowest with 0 real false positives): 0/15 false positives, 9/15 (60%) true positives | 12 | `experiments/12a_semantic_cache_threshold_sweep.py`, `docs/results/semantic-cache-threshold.md` | 2026-09-26 |
+| Full test suite after Phase 12 Unit 2 | 440/440 passed (+10 new: `test_semantic_cache.py`, including one real integration test against the actual hardest near-miss pair) | 12 | `uv run pytest -q` | 2026-09-26 |
 
 ### Definition of Done tracker
 
@@ -350,7 +503,7 @@ Every non-obvious choice, its alternatives, and why. Append-only.
 | 09 | `generation-prompting-and-citations.md` | 9 | ✅ |
 | 10 | `calibrated-abstention.md` | 10 | ✅ |
 | 11 | `evaluating-generation.md` — written as 7 lettered sub-records instead (CLAUDE.md §3 convention): `11-groq-model-replacement-and-ragas-wiring.md`, `11b-cohens-kappa-utility.md`, `11c-llm-as-judge.md`, `11d-judge-agreement-batch.md`, `11e-eval-scorecard.md`, `11f-judge-rubric-refusal-fix.md`, `11h-faithfulness-root-cause.md` | 11 | ✅ |
-| 12 | `caching-delta-indexing-and-cost.md` | 12 | ⬜ |
+| 12 | `caching-delta-indexing-and-cost.md` — written as lettered sub-records instead (CLAUDE.md §3 convention): `12-exact-match-cache.md`, `12b-semantic-cache.md`; more units to follow | 12 | 🟡 |
 | 13 | `observability-and-latency.md` | 13 | ⬜ |
 | 14 | `serving-streaming-and-ux.md` | 14 | ⬜ |
 | 15 | `rag-security.md` | 15 | ⬜ |
@@ -402,6 +555,8 @@ Tracks what's actually implemented from scratch vs. imported, so the ratio state
 | LLM-as-judge (helpfulness rubric) | Build (plan.md Phase 11 step 2) | Import (`instructor` structured output, reusing Unit 1's `InstructorLLM` builders) + Build (~100 lines, `eval/judge.py` -- `Judge`/`HelpfulnessJudgment`, prompt template, TDD'd with a fake LLM, 9 tests) | 11 |
 | Custom metrics (citation validity, escalation appropriateness, code-block correctness) | Build (plan.md Phase 11 step 4) | Build (~130 lines, `eval/custom_metrics.py` -- reuses `CitationValidator`/Phase 10's escalation decision/`split_code_segments` rather than duplicating their logic; `ast.parse` for code correctness, not sandboxed execution; TDD'd, 13 tests, one reproducing Phase 10's exact shipped confusion-matrix numbers as a regression guard) | 11 |
 | `make eval` scorecard | Build (plan.md Phase 11 step 5) | Build (~200 lines, `eval/scorecard.py` -- pure aggregation over Unit 4's already-written batch rows, reuses `agreement.cohen_kappa`/`custom_metrics.code_block_syntax_validity` rather than recomputing; TDD'd, 14 tests, one a regression guard against `docs/results/judge-agreement.md`'s exact published numbers from the real raw file) | 11 |
+| Exact-match cache | Build (plan.md Phase 12 step 1) | Build (~65 lines, `cache/exact_match.py` -- sqlite-backed, same thread-safety pattern as `EmbeddingCache`; TDD'd, 10 tests) | 12 |
+| Semantic cache | Build (plan.md Phase 12 step 2) | Build (~85 lines, `cache/semantic.py` -- brute-force cosine similarity, sqlite-persisted; reuses Phase 3's `Encoder`/bge-large rather than a new model) + real threshold tuning (`experiments/12a_semantic_cache_threshold_sweep.py`, zero LLM cost); TDD'd (10 tests: fake deterministic encoder + one real integration test against the actual hardest near-miss pair) | 12 |
 | Tracing | Import (Langfuse) | — | 13 |
 
 ---
@@ -432,6 +587,51 @@ Tracks what's actually implemented from scratch vs. imported, so the ratio state
 ## Session Log
 
 Newest first. One entry per working session.
+
+### 2026-09-26 — Phase 12 started: exact-match cache (Unit 1)
+
+**Context.** Same session, continued from wrapping up Phase 11 (all 6 units + rubric fix + faithfulness
+root cause done; real paired κ and the last 2 sampling-sweep configs explicitly deferred to the user, not
+this project's own next-session task — see the "Phase 11 wrap-up" note above). User confirmed starting
+Phase 12; scoped its 6 build items from plan.md before writing code (all local/embedding-side, none need
+an LLM call, fully unblocked by today's quota state).
+
+**Done**
+- Unit 1 (exact-match cache): `src/aegis/cache/exact_match.py` — `ExactMatchCache` (sqlite-backed,
+  `EmbeddingCache`'s thread-safety pattern reused), `normalize_query`, `CachedAnswer`. TDD'd first (10
+  tests: normalization, case/whitespace insensitivity, corpus-version scoping — a version bump makes old
+  entries unreachable rather than needing an explicit purge, persistence across reopened instances). All
+  passed on first implementation, no RED→fix cycle needed.
+- Deliberately scoped the cache to a purpose-built `CachedAnswer` (text, cited chunk ids, provider) instead
+  of the full `GenerationResult` — avoids duplicating `PackedContext`'s full `Chunk` payload (already
+  durably stored elsewhere) into every cache row. `corpus_version` is accepted as an opaque parameter, not
+  computed in this unit — that's Unit 4's (delta indexing) job, kept decoupled via the same DI pattern the
+  rest of this project already uses.
+- Design record 12 (`docs/explainers/12-exact-match-cache.md`).
+
+**Exit criteria — Unit 1 of 6 complete**
+- Real, working, persistent exact-match cache with corpus-version scoping — done.
+- `docs/results/cache-performance.md`, the semantic-cache near-miss test, delta-indexing's deleted-doc
+  test, `docs/results/quantization-tradeoff.md`, and the cost-per-query table are all still ahead (Units
+  2-6).
+
+**Unit 2 (semantic cache) — real threshold tuning, zero LLM cost.** Wrote
+`experiments/12a_semantic_cache_threshold_sweep.py`: embedded (bge-large, local, free) the 15 real
+highest-similarity pairs among genuinely different real dev-positive golden queries (real negatives) and 15
+hand-written paraphrases of real golden queries (positives, disclosed as one person's phrasing, not a
+sampled population). **Found real overlap** between the two populations — no threshold cleanly separates
+"same question" from "different-but-related question" on this corpus (negatives up to 0.8694, positives
+down to 0.7441). Chose 0.88 — same asymmetric-cost logic as Phase 10's tau (a false positive here serves a
+confidently wrong cached answer; a false negative just costs one extra real pipeline call) — the lowest
+threshold with zero real false positives, real hit rate 9/15 (60%). Built `SemanticCache` (brute-force
+cosine, sqlite-persisted, same `corpus_version`/`CachedAnswer` shape as Unit 1), TDD'd with a fake
+deterministic 2D embedder (9 tests covering threshold behavior precisely) plus one real integration test
+using the actual shipped default against the real hardest near-miss pair found — the explicit near-miss
+test plan.md's exit criteria ask for, not just a fake-vector proxy for it. Design record 12b. `uv run
+pytest -q`: 440/440 passed (+10 new).
+
+**Next:** Unit 3 (hit-rate simulation against a Zipfian query distribution) — measure what these two cache
+tiers actually save in aggregate, not just per-query correctness.
 
 ### 2026-09-25 — Phase 11 Units 1-6 complete: Groq/RAGAS fixes, κ utility, LLM-judge, N=30 batch (real negative result), custom metrics, `make eval` scorecard
 

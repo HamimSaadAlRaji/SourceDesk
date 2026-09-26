@@ -12,6 +12,8 @@ mock client per CLAUDE.md's I/O-component guidance.
 
 from __future__ import annotations
 
+import uuid
+
 from qdrant_client import QdrantClient
 from qdrant_client.models import (
     Distance,
@@ -30,6 +32,23 @@ _PAYLOAD_INDEX_FIELDS = {
     "doc_type": PayloadSchemaType.KEYWORD,
     "doc_version": PayloadSchemaType.KEYWORD,
 }
+
+# Qdrant point IDs must be an unsigned int or a UUID -- verified directly
+# (an arbitrary string like a real chunk_id, e.g.
+# "doc::release-notes.md::heading_aware::961", is rejected server-side).
+# uuid5 gives a deterministic point ID from that same real chunk_id, stable
+# across runs -- required for delta indexing's upsert/delete-by-id to ever
+# target the right point twice (plan.md Phase 12 step 4). Previously
+# `upsert_chunks` used the chunk's position in the passed-in list as the
+# point ID, which only ever worked because `create_collection` fully wipes
+# and rebuilds every time it's called -- silently unsafe for any future
+# incremental upsert, since one deletion anywhere in the list shifts every
+# later chunk's position, and therefore its point ID.
+_POINT_ID_NAMESPACE = uuid.UUID("d9f4a9d0-6e0c-4d3b-8e29-9d4a6e7b1f00")
+
+
+def chunk_point_id(chunk_id: str) -> str:
+    return str(uuid.uuid5(_POINT_ID_NAMESPACE, chunk_id))
 
 
 def get_client() -> QdrantClient:
@@ -60,10 +79,27 @@ def create_collection(
         client.create_payload_index(collection_name=collection_name, field_name=field_name, field_schema=schema)
 
 
+def ensure_collection(
+    client: QdrantClient,
+    collection_name: str,
+    dim: int,
+    hnsw_m: int | None = None,
+    hnsw_ef_construct: int | None = None,
+) -> None:
+    """Like `create_collection`, but a no-op if the collection already
+    exists -- non-destructive, for the delta path (Phase 12 Unit 4), which
+    must never wipe the points it isn't touching. `create_collection`
+    itself stays `recreate_collection`-based, unchanged, for its one real
+    caller (`embedding/run.py`'s full-corpus rebuild)."""
+    if client.collection_exists(collection_name):
+        return
+    create_collection(client, collection_name, dim, hnsw_m, hnsw_ef_construct)
+
+
 def upsert_chunks(client: QdrantClient, collection_name: str, chunks: list[Chunk], vectors, batch_size: int = 256) -> None:
     points = [
         PointStruct(
-            id=i,
+            id=chunk_point_id(chunk.id),
             vector={DENSE_VECTOR_NAME: vectors[i].tolist()},
             payload={
                 "chunk_id": chunk.id,
@@ -80,3 +116,12 @@ def upsert_chunks(client: QdrantClient, collection_name: str, chunks: list[Chunk
     ]
     for start in range(0, len(points), batch_size):
         client.upsert(collection_name=collection_name, points=points[start : start + batch_size])
+
+
+def delete_chunks(client: QdrantClient, collection_name: str, chunk_ids: list[str]) -> None:
+    if not chunk_ids:
+        return
+    client.delete(
+        collection_name=collection_name,
+        points_selector=[chunk_point_id(cid) for cid in chunk_ids],
+    )
