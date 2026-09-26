@@ -1,0 +1,50 @@
+[
+  {
+    "query_id": "golden::issue::2689",
+    "finish_reason": "stop",
+    "completion_tokens": 140,
+    "reasoning_tokens": null,
+    "visible_chars": 714,
+    "visible_empty": false,
+    "latency_ms": 879.1894169989973,
+    "answer_text": "The `response_model` feature in FastAPI intentionally performs a second validation pass on the returned object, which causes validators like `@root_validator` to execute twice [1][4]. This behavior is by design to ensure that the returned data strictly conforms to the declared `response_model` schema, preventing potential security issues where extra fields from a subclass might be exposed [1]. Specifically, the `response_model` is \"cloned\" to create a new Pydantic model instance, ensuring that the output is filtered to contain only the declared fields [1]. While this results in redundant validation logic being run, it is a necessary mechanism for FastAPI to guarantee response consistency and security [1]."
+  },
+  {
+    "query_id": "golden::issue::2884",
+    "error": "RateLimitError('Error code: 429 - {\\'error\\': {\\'message\\': \"Request too large for model `qwen/qwen3.8-27b` in organization `org_01kyn3er0rejetrhf5mtrfghv4` service tier `on_demand` on output tokens per minute (OTPM): Limit 1000, Requested 1024. The request\\'s expected output tokens exceed the enforced limit; reduce max_tokens (or the request\\'s expected output) and try again. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\", \\'type\\': \\'tokens\\', \\'code\\': \\'rate_limit_exceeded\\'}}')"
+  },
+  {
+    "query_id": "golden::issue::3212",
+    "finish_reason": "stop",
+    "completion_tokens": 237,
+    "reasoning_tokens": null,
+    "visible_chars": 984,
+    "visible_empty": false,
+    "latency_ms": 865.405083000951,
+    "answer_text": "The provided context does not contain information about how to add routes that include an equal sign (`=`) in the path or how to handle query parameters formatted as `key=value` within a route definition [1][3][4][5][6][7][8][9][10].\n\nThe context discusses other routing topics, such as:\n*   Matching paths that start with an anchor tag (`#`) [1].\n*   Handling form data in routes [3].\n*   Using `APIRouter` with prefixes and tags [5].\n*   Catching generic paths or \"anything else\" routes [7].\n*   Defining body parameters versus query parameters [9].\n*   Supporting multiple query parameters with the same name [10].\n*   Defining multiple path operations for the same method and path [8].\n*   Suggested enhancements for default values in route functions [4].\n\nBecause the specific scenario of using an equal sign in a route path (e.g., `/animal={animal}`) is not addressed in the provided documentation or issues, I cannot provide a verified answer based solely on the given context."
+  },
+  {
+    "query_id": "golden::issue::753",
+    "finish_reason": "stop",
+    "completion_tokens": 188,
+    "reasoning_tokens": null,
+    "visible_chars": 865,
+    "visible_empty": false,
+    "latency_ms": 7857.118041996728,
+    "answer_text": "The provided context does not contain information about a feature request to add a `name` keyword argument to the `Depends` class or a mechanism to automatically inject dependency results as keyword arguments to path operations without declaring them in each function signature [1][3][5][7][8][9][10][4][2].\n\nThe context confirms that dependencies can be applied to all path operations in a router by passing them to the `APIRouter` constructor or the `include_router` method [1][3][5][10]. However, it does not describe any functionality that allows the result of a dependency to be automatically passed to a path operation function as a named keyword argument based on a `name` parameter in `Depends` [1][3][5][10].\n\nTherefore, I cannot confirm or deny the existence of this specific feature or provide implementation details for it based on the provided context."
+  },
+  {
+    "query_id": "golden::issue::219",
+    "error": "RateLimitError('Error code: 429 - {\\'error\\': {\\'message\\': \"Request too large for model `qwen/qwen3.8-27b` in organization `org_01kyn3er0rejetrhf5mtrfghv4` service tier `on_demand` on output tokens per minute (OTPM): Limit 1000, Requested 1024. The request\\'s expected output tokens exceed the enforced limit; reduce max_tokens (or the request\\'s expected output) and try again. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\", \\'type\\': \\'tokens\\', \\'code\\': \\'rate_limit_exceeded\\'}}')"
+  },
+  {
+    "query_id": "golden::issue::11104",
+    "finish_reason": "stop",
+    "completion_tokens": 157,
+    "reasoning_tokens": null,
+    "visible_chars": 547,
+    "visible_empty": false,
+    "latency_ms": 653.3308329962892,
+    "answer_text": "The provided context does not contain information about the specific bug where upgrading `python-multipart` to version 0.0.7 causes \"There was an error parsing the body\" or 400 errors when uploading files in FastAPI 0.94.1 [1][2][3][4][5][6][7][8][9][10]. The available context blocks only list resolutions for various other issues across different FastAPI versions (ranging from 0.45.0 to 0.81.0) and do not address the `python-multipart` upgrade issue or the specific security advisory mentioned in your question [1][2][3][4][5][6][7][8][9][10]."
+  }
+]

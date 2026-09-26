@@ -1,0 +1,62 @@
+[
+  {
+    "query_id": "golden::issue::2689",
+    "finish_reason": "stop",
+    "completion_tokens": 150,
+    "reasoning_tokens": 41,
+    "visible_chars": 484,
+    "visible_empty": false,
+    "latency_ms": 1186.4436250034487,
+    "answer_text": "FastAPI runs the Pydantic model validation once for the request body and a second time when it creates the response object from the declared\u202f`response_model`\u202f[4]. Because the same model class is used for both the input parameter (`user_update: schemas.UserSwipes`) and the `response_model`, any validators (including `@root_validator`s) are executed twice \u2013 once during request parsing and again when FastAPI builds the response, which leads to the redundant validation you\u2019re seeing."
+  },
+  {
+    "query_id": "golden::issue::2884",
+    "finish_reason": "stop",
+    "completion_tokens": 625,
+    "reasoning_tokens": 112,
+    "visible_chars": 2120,
+    "visible_empty": false,
+    "latency_ms": 6855.474666997907,
+    "answer_text": "In FastAPI you don\u2019t use a FastAPI\u2011specific attribute to tell a model which database it belongs to; you rely on SQLAlchemy\u2019s own \u201cbind key\u201d feature.  \nYou can create a custom declarative base that reads a `__bind_key__` attribute from each model and stores it in the table\u2019s `info` dict, as shown in the example below\u202f[5]. Then, when you create the engine(s) you can pass a dictionary of binds to `create_engine`/`sessionmaker`, and SQLAlchemy will route queries for tables whose `info[\"bind_key\"]` matches the key to the appropriate database\u202f[6].  \n\n```python\nfrom sqlalchemy import Column, Integer, String\nfrom sqlalchemy.ext.declarative import declarative_base\n\n# Base class that copies __bind_key__ into table.info\nclass BindMetaMixin(object):\n    def __init__(cls, name, bases, d):\n        bind_key = d.pop('__bind_key__', None) or getattr(cls, '__bind_key__', None)\n        super().__init__(name, bases, d)\n        if bind_key is not None and getattr(cls, '__table__', None) is not None:\n            cls.__table__.info['bind_key'] = bind_key\n\nclass DefaultMeta(BindMetaMixin):\n    pass\n\nBase = declarative_base(metaclass=DefaultMeta)\n\nclass User(Base):\n    __tablename__ = \"users\"\n    __bind_key__ = \"example\"          # \u2190 tells SQLAlchemy this table uses the \u201cexample\u201d bind\n    id = Column(Integer, primary_key=True, index=True)\n    first_name = Column(String)\n    last_name = Column(String)\n```\n\nWhen you configure the engines you would do something like:\n\n```python\nfrom sqlalchemy import create_engine\nfrom sqlalchemy.orm import sessionmaker\n\nengine = create_engine(\n    \"sqlite:///default.db\",\n    future=True,\n    connect_args={\"check_same_thread\": False},\n    # map bind keys to engines\n    binds={\n        \"example\": create_engine(\"postgresql://user:pwd@host/example_db\")\n    },\n)\n\nSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)\n```\n\nNow any query that involves `User` will automatically use the engine associated with the `\"example\"` bind key. FastAPI itself does not add any extra syntax; you just use the standard SQLAlchemy approach within your FastAPI dependencies\u202f[5][6]."
+  },
+  {
+    "query_id": "golden::issue::3212",
+    "finish_reason": "stop",
+    "completion_tokens": 52,
+    "reasoning_tokens": 18,
+    "visible_chars": 135,
+    "visible_empty": false,
+    "latency_ms": 20881.455750000896,
+    "answer_text": "I\u2019m sorry, but the provided context does not contain enough information to answer your question about adding routes with an equal sign."
+  },
+  {
+    "query_id": "golden::issue::753",
+    "finish_reason": "stop",
+    "completion_tokens": 100,
+    "reasoning_tokens": 45,
+    "visible_chars": 214,
+    "visible_empty": false,
+    "latency_ms": 25107.789207999303,
+    "answer_text": "I\u2019m sorry, but the provided context doesn\u2019t contain information about adding a `name` argument to `Depends` or how that would work with `APIRoute`. I can\u2019t answer that question based on the available documentation."
+  },
+  {
+    "query_id": "golden::issue::219",
+    "finish_reason": "stop",
+    "completion_tokens": 579,
+    "reasoning_tokens": 129,
+    "visible_chars": 1966,
+    "visible_empty": false,
+    "latency_ms": 29043.669582999428,
+    "answer_text": "The example you posted shows several common pitfalls when using **UploadFile** together with other form fields:\n\n1. **Optional list of files still raises a 422 error** \u2013 FastAPI treats a parameter as required unless its default value is `None`. To make a list of files optional you need to give it a default of `None` (or use `Annotated` with `File(None)`) so that FastAPI does not consider the field missing when the client sends no files\u202f[10].  \n\n2. **Mixing `multipart/form\u2011data` file fields with other form fields** \u2013 FastAPI can accept both file uploads (`File(...)` or `UploadFile`) and regular form fields (`Form(...)`) in the same request, but each parameter must be declared separately in the path\u2011operation function. The request must be sent as `multipart/form\u2011data` with a separate part for each field (files and non\u2011file fields). The issue you observed is not a bug in FastAPI; it is usually caused by the client not constructing the multipart request correctly\u202f[1].  \n\n3. **`UploadFile` cannot be used inside a Pydantic model** \u2013 `UploadFile` is a special FastAPI type that is parsed from the request body, not a regular data type that Pydantic can validate. Therefore it cannot be placed inside a `BaseModel`; you need to receive it as a separate function parameter, not as a field of a Pydantic model\u202f[3].  \n\n4. **Receiving a list of strings from Swagger UI** \u2013 When you declare a parameter as `List[str] = Form(...)`, Swagger UI sends each string as a separate form part with the same name. If the client sends a single combined string, FastAPI will treat it as one element in the list. The documentation does not provide a built\u2011in way to split a single comma\u2011separated string into multiple list items, so you would need to handle that parsing yourself in the endpoint code. The current context does not contain a specific solution for this behavior.  \n\nIf you need concrete code examples for any of these points, let me know and I can provide them."
+  },
+  {
+    "query_id": "golden::issue::11104",
+    "finish_reason": "stop",
+    "completion_tokens": 189,
+    "reasoning_tokens": 61,
+    "visible_chars": 406,
+    "visible_empty": false,
+    "latency_ms": 17108.096333002322,
+    "answer_text": "The problem you\u2019re seeing is known to have been fixed in FastAPI\u202f0.79.0 and later\u202f\u2014 the change was merged in\u202f#5145 and is included starting with FastAPI\u202f0.79.0\u202f[1].\u202fIf you upgrade your FastAPI version to\u202f0.79.0\u202for any newer release (for example\u202f0.81.0, which also contains the fix\u202f[9]), the \u201cThere was an error parsing the body\u201d error when using the newer\u202fpython\u2011multipart\u202f0.0.7 library should be resolved."
+  }
+]

@@ -1,0 +1,2342 @@
+[
+  {
+    "query_id": "golden::issue::604",
+    "is_negative": false,
+    "stratum": "how_to",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9562846422195435,
+      "score_gap": 0.7541841119527817,
+      "semantic_agreement": 0.7367666363716125,
+      "distribution_shape": 9.026254851177386
+    }
+  },
+  {
+    "query_id": "golden::issue::257",
+    "is_negative": false,
+    "stratum": "how_to",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9852544069290161,
+      "score_gap": 0.007308363914489746,
+      "semantic_agreement": 0.7333418130874634,
+      "distribution_shape": 1.7335665099293183
+    }
+  },
+  {
+    "query_id": "golden::issue::882",
+    "is_negative": false,
+    "stratum": "how_to",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.7660642862319946,
+      "score_gap": 0.14578276872634888,
+      "semantic_agreement": 0.7483749389648438,
+      "distribution_shape": 2.297185107341208
+    }
+  },
+  {
+    "query_id": "golden::issue::1781",
+    "is_negative": false,
+    "stratum": "how_to",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.8830453157424927,
+      "score_gap": 0.011558592319488525,
+      "semantic_agreement": 0.7382267713546753,
+      "distribution_shape": 4.79122491703732
+    }
+  },
+  {
+    "query_id": "golden::issue::2467",
+    "is_negative": false,
+    "stratum": "how_to",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.7859963178634644,
+      "score_gap": 0.32030409574508667,
+      "semantic_agreement": 0.7855353355407715,
+      "distribution_shape": 2.0270074135590885
+    }
+  },
+  {
+    "query_id": "golden::issue::1996",
+    "is_negative": false,
+    "stratum": "how_to",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.7991263270378113,
+      "score_gap": 0.012271225452423096,
+      "semantic_agreement": 0.7459625005722046,
+      "distribution_shape": 6.089886741744524
+    }
+  },
+  {
+    "query_id": "golden::issue::3212",
+    "is_negative": false,
+    "stratum": "how_to",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.0030066920444369316,
+      "score_gap": 0.0021194778382778168,
+      "semantic_agreement": 0.6938133835792542,
+      "distribution_shape": 5.564945447358006
+    }
+  },
+  {
+    "query_id": "golden::issue::5532",
+    "is_negative": false,
+    "stratum": "how_to",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9181737303733826,
+      "score_gap": 0.024685800075531006,
+      "semantic_agreement": 0.8865839838981628,
+      "distribution_shape": 6.811813528360332
+    }
+  },
+  {
+    "query_id": "golden::issue::959",
+    "is_negative": false,
+    "stratum": "how_to",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.8800115585327148,
+      "score_gap": 0.1932891607284546,
+      "semantic_agreement": 0.7634967565536499,
+      "distribution_shape": 2.5957572529217594
+    }
+  },
+  {
+    "query_id": "golden::issue::4860",
+    "is_negative": false,
+    "stratum": "how_to",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9246481657028198,
+      "score_gap": 0.20287799835205078,
+      "semantic_agreement": 0.9007754921913147,
+      "distribution_shape": 68.4521282384236
+    }
+  },
+  {
+    "query_id": "golden::issue::78",
+    "is_negative": false,
+    "stratum": "how_to",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9822952747344971,
+      "score_gap": 0.0002193450927734375,
+      "semantic_agreement": 0.7674145102500916,
+      "distribution_shape": 2.0746467785002816
+    }
+  },
+  {
+    "query_id": "golden::issue::58",
+    "is_negative": false,
+    "stratum": "how_to",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9344993233680725,
+      "score_gap": 0.07929259538650513,
+      "semantic_agreement": 0.7437651753425598,
+      "distribution_shape": 5.168070383324461
+    }
+  },
+  {
+    "query_id": "golden::issue::5045",
+    "is_negative": false,
+    "stratum": "how_to",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9088325500488281,
+      "score_gap": 0.006100296974182129,
+      "semantic_agreement": 0.9540024399757385,
+      "distribution_shape": 3.011305656360338
+    }
+  },
+  {
+    "query_id": "golden::issue::3563",
+    "is_negative": false,
+    "stratum": "how_to",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9760780334472656,
+      "score_gap": 0.013311147689819336,
+      "semantic_agreement": 0.7881590723991394,
+      "distribution_shape": 2.576031958717578
+    }
+  },
+  {
+    "query_id": "golden::issue::923",
+    "is_negative": false,
+    "stratum": "how_to",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9705665707588196,
+      "score_gap": 0.0034050345420837402,
+      "semantic_agreement": 0.8257745504379272,
+      "distribution_shape": 2.5493802129737726
+    }
+  },
+  {
+    "query_id": "golden::issue::129",
+    "is_negative": false,
+    "stratum": "how_to",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.24045617878437042,
+      "score_gap": 0.11698843538761139,
+      "semantic_agreement": 0.7740008234977722,
+      "distribution_shape": 1.881716865279475
+    }
+  },
+  {
+    "query_id": "golden::issue::758",
+    "is_negative": false,
+    "stratum": "how_to",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.18425866961479187,
+      "score_gap": 0.14922044798731804,
+      "semantic_agreement": 0.720008909702301,
+      "distribution_shape": 8.996538512814485
+    }
+  },
+  {
+    "query_id": "golden::issue::4478",
+    "is_negative": false,
+    "stratum": "how_to",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9191147685050964,
+      "score_gap": 0.03058028221130371,
+      "semantic_agreement": 0.9677543044090271,
+      "distribution_shape": 4.739996951005137
+    }
+  },
+  {
+    "query_id": "golden::issue::1491",
+    "is_negative": false,
+    "stratum": "how_to",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9960132837295532,
+      "score_gap": 0.0925646424293518,
+      "semantic_agreement": 0.7718676924705505,
+      "distribution_shape": 2.957156903775831
+    }
+  },
+  {
+    "query_id": "golden::issue::602",
+    "is_negative": false,
+    "stratum": "how_to",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.6980769038200378,
+      "score_gap": 0.06459903717041016,
+      "semantic_agreement": 0.6937456727027893,
+      "distribution_shape": 3.2471838853465975
+    }
+  },
+  {
+    "query_id": "golden::issue::1005",
+    "is_negative": false,
+    "stratum": "how_to",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.8221721649169922,
+      "score_gap": 0.28363972902297974,
+      "semantic_agreement": 0.761592447757721,
+      "distribution_shape": 1.615119750007859
+    }
+  },
+  {
+    "query_id": "golden::issue::527",
+    "is_negative": false,
+    "stratum": "how_to",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9796363115310669,
+      "score_gap": 0.1643114686012268,
+      "semantic_agreement": 0.8639413714408875,
+      "distribution_shape": 4.510648370442148
+    }
+  },
+  {
+    "query_id": "golden::issue::3",
+    "is_negative": false,
+    "stratum": "how_to",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.867588222026825,
+      "score_gap": 0.07493466138839722,
+      "semantic_agreement": 0.7180213928222656,
+      "distribution_shape": 2.6765300366718825
+    }
+  },
+  {
+    "query_id": "golden::issue::2300",
+    "is_negative": false,
+    "stratum": "how_to",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9781524538993835,
+      "score_gap": 0.0008083581924438477,
+      "semantic_agreement": 0.7403355836868286,
+      "distribution_shape": 2.845715959389752
+    }
+  },
+  {
+    "query_id": "golden::issue::3947",
+    "is_negative": false,
+    "stratum": "how_to",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.46856382489204407,
+      "score_gap": 0.010957419872283936,
+      "semantic_agreement": 0.9954039454460144,
+      "distribution_shape": 3.1951931591204974
+    }
+  },
+  {
+    "query_id": "golden::issue::2934",
+    "is_negative": false,
+    "stratum": "error_debugging",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9620100259780884,
+      "score_gap": 0.01872175931930542,
+      "semantic_agreement": 0.7939823865890503,
+      "distribution_shape": 4.139060739937453
+    }
+  },
+  {
+    "query_id": "golden::issue::12965",
+    "is_negative": false,
+    "stratum": "error_debugging",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9633194804191589,
+      "score_gap": 0.001083672046661377,
+      "semantic_agreement": 0.9437055587768555,
+      "distribution_shape": 76856.55000000003
+    }
+  },
+  {
+    "query_id": "golden::issue::1125",
+    "is_negative": false,
+    "stratum": "error_debugging",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9901328086853027,
+      "score_gap": 0.0012608170509338379,
+      "semantic_agreement": 0.7665666937828064,
+      "distribution_shape": 1.8629642400080815
+    }
+  },
+  {
+    "query_id": "golden::issue::2618",
+    "is_negative": false,
+    "stratum": "error_debugging",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9722761511802673,
+      "score_gap": 0.006982982158660889,
+      "semantic_agreement": 0.785618782043457,
+      "distribution_shape": 5.239354772763727
+    }
+  },
+  {
+    "query_id": "golden::issue::4236",
+    "is_negative": false,
+    "stratum": "error_debugging",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.8944003582000732,
+      "score_gap": 0.0026726126670837402,
+      "semantic_agreement": 0.9892429113388062,
+      "distribution_shape": 4.693191732686079
+    }
+  },
+  {
+    "query_id": "golden::issue::5387",
+    "is_negative": false,
+    "stratum": "error_debugging",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9546849131584167,
+      "score_gap": 0.016049206256866455,
+      "semantic_agreement": 0.747434139251709,
+      "distribution_shape": 7.696608408986703
+    }
+  },
+  {
+    "query_id": "golden::issue::744",
+    "is_negative": false,
+    "stratum": "error_debugging",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9433278441429138,
+      "score_gap": 0.05790722370147705,
+      "semantic_agreement": 0.8218386173248291,
+      "distribution_shape": 2.5399332752460104
+    }
+  },
+  {
+    "query_id": "golden::issue::12402",
+    "is_negative": false,
+    "stratum": "error_debugging",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9245627522468567,
+      "score_gap": 0.051683783531188965,
+      "semantic_agreement": 0.8309699892997742,
+      "distribution_shape": 3.6018830650086717
+    }
+  },
+  {
+    "query_id": "golden::issue::1779",
+    "is_negative": false,
+    "stratum": "error_debugging",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9327924251556396,
+      "score_gap": 0.04560166597366333,
+      "semantic_agreement": 0.758428692817688,
+      "distribution_shape": 3.322767411179553
+    }
+  },
+  {
+    "query_id": "golden::issue::4391",
+    "is_negative": false,
+    "stratum": "error_debugging",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.15296752750873566,
+      "score_gap": 0.046262890100479126,
+      "semantic_agreement": 0.985281229019165,
+      "distribution_shape": 2.627867998204467
+    }
+  },
+  {
+    "query_id": "golden::issue::1490",
+    "is_negative": false,
+    "stratum": "error_debugging",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9918079972267151,
+      "score_gap": 0.0009232759475708008,
+      "semantic_agreement": 0.7746292352676392,
+      "distribution_shape": 2.868570718709737
+    }
+  },
+  {
+    "query_id": "golden::issue::1719",
+    "is_negative": false,
+    "stratum": "error_debugging",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.8945597410202026,
+      "score_gap": 0.006213068962097168,
+      "semantic_agreement": 0.9501866698265076,
+      "distribution_shape": 3.4429023706328947
+    }
+  },
+  {
+    "query_id": "golden::issue::23",
+    "is_negative": false,
+    "stratum": "error_debugging",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.7957008481025696,
+      "score_gap": 0.13449186086654663,
+      "semantic_agreement": 0.7387712001800537,
+      "distribution_shape": 2.3997887813342906
+    }
+  },
+  {
+    "query_id": "golden::issue::763",
+    "is_negative": false,
+    "stratum": "error_debugging",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9591660499572754,
+      "score_gap": 0.09343725442886353,
+      "semantic_agreement": 0.7760579586029053,
+      "distribution_shape": 4.313028630802637
+    }
+  },
+  {
+    "query_id": "golden::issue::950",
+    "is_negative": false,
+    "stratum": "error_debugging",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9847266674041748,
+      "score_gap": 0.019121527671813965,
+      "semantic_agreement": 0.8850556015968323,
+      "distribution_shape": 2.739564616377735
+    }
+  },
+  {
+    "query_id": "golden::issue::1195",
+    "is_negative": false,
+    "stratum": "error_debugging",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9222451448440552,
+      "score_gap": 0.003809809684753418,
+      "semantic_agreement": 0.7338888645172119,
+      "distribution_shape": 3.5407632093711987
+    }
+  },
+  {
+    "query_id": "golden::issue::1732",
+    "is_negative": false,
+    "stratum": "error_debugging",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.8159207105636597,
+      "score_gap": 0.008838236331939697,
+      "semantic_agreement": 0.8935663104057312,
+      "distribution_shape": 12.498041459244485
+    }
+  },
+  {
+    "query_id": "golden::issue::2657",
+    "is_negative": false,
+    "stratum": "error_debugging",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9734892845153809,
+      "score_gap": 0.015110969543457031,
+      "semantic_agreement": 0.7953295111656189,
+      "distribution_shape": 2.6617926744880793
+    }
+  },
+  {
+    "query_id": "golden::issue::4816",
+    "is_negative": false,
+    "stratum": "error_debugging",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9373374581336975,
+      "score_gap": 0.007430076599121094,
+      "semantic_agreement": 0.7779751420021057,
+      "distribution_shape": 1.5113111129460477
+    }
+  },
+  {
+    "query_id": "golden::issue::1264",
+    "is_negative": false,
+    "stratum": "error_debugging",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.7757628560066223,
+      "score_gap": 0.13264739513397217,
+      "semantic_agreement": 0.7210187315940857,
+      "distribution_shape": 3.8612333051438927
+    }
+  },
+  {
+    "query_id": "golden::issue::1320",
+    "is_negative": false,
+    "stratum": "error_debugging",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9855291247367859,
+      "score_gap": 0.029080510139465332,
+      "semantic_agreement": 0.8368405699729919,
+      "distribution_shape": 3.6250470160393387
+    }
+  },
+  {
+    "query_id": "golden::issue::1743",
+    "is_negative": false,
+    "stratum": "error_debugging",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9766457080841064,
+      "score_gap": 0.002352416515350342,
+      "semantic_agreement": 0.7788916826248169,
+      "distribution_shape": 2.482986297524277
+    }
+  },
+  {
+    "query_id": "golden::issue::3021",
+    "is_negative": false,
+    "stratum": "error_debugging",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9801406264305115,
+      "score_gap": 0.18333172798156738,
+      "semantic_agreement": 0.8487062454223633,
+      "distribution_shape": 2.3806007611571607
+    }
+  },
+  {
+    "query_id": "golden::issue::2735",
+    "is_negative": false,
+    "stratum": "error_debugging",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9736678600311279,
+      "score_gap": 0.005726814270019531,
+      "semantic_agreement": 0.8119511008262634,
+      "distribution_shape": 2.12403796759651
+    }
+  },
+  {
+    "query_id": "golden::issue::1631",
+    "is_negative": false,
+    "stratum": "error_debugging",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9111907482147217,
+      "score_gap": 0.015326738357543945,
+      "semantic_agreement": 0.9973200559616089,
+      "distribution_shape": 6.1394439411649495
+    }
+  },
+  {
+    "query_id": "golden::issue::753",
+    "is_negative": false,
+    "stratum": "conceptual",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.73591548204422,
+      "score_gap": 0.06473910808563232,
+      "semantic_agreement": 0.7887685298919678,
+      "distribution_shape": 2.652593477734121
+    }
+  },
+  {
+    "query_id": "golden::issue::600",
+    "is_negative": false,
+    "stratum": "conceptual",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.11236422508955002,
+      "score_gap": 0.015070445835590363,
+      "semantic_agreement": 0.7364739179611206,
+      "distribution_shape": 2.324551991123288
+    }
+  },
+  {
+    "query_id": "golden::issue::2780",
+    "is_negative": false,
+    "stratum": "conceptual",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.922264575958252,
+      "score_gap": 0.04305332899093628,
+      "semantic_agreement": 0.7374693751335144,
+      "distribution_shape": 2.179433987911272
+    }
+  },
+  {
+    "query_id": "golden::issue::219",
+    "is_negative": false,
+    "stratum": "conceptual",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.30661314725875854,
+      "score_gap": 0.05469897389411926,
+      "semantic_agreement": 0.7416543960571289,
+      "distribution_shape": 1.9442117156218932
+    }
+  },
+  {
+    "query_id": "golden::issue::625",
+    "is_negative": false,
+    "stratum": "conceptual",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.8821736574172974,
+      "score_gap": 0.5918521285057068,
+      "semantic_agreement": 0.7911850810050964,
+      "distribution_shape": 2.4910960731052283
+    }
+  },
+  {
+    "query_id": "golden::issue::2549",
+    "is_negative": false,
+    "stratum": "conceptual",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.8469046354293823,
+      "score_gap": 0.05895411968231201,
+      "semantic_agreement": 0.7093247175216675,
+      "distribution_shape": 2.7155848692454976
+    }
+  },
+  {
+    "query_id": "golden::issue::167",
+    "is_negative": false,
+    "stratum": "conceptual",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.6998621821403503,
+      "score_gap": 0.31782621145248413,
+      "semantic_agreement": 0.7454419732093811,
+      "distribution_shape": 2.84171908822415
+    }
+  },
+  {
+    "query_id": "golden::issue::2689",
+    "is_negative": false,
+    "stratum": "conceptual",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.24498312175273895,
+      "score_gap": 0.059958621859550476,
+      "semantic_agreement": 0.7567670345306396,
+      "distribution_shape": 3.559567807844852
+    }
+  },
+  {
+    "query_id": "golden::issue::1156",
+    "is_negative": false,
+    "stratum": "conceptual",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9709651470184326,
+      "score_gap": 0.026309847831726074,
+      "semantic_agreement": 0.8123375177383423,
+      "distribution_shape": 3.693300247308108
+    }
+  },
+  {
+    "query_id": "golden::issue::777",
+    "is_negative": false,
+    "stratum": "conceptual",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.3755897879600525,
+      "score_gap": 0.2048524171113968,
+      "semantic_agreement": 0.7520480751991272,
+      "distribution_shape": 4.898460036860303
+    }
+  },
+  {
+    "query_id": "golden::issue::1001",
+    "is_negative": false,
+    "stratum": "conceptual",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9378786683082581,
+      "score_gap": 0.026322543621063232,
+      "semantic_agreement": 0.7768175601959229,
+      "distribution_shape": 2.707198404005195
+    }
+  },
+  {
+    "query_id": "golden::issue::16037",
+    "is_negative": false,
+    "stratum": "conceptual",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9950227737426758,
+      "score_gap": 0.003358185291290283,
+      "semantic_agreement": 0.7936270236968994,
+      "distribution_shape": 5.836259233668074
+    }
+  },
+  {
+    "query_id": "golden::issue::852",
+    "is_negative": false,
+    "stratum": "conceptual",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.7824075222015381,
+      "score_gap": 0.28699302673339844,
+      "semantic_agreement": 0.7699546813964844,
+      "distribution_shape": 4.319836699428722
+    }
+  },
+  {
+    "query_id": "golden::issue::2967",
+    "is_negative": false,
+    "stratum": "conceptual",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.958703875541687,
+      "score_gap": 0.07218962907791138,
+      "semantic_agreement": 0.8083186745643616,
+      "distribution_shape": 14.589562803681048
+    }
+  },
+  {
+    "query_id": "golden::issue::1329",
+    "is_negative": false,
+    "stratum": "conceptual",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.8076399564743042,
+      "score_gap": 0.07396870851516724,
+      "semantic_agreement": 0.748377799987793,
+      "distribution_shape": 2.296887620280165
+    }
+  },
+  {
+    "query_id": "golden::issue::760",
+    "is_negative": false,
+    "stratum": "conceptual",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.8799146413803101,
+      "score_gap": 0.06486892700195312,
+      "semantic_agreement": 0.8210529685020447,
+      "distribution_shape": 8.018465361903827
+    }
+  },
+  {
+    "query_id": "golden::issue::10322",
+    "is_negative": false,
+    "stratum": "conceptual",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.968086302280426,
+      "score_gap": 0.016933441162109375,
+      "semantic_agreement": 0.7975234985351562,
+      "distribution_shape": 2.314920689805793
+    }
+  },
+  {
+    "query_id": "golden::issue::2236",
+    "is_negative": false,
+    "stratum": "conceptual",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.8404936194419861,
+      "score_gap": 0.396854966878891,
+      "semantic_agreement": 0.7739315629005432,
+      "distribution_shape": 3.357906642852174
+    }
+  },
+  {
+    "query_id": "golden::issue::532",
+    "is_negative": false,
+    "stratum": "conceptual",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.12196722626686096,
+      "score_gap": 0.09427672252058983,
+      "semantic_agreement": 0.7652937769889832,
+      "distribution_shape": 3.0495561904909394
+    }
+  },
+  {
+    "query_id": "golden::issue::324",
+    "is_negative": false,
+    "stratum": "conceptual",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.8548946976661682,
+      "score_gap": 0.03276968002319336,
+      "semantic_agreement": 0.7090953588485718,
+      "distribution_shape": 2.8064330504159285
+    }
+  },
+  {
+    "query_id": "golden::issue::910",
+    "is_negative": false,
+    "stratum": "conceptual",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.769994854927063,
+      "score_gap": 0.3487178385257721,
+      "semantic_agreement": 0.7937784790992737,
+      "distribution_shape": 3.517805889444127
+    }
+  },
+  {
+    "query_id": "golden::issue::2937",
+    "is_negative": false,
+    "stratum": "conceptual",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.5404744744300842,
+      "score_gap": 0.3948761522769928,
+      "semantic_agreement": 0.7625542283058167,
+      "distribution_shape": 2.7006065206507515
+    }
+  },
+  {
+    "query_id": "golden::issue::2484",
+    "is_negative": false,
+    "stratum": "conceptual",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.8404734134674072,
+      "score_gap": 0.05254131555557251,
+      "semantic_agreement": 0.7903096675872803,
+      "distribution_shape": 1.8840737450624374
+    }
+  },
+  {
+    "query_id": "golden::issue::1679",
+    "is_negative": false,
+    "stratum": "conceptual",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9440248608589172,
+      "score_gap": 0.0061029791831970215,
+      "semantic_agreement": 0.7688460350036621,
+      "distribution_shape": 3.387647284013435
+    }
+  },
+  {
+    "query_id": "golden::issue::938",
+    "is_negative": false,
+    "stratum": "conceptual",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9810487031936646,
+      "score_gap": 0.01841217279434204,
+      "semantic_agreement": 0.8270623683929443,
+      "distribution_shape": 7.092019259353827
+    }
+  },
+  {
+    "query_id": "golden::issue::1767",
+    "is_negative": false,
+    "stratum": "version_specific",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.38192835450172424,
+      "score_gap": 0.303621768951416,
+      "semantic_agreement": 0.7625391483306885,
+      "distribution_shape": 2.767470306966157
+    }
+  },
+  {
+    "query_id": "golden::issue::711",
+    "is_negative": false,
+    "stratum": "version_specific",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9889878630638123,
+      "score_gap": 0.0019367337226867676,
+      "semantic_agreement": 0.8398693799972534,
+      "distribution_shape": 3.226489677222055
+    }
+  },
+  {
+    "query_id": "golden::issue::11104",
+    "is_negative": false,
+    "stratum": "version_specific",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.8639202117919922,
+      "score_gap": 0.013583958148956299,
+      "semantic_agreement": 0.9379003643989563,
+      "distribution_shape": 1.6860335451734858
+    }
+  },
+  {
+    "query_id": "golden::issue::11251",
+    "is_negative": false,
+    "stratum": "version_specific",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.8626834750175476,
+      "score_gap": 0.049451351165771484,
+      "semantic_agreement": 0.7928916215896606,
+      "distribution_shape": 4.678564603352423
+    }
+  },
+  {
+    "query_id": "golden::issue::15764",
+    "is_negative": false,
+    "stratum": "version_specific",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9873752593994141,
+      "score_gap": 0.0014336705207824707,
+      "semantic_agreement": 0.7487936019897461,
+      "distribution_shape": 2.7219973496466756
+    }
+  },
+  {
+    "query_id": "golden::issue::1952",
+    "is_negative": false,
+    "stratum": "version_specific",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9553151726722717,
+      "score_gap": 0.03641784191131592,
+      "semantic_agreement": 0.8498860001564026,
+      "distribution_shape": 3.6827115227793352
+    }
+  },
+  {
+    "query_id": "golden::issue::5602",
+    "is_negative": false,
+    "stratum": "version_specific",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9753603339195251,
+      "score_gap": 0.001802980899810791,
+      "semantic_agreement": 0.9432520270347595,
+      "distribution_shape": 6.997962328773569
+    }
+  },
+  {
+    "query_id": "golden::issue::2342",
+    "is_negative": false,
+    "stratum": "version_specific",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.788240373134613,
+      "score_gap": 0.30853739380836487,
+      "semantic_agreement": 0.8204245567321777,
+      "distribution_shape": 3.470372312074832
+    }
+  },
+  {
+    "query_id": "golden::issue::286",
+    "is_negative": false,
+    "stratum": "version_specific",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9072833061218262,
+      "score_gap": 0.002138674259185791,
+      "semantic_agreement": 0.7417520880699158,
+      "distribution_shape": 4.353587106727063
+    }
+  },
+  {
+    "query_id": "golden::issue::5646",
+    "is_negative": false,
+    "stratum": "version_specific",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9575192928314209,
+      "score_gap": 0.0026570558547973633,
+      "semantic_agreement": 0.9782156944274902,
+      "distribution_shape": 14.187911088474563
+    }
+  },
+  {
+    "query_id": "golden::issue::4187",
+    "is_negative": false,
+    "stratum": "version_specific",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.6657270193099976,
+      "score_gap": 0.0,
+      "semantic_agreement": 0.9999998211860657,
+      "distribution_shape": 0.0
+    }
+  },
+  {
+    "query_id": "golden::issue::9780",
+    "is_negative": false,
+    "stratum": "version_specific",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9259001612663269,
+      "score_gap": 0.052272677421569824,
+      "semantic_agreement": 0.7774879336357117,
+      "distribution_shape": 2.4492235895242422
+    }
+  },
+  {
+    "query_id": "golden::issue::4041",
+    "is_negative": false,
+    "stratum": "version_specific",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9016556143760681,
+      "score_gap": 0.0005501508712768555,
+      "semantic_agreement": 0.9930298924446106,
+      "distribution_shape": 2.877521767079814
+    }
+  },
+  {
+    "query_id": "golden::issue::5857",
+    "is_negative": false,
+    "stratum": "version_specific",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9323127269744873,
+      "score_gap": 0.04234349727630615,
+      "semantic_agreement": 0.9291287064552307,
+      "distribution_shape": 3.621506764722951
+    }
+  },
+  {
+    "query_id": "golden::issue::16010",
+    "is_negative": false,
+    "stratum": "version_specific",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9924115538597107,
+      "score_gap": 0.002037942409515381,
+      "semantic_agreement": 0.813804030418396,
+      "distribution_shape": 3.887779435317601
+    }
+  },
+  {
+    "query_id": "golden::issue::5649",
+    "is_negative": false,
+    "stratum": "version_specific",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9565560221672058,
+      "score_gap": 0.022429049015045166,
+      "semantic_agreement": 0.9509351253509521,
+      "distribution_shape": 5.531855737150184
+    }
+  },
+  {
+    "query_id": "golden::issue::332",
+    "is_negative": false,
+    "stratum": "version_specific",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9707829356193542,
+      "score_gap": 0.010332703590393066,
+      "semantic_agreement": 0.790191650390625,
+      "distribution_shape": 5.070255702827057
+    }
+  },
+  {
+    "query_id": "golden::issue::1787",
+    "is_negative": false,
+    "stratum": "version_specific",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.846979022026062,
+      "score_gap": 0.034729599952697754,
+      "semantic_agreement": 0.7281206846237183,
+      "distribution_shape": 2.305158992167482
+    }
+  },
+  {
+    "query_id": "golden::issue::2791",
+    "is_negative": false,
+    "stratum": "version_specific",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9334236979484558,
+      "score_gap": 0.030873239040374756,
+      "semantic_agreement": 0.813718855381012,
+      "distribution_shape": 2.3599028532034034
+    }
+  },
+  {
+    "query_id": "golden::issue::1633",
+    "is_negative": false,
+    "stratum": "version_specific",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9842707514762878,
+      "score_gap": 0.000406801700592041,
+      "semantic_agreement": 0.759063720703125,
+      "distribution_shape": 3.7451368050120784
+    }
+  },
+  {
+    "query_id": "golden::issue::12240",
+    "is_negative": false,
+    "stratum": "version_specific",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9194990992546082,
+      "score_gap": 0.009005963802337646,
+      "semantic_agreement": 0.9449055194854736,
+      "distribution_shape": 16.630307184311498
+    }
+  },
+  {
+    "query_id": "golden::issue::15503",
+    "is_negative": false,
+    "stratum": "version_specific",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9397728443145752,
+      "score_gap": 0.00655972957611084,
+      "semantic_agreement": 0.7793641090393066,
+      "distribution_shape": 4.049840104465986
+    }
+  },
+  {
+    "query_id": "golden::issue::2600",
+    "is_negative": false,
+    "stratum": "version_specific",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.8957534432411194,
+      "score_gap": 0.0036848783493041992,
+      "semantic_agreement": 0.9988497495651245,
+      "distribution_shape": 2.966267092759667
+    }
+  },
+  {
+    "query_id": "golden::issue::809",
+    "is_negative": false,
+    "stratum": "version_specific",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9932693839073181,
+      "score_gap": 0.0019975900650024414,
+      "semantic_agreement": 0.7921653985977173,
+      "distribution_shape": 10.657905735694213
+    }
+  },
+  {
+    "query_id": "golden::issue::13533",
+    "is_negative": false,
+    "stratum": "version_specific",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9577857255935669,
+      "score_gap": 0.04902690649032593,
+      "semantic_agreement": 0.7556731104850769,
+      "distribution_shape": 1.4790880396006094
+    }
+  },
+  {
+    "query_id": "golden::issue::992",
+    "is_negative": false,
+    "stratum": "multi_hop",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.8949883580207825,
+      "score_gap": 0.04444664716720581,
+      "semantic_agreement": 0.8715947270393372,
+      "distribution_shape": 5.867247529598929
+    }
+  },
+  {
+    "query_id": "golden::issue::688",
+    "is_negative": false,
+    "stratum": "multi_hop",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.13619458675384521,
+      "score_gap": 0.09346845000982285,
+      "semantic_agreement": 0.7679089307785034,
+      "distribution_shape": 4.8887014708983605
+    }
+  },
+  {
+    "query_id": "golden::issue::581",
+    "is_negative": false,
+    "stratum": "multi_hop",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9553285241127014,
+      "score_gap": 0.04159224033355713,
+      "semantic_agreement": 0.6965174078941345,
+      "distribution_shape": 4.466290444150341
+    }
+  },
+  {
+    "query_id": "golden::issue::1034",
+    "is_negative": false,
+    "stratum": "multi_hop",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9690919518470764,
+      "score_gap": 0.02690035104751587,
+      "semantic_agreement": 0.7965098023414612,
+      "distribution_shape": 3.550225896334221
+    }
+  },
+  {
+    "query_id": "golden::issue::1266",
+    "is_negative": false,
+    "stratum": "multi_hop",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.8263608813285828,
+      "score_gap": 0.1749926209449768,
+      "semantic_agreement": 0.7586768865585327,
+      "distribution_shape": 2.316901436786023
+    }
+  },
+  {
+    "query_id": "golden::issue::2140",
+    "is_negative": false,
+    "stratum": "multi_hop",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.46599340438842773,
+      "score_gap": 0.08928003907203674,
+      "semantic_agreement": 0.7109109163284302,
+      "distribution_shape": 2.5505492140002657
+    }
+  },
+  {
+    "query_id": "golden::issue::3155",
+    "is_negative": false,
+    "stratum": "multi_hop",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9697503447532654,
+      "score_gap": 0.03770691156387329,
+      "semantic_agreement": 0.882215142250061,
+      "distribution_shape": 7.327797805501461
+    }
+  },
+  {
+    "query_id": "golden::issue::4475",
+    "is_negative": false,
+    "stratum": "multi_hop",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9565248489379883,
+      "score_gap": 0.0010964274406433105,
+      "semantic_agreement": 0.941072404384613,
+      "distribution_shape": 5.634307719000425
+    }
+  },
+  {
+    "query_id": "golden::issue::3025",
+    "is_negative": false,
+    "stratum": "multi_hop",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9086247086524963,
+      "score_gap": 0.023040175437927246,
+      "semantic_agreement": 0.74977046251297,
+      "distribution_shape": 1.886031901229371
+    }
+  },
+  {
+    "query_id": "golden::issue::1140",
+    "is_negative": false,
+    "stratum": "multi_hop",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9600710272789001,
+      "score_gap": 0.014117836952209473,
+      "semantic_agreement": 0.7720399498939514,
+      "distribution_shape": 2.4344127972732426
+    }
+  },
+  {
+    "query_id": "golden::issue::788",
+    "is_negative": false,
+    "stratum": "multi_hop",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.8704785108566284,
+      "score_gap": 0.3836061656475067,
+      "semantic_agreement": 0.8117029666900635,
+      "distribution_shape": 6.905323126885316
+    }
+  },
+  {
+    "query_id": "golden::issue::616",
+    "is_negative": false,
+    "stratum": "multi_hop",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.7730713486671448,
+      "score_gap": 0.03200638294219971,
+      "semantic_agreement": 0.7817545533180237,
+      "distribution_shape": 2.5119565171166185
+    }
+  },
+  {
+    "query_id": "golden::issue::1971",
+    "is_negative": false,
+    "stratum": "multi_hop",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.5481358170509338,
+      "score_gap": 0.021059811115264893,
+      "semantic_agreement": 0.7348217368125916,
+      "distribution_shape": 2.7464843643405534
+    }
+  },
+  {
+    "query_id": "golden::issue::190",
+    "is_negative": false,
+    "stratum": "multi_hop",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9754809141159058,
+      "score_gap": 0.6811012029647827,
+      "semantic_agreement": 0.7397222518920898,
+      "distribution_shape": 11.116353700608993
+    }
+  },
+  {
+    "query_id": "golden::issue::1123",
+    "is_negative": false,
+    "stratum": "multi_hop",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9772032499313354,
+      "score_gap": 0.009753227233886719,
+      "semantic_agreement": 0.7141570448875427,
+      "distribution_shape": 2.3397233670588182
+    }
+  },
+  {
+    "query_id": "golden::issue::3200",
+    "is_negative": false,
+    "stratum": "multi_hop",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.7961224913597107,
+      "score_gap": 0.30539923906326294,
+      "semantic_agreement": 0.7996028661727905,
+      "distribution_shape": 2.1938056080019988
+    }
+  },
+  {
+    "query_id": "golden::issue::1810",
+    "is_negative": false,
+    "stratum": "multi_hop",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9582431316375732,
+      "score_gap": 0.049024760723114014,
+      "semantic_agreement": 0.7497709393501282,
+      "distribution_shape": 3.3707559221591143
+    }
+  },
+  {
+    "query_id": "golden::issue::379",
+    "is_negative": false,
+    "stratum": "multi_hop",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9524452090263367,
+      "score_gap": 0.07009363174438477,
+      "semantic_agreement": 0.7966583967208862,
+      "distribution_shape": 2.2096672975913045
+    }
+  },
+  {
+    "query_id": "golden::issue::2164",
+    "is_negative": false,
+    "stratum": "multi_hop",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.8886730670928955,
+      "score_gap": 0.046095967292785645,
+      "semantic_agreement": 0.7715163230895996,
+      "distribution_shape": 5.543113261388375
+    }
+  },
+  {
+    "query_id": "golden::issue::924",
+    "is_negative": false,
+    "stratum": "multi_hop",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.8867591023445129,
+      "score_gap": 0.016860485076904297,
+      "semantic_agreement": 0.839356005191803,
+      "distribution_shape": 2.8738672570771056
+    }
+  },
+  {
+    "query_id": "golden::issue::1119",
+    "is_negative": false,
+    "stratum": "multi_hop",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.08301571011543274,
+      "score_gap": 0.012726165354251862,
+      "semantic_agreement": 0.9786911606788635,
+      "distribution_shape": 1.4299341245352013
+    }
+  },
+  {
+    "query_id": "golden::issue::125",
+    "is_negative": false,
+    "stratum": "multi_hop",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.7254133224487305,
+      "score_gap": 0.34154221415519714,
+      "semantic_agreement": 0.7236849665641785,
+      "distribution_shape": 2.090596757567181
+    }
+  },
+  {
+    "query_id": "golden::issue::102",
+    "is_negative": false,
+    "stratum": "multi_hop",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9757875204086304,
+      "score_gap": 0.0316317081451416,
+      "semantic_agreement": 0.7550007104873657,
+      "distribution_shape": 1.6658610269346197
+    }
+  },
+  {
+    "query_id": "golden::issue::2855",
+    "is_negative": false,
+    "stratum": "multi_hop",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9780046343803406,
+      "score_gap": 0.06352299451828003,
+      "semantic_agreement": 0.7426913976669312,
+      "distribution_shape": 2.0231217931307324
+    }
+  },
+  {
+    "query_id": "golden::issue::2786",
+    "is_negative": false,
+    "stratum": "multi_hop",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9885423183441162,
+      "score_gap": 0.0018396377563476562,
+      "semantic_agreement": 0.7679831385612488,
+      "distribution_shape": 6.5987404265943
+    }
+  },
+  {
+    "query_id": "golden::issue::1218",
+    "is_negative": false,
+    "stratum": "ambiguous",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.7874054312705994,
+      "score_gap": 0.040488481521606445,
+      "semantic_agreement": 0.7438048720359802,
+      "distribution_shape": 2.731440347802026
+    }
+  },
+  {
+    "query_id": "golden::issue::2834",
+    "is_negative": false,
+    "stratum": "ambiguous",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.28264546394348145,
+      "score_gap": 0.22745828703045845,
+      "semantic_agreement": 0.7475945353507996,
+      "distribution_shape": 2.0003617265292584
+    }
+  },
+  {
+    "query_id": "golden::issue::343",
+    "is_negative": false,
+    "stratum": "ambiguous",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.8347446918487549,
+      "score_gap": 0.05539184808731079,
+      "semantic_agreement": 0.8470502495765686,
+      "distribution_shape": 2.9399247651657565
+    }
+  },
+  {
+    "query_id": "golden::issue::1653",
+    "is_negative": false,
+    "stratum": "ambiguous",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.18524961173534393,
+      "score_gap": 0.07959999144077301,
+      "semantic_agreement": 0.8286755681037903,
+      "distribution_shape": 2.4568567976441704
+    }
+  },
+  {
+    "query_id": "golden::issue::3587",
+    "is_negative": false,
+    "stratum": "ambiguous",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9278203248977661,
+      "score_gap": 0.00586467981338501,
+      "semantic_agreement": 0.776633620262146,
+      "distribution_shape": 2.6955580051132624
+    }
+  },
+  {
+    "query_id": "golden::issue::1341",
+    "is_negative": false,
+    "stratum": "ambiguous",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.5946870446205139,
+      "score_gap": 0.46486610174179077,
+      "semantic_agreement": 0.7760915756225586,
+      "distribution_shape": 2.356799433679972
+    }
+  },
+  {
+    "query_id": "golden::issue::3123",
+    "is_negative": false,
+    "stratum": "ambiguous",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.8001407384872437,
+      "score_gap": 0.29542243480682373,
+      "semantic_agreement": 0.7867457270622253,
+      "distribution_shape": 2.081887448117848
+    }
+  },
+  {
+    "query_id": "golden::issue::2228",
+    "is_negative": false,
+    "stratum": "ambiguous",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.49278342723846436,
+      "score_gap": 0.25951045751571655,
+      "semantic_agreement": 0.8840354084968567,
+      "distribution_shape": 8.121998725443053
+    }
+  },
+  {
+    "query_id": "golden::issue::3349",
+    "is_negative": false,
+    "stratum": "ambiguous",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.025673389434814453,
+      "score_gap": 0.014881845563650131,
+      "semantic_agreement": 0.8703834414482117,
+      "distribution_shape": 4.739072385723318
+    }
+  },
+  {
+    "query_id": "golden::issue::10178",
+    "is_negative": false,
+    "stratum": "ambiguous",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.018231499940156937,
+      "score_gap": 0.005418063141405582,
+      "semantic_agreement": 0.7400542497634888,
+      "distribution_shape": 3.1310993082262253
+    }
+  },
+  {
+    "query_id": "golden::issue::2546",
+    "is_negative": false,
+    "stratum": "ambiguous",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.48903870582580566,
+      "score_gap": 0.347414568066597,
+      "semantic_agreement": 0.6850077509880066,
+      "distribution_shape": 7.8506619203443115
+    }
+  },
+  {
+    "query_id": "golden::issue::1240",
+    "is_negative": false,
+    "stratum": "ambiguous",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9540770649909973,
+      "score_gap": 0.04215520620346069,
+      "semantic_agreement": 0.7473708391189575,
+      "distribution_shape": 6.297895101022665
+    }
+  },
+  {
+    "query_id": "golden::issue::2918",
+    "is_negative": false,
+    "stratum": "ambiguous",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.18911999464035034,
+      "score_gap": 0.1848833910189569,
+      "semantic_agreement": 0.884831428527832,
+      "distribution_shape": 4.08603470993938
+    }
+  },
+  {
+    "query_id": "golden::issue::3053",
+    "is_negative": false,
+    "stratum": "ambiguous",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.7981773614883423,
+      "score_gap": 0.14727574586868286,
+      "semantic_agreement": 0.7954927086830139,
+      "distribution_shape": 2.4500256467727524
+    }
+  },
+  {
+    "query_id": "golden::issue::2286",
+    "is_negative": false,
+    "stratum": "ambiguous",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9568219184875488,
+      "score_gap": 0.15115034580230713,
+      "semantic_agreement": 0.7830249071121216,
+      "distribution_shape": 5.415218276049234
+    }
+  },
+  {
+    "query_id": "golden::issue::357",
+    "is_negative": false,
+    "stratum": "ambiguous",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.928216278553009,
+      "score_gap": 0.4175764322280884,
+      "semantic_agreement": 0.8728569746017456,
+      "distribution_shape": 2.29460243665379
+    }
+  },
+  {
+    "query_id": "golden::issue::2884",
+    "is_negative": false,
+    "stratum": "ambiguous",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.695366382598877,
+      "score_gap": 0.3687620162963867,
+      "semantic_agreement": 0.7906437516212463,
+      "distribution_shape": 2.1131369566850937
+    }
+  },
+  {
+    "query_id": "golden::issue::2151",
+    "is_negative": false,
+    "stratum": "ambiguous",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9676528573036194,
+      "score_gap": 0.00603795051574707,
+      "semantic_agreement": 0.768176257610321,
+      "distribution_shape": 2.610625297895046
+    }
+  },
+  {
+    "query_id": "golden::issue::3065",
+    "is_negative": false,
+    "stratum": "ambiguous",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9701139330863953,
+      "score_gap": 0.2831771969795227,
+      "semantic_agreement": 0.8125779032707214,
+      "distribution_shape": 2.3532315654900824
+    }
+  },
+  {
+    "query_id": "golden::issue::3018",
+    "is_negative": false,
+    "stratum": "ambiguous",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.7838453650474548,
+      "score_gap": 0.275718629360199,
+      "semantic_agreement": 0.8312135338783264,
+      "distribution_shape": 2.4385389397144923
+    }
+  },
+  {
+    "query_id": "golden::issue::1649",
+    "is_negative": false,
+    "stratum": "ambiguous",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9244859218597412,
+      "score_gap": 0.19271373748779297,
+      "semantic_agreement": 0.6904017329216003,
+      "distribution_shape": 4.072648743682113
+    }
+  },
+  {
+    "query_id": "golden::issue::1705",
+    "is_negative": false,
+    "stratum": "ambiguous",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.6655170321464539,
+      "score_gap": 0.6003895178437233,
+      "semantic_agreement": 0.751071572303772,
+      "distribution_shape": 3.014986957547183
+    }
+  },
+  {
+    "query_id": "golden::issue::244",
+    "is_negative": false,
+    "stratum": "ambiguous",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.9118965864181519,
+      "score_gap": 0.22508901357650757,
+      "semantic_agreement": 0.7879765629768372,
+      "distribution_shape": 2.239312266803383
+    }
+  },
+  {
+    "query_id": "golden::issue::644",
+    "is_negative": false,
+    "stratum": "ambiguous",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.8724038600921631,
+      "score_gap": 0.3206114172935486,
+      "semantic_agreement": 0.7252117395401001,
+      "distribution_shape": 2.893434909943084
+    }
+  },
+  {
+    "query_id": "golden::issue::2896",
+    "is_negative": false,
+    "stratum": "ambiguous",
+    "negative_category": null,
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.28877466917037964,
+      "score_gap": 0.034568846225738525,
+      "semantic_agreement": 0.706607460975647,
+      "distribution_shape": 2.3648314908275614
+    }
+  },
+  {
+    "query_id": "negative::unanswerable::3",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "unanswerable",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.0412561409175396,
+      "score_gap": 0.038424234837293625,
+      "semantic_agreement": 0.7764081358909607,
+      "distribution_shape": 5.233906916004922
+    }
+  },
+  {
+    "query_id": "negative::out_of_corpus::1",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "out_of_corpus",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.3091909885406494,
+      "score_gap": 0.25421835854649544,
+      "semantic_agreement": 0.7797328233718872,
+      "distribution_shape": 3.40106949290834
+    }
+  },
+  {
+    "query_id": "negative::adversarial_injection::5",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "adversarial_injection",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.0024134721606969833,
+      "score_gap": 0.0017827068222686648,
+      "semantic_agreement": 0.8235155940055847,
+      "distribution_shape": 2.9082034311967977
+    }
+  },
+  {
+    "query_id": "negative::adversarial_injection::1",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "adversarial_injection",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.016470393165946007,
+      "score_gap": 0.015781995083671063,
+      "semantic_agreement": 0.653037428855896,
+      "distribution_shape": 2.3944972726155194
+    }
+  },
+  {
+    "query_id": "negative::adversarial_injection::6",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "adversarial_injection",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.025950871407985687,
+      "score_gap": 0.018212694209069014,
+      "semantic_agreement": 0.8262131810188293,
+      "distribution_shape": 2.133598714833824
+    }
+  },
+  {
+    "query_id": "negative::unanswerable::9",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "unanswerable",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.548481285572052,
+      "score_gap": 0.27416834235191345,
+      "semantic_agreement": 0.7619284987449646,
+      "distribution_shape": 2.8050475772795935
+    }
+  },
+  {
+    "query_id": "negative::adversarial_injection::0",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "adversarial_injection",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.0031494502909481525,
+      "score_gap": 0.002471185172908008,
+      "semantic_agreement": 0.5967588424682617,
+      "distribution_shape": 3.6785901990991223
+    }
+  },
+  {
+    "query_id": "negative::billing_legal::6",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "billing_legal",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.00012456341937649995,
+      "score_gap": 0.0001031497995427344,
+      "semantic_agreement": 0.6351079344749451,
+      "distribution_shape": 2.0345954881730277
+    }
+  },
+  {
+    "query_id": "negative::out_of_corpus::2",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "out_of_corpus",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.0027618007734417915,
+      "score_gap": 0.0024416649248450994,
+      "semantic_agreement": 0.6438103318214417,
+      "distribution_shape": 2.058598570444322
+    }
+  },
+  {
+    "query_id": "negative::out_of_corpus::4",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "out_of_corpus",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.09983865916728973,
+      "score_gap": 0.09700158564373851,
+      "semantic_agreement": 0.6908541917800903,
+      "distribution_shape": 2.029779999483722
+    }
+  },
+  {
+    "query_id": "negative::billing_legal::9",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "billing_legal",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.0003515960997901857,
+      "score_gap": 6.718392251059413e-05,
+      "semantic_agreement": 0.8428989052772522,
+      "distribution_shape": 2.9403627570075286
+    }
+  },
+  {
+    "query_id": "negative::billing_legal::2",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "billing_legal",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.00017416180344298482,
+      "score_gap": 1.2590127880685031e-05,
+      "semantic_agreement": 0.7888091802597046,
+      "distribution_shape": 2.5213915908404414
+    }
+  },
+  {
+    "query_id": "negative::out_of_corpus::7",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "out_of_corpus",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.2140112668275833,
+      "score_gap": 0.20878041815012693,
+      "semantic_agreement": 0.6825577020645142,
+      "distribution_shape": 3.4166144627639015
+    }
+  },
+  {
+    "query_id": "negative::unanswerable::2",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "unanswerable",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.37691155076026917,
+      "score_gap": 0.08934828639030457,
+      "semantic_agreement": 0.7152001261711121,
+      "distribution_shape": 4.728582595075655
+    }
+  },
+  {
+    "query_id": "negative::billing_legal::7",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "billing_legal",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 8.34746242617257e-05,
+      "score_gap": 2.8449667297536507e-05,
+      "semantic_agreement": 0.8796788454055786,
+      "distribution_shape": 2.3493350668723543
+    }
+  },
+  {
+    "query_id": "negative::unanswerable::4",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "unanswerable",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.3009931147098541,
+      "score_gap": 0.18307499587535858,
+      "semantic_agreement": 0.7477680444717407,
+      "distribution_shape": 7.294912331381661
+    }
+  },
+  {
+    "query_id": "negative::out_of_corpus::5",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "out_of_corpus",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.006171933840960264,
+      "score_gap": 0.0049910107627511024,
+      "semantic_agreement": 0.7420405745506287,
+      "distribution_shape": 3.3590617692052636
+    }
+  },
+  {
+    "query_id": "negative::adversarial_injection::3",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "adversarial_injection",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.009396038018167019,
+      "score_gap": 0.008561485505197197,
+      "semantic_agreement": 0.6564569473266602,
+      "distribution_shape": 1.8694253066439754
+    }
+  },
+  {
+    "query_id": "negative::billing_legal::1",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "billing_legal",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.0001502359809819609,
+      "score_gap": 0.0001340588933089748,
+      "semantic_agreement": 0.6885635852813721,
+      "distribution_shape": 3.7696932592654204
+    }
+  },
+  {
+    "query_id": "negative::billing_legal::8",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "billing_legal",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.005601559765636921,
+      "score_gap": 0.0005158563144505024,
+      "semantic_agreement": 0.8181975483894348,
+      "distribution_shape": 5.515537344352413
+    }
+  },
+  {
+    "query_id": "negative::unanswerable::1",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "unanswerable",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.05810078606009483,
+      "score_gap": 0.053111528512090445,
+      "semantic_agreement": 0.7279024124145508,
+      "distribution_shape": 3.7169563423117875
+    }
+  },
+  {
+    "query_id": "negative::billing_legal::3",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "billing_legal",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.0001504241954535246,
+      "score_gap": 6.635988393099979e-05,
+      "semantic_agreement": 0.7689590454101562,
+      "distribution_shape": 3.384578677220951
+    }
+  },
+  {
+    "query_id": "negative::unanswerable::7",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "unanswerable",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.7710385322570801,
+      "score_gap": 0.7441865261644125,
+      "semantic_agreement": 0.8416246175765991,
+      "distribution_shape": 1.3767319735160963
+    }
+  },
+  {
+    "query_id": "negative::adversarial_injection::9",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "adversarial_injection",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.015242394059896469,
+      "score_gap": 0.014410749427042902,
+      "semantic_agreement": 0.6742597222328186,
+      "distribution_shape": 2.422955355656371
+    }
+  },
+  {
+    "query_id": "negative::out_of_corpus::9",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "out_of_corpus",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.7446089386940002,
+      "score_gap": 0.5806946009397507,
+      "semantic_agreement": 0.6724295616149902,
+      "distribution_shape": 6.501860698102189
+    }
+  },
+  {
+    "query_id": "negative::billing_legal::4",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "billing_legal",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 3.409065175219439e-05,
+      "score_gap": 1.2718548532575369e-05,
+      "semantic_agreement": 0.8572111129760742,
+      "distribution_shape": 5.415879674473849
+    }
+  },
+  {
+    "query_id": "negative::unanswerable::8",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "unanswerable",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.6632896661758423,
+      "score_gap": 0.6469614449888468,
+      "semantic_agreement": 0.7928717732429504,
+      "distribution_shape": 2.2159011629108214
+    }
+  },
+  {
+    "query_id": "negative::unanswerable::0",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "unanswerable",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.5976772308349609,
+      "score_gap": 0.18930736184120178,
+      "semantic_agreement": 0.7461055517196655,
+      "distribution_shape": 8.900581068815379
+    }
+  },
+  {
+    "query_id": "negative::unanswerable::5",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "unanswerable",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.006004634778946638,
+      "score_gap": 0.001371196936815977,
+      "semantic_agreement": 0.7121248245239258,
+      "distribution_shape": 3.570433953687879
+    }
+  },
+  {
+    "query_id": "negative::adversarial_injection::2",
+    "is_negative": true,
+    "stratum": null,
+    "negative_category": "adversarial_injection",
+    "n_candidates": 10,
+    "raw": {
+      "reranker_top_score": 0.00409773550927639,
+      "score_gap": 0.0008686492219567299,
+      "semantic_agreement": 0.8409641981124878,
+      "distribution_shape": 3.405140706282037
+    }
+  }
+]

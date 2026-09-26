@@ -1,0 +1,132 @@
+{
+  "summaries": [
+    {
+      "provider": "groq",
+      "n_succeeded": 2,
+      "n_failed": 13,
+      "mean_valid_citation_rate": 0.15384615384615385,
+      "mean_latency_ms": 1548.8937294867355
+    },
+    {
+      "provider": "gemini",
+      "n_succeeded": 12,
+      "n_failed": 3,
+      "mean_valid_citation_rate": 0.7013888888888888,
+      "mean_latency_ms": 21437.43193774814
+    }
+  ],
+  "raw": [
+    {
+      "provider": "groq",
+      "query_id": "golden::issue::2689",
+      "valid_citation_rate": 0.3076923076923077,
+      "tier2_calls": 0,
+      "latency_ms": 1736.3891669665463,
+      "answer_text": "The issue you're describing is related to redundant validation when using `response_model` in FastAPI. \n\nWhen you use `response_model`, FastAPI will validate the response data against the model to ensure it conforms to the expected structure. However, in your case, the `@root_validator` is being executed twice: once when the request data is validated against the `UserSwipes` model, and again when the response data is validated against the same model.\n\nThis redundant validation can be optimized by using the `response_model_exclude_unset` parameter, which tells FastAPI to exclude any fields that were not set in the response data. However, this does not directly address the issue of redundant validation.\n\nTo avoid redundant validation, you could consider using a separate model for the response that does not include the validation logic. Alternatively, you could modify your validation logic to only execute when the data is being validated for the request, not for the response.\n\nUnfortunately, without more information about your specific use case, it's difficult to provide a more specific solution. However, it's worth noting that the context blocks provided do describe similar issues with validation and response models [1][4][7]. \n\nIn particular, [1] describes how FastAPI clones the `response_model` to avoid potential security issues, which may be related to your concern about redundant validation. \n\nAdditionally, [4] describes an issue where validators are called twice for a model used with `response_model`, which may be similar to the issue you're experiencing. \n\nIt's also worth noting that [7] describes an issue with duplicated validation errors when using `Union` types, which may be related to your concern about redundant validation. \n\nHowever, without more information, it's difficult to say for certain whether these issues are directly related to your problem."
+    },
+    {
+      "provider": "groq",
+      "query_id": "golden::issue::11104",
+      "valid_citation_rate": 0.0,
+      "tier2_calls": 1,
+      "latency_ms": 1361.3982920069247,
+      "answer_text": "The issue you're experiencing with uploading files and receiving a \"There was an error parsing the body\" error after upgrading python-multipart to 0.0.7 [no citation available in the provided context]. The context provided does not contain enough information to directly answer your question about the specific issue with FastAPI and python-multipart 0.0.7 [no citation available]. However, it does mention various resolutions to different issues across different versions of FastAPI [1][3][5][7][9][10][8][6][4][2], but none of these directly address the issue you're experiencing with python-multipart 0.0.7."
+    },
+    {
+      "provider": "gemini",
+      "query_id": "golden::issue::2689",
+      "valid_citation_rate": 1.0,
+      "tier2_calls": 0,
+      "latency_ms": 14663.651124981698,
+      "answer_text": "Based on the provided context, FastAPI clones the declared `response_model` to avoid a potential security issue [1]. \n\nWhen a returned object is passed directly to Pydantic, if that object is a subclass of the `response_model` (for example, returning a `UserInDB` containing extra fields like `hashed_password` when `User` is the declared `response_model`), it would normally pass validation because it is a subclass [1]. Consequently, the object would be returned as-is, including the sensitive extra fields [1].\n\nTo prevent this, FastAPI clones the declared `response_model` class (and its submodels) [1]. Because the returned object is no longer a subclass of the newly cloned `response_model`, it cannot simply pass validation to be returned as-is [1]. Instead, a new Pydantic model object is created using the data from the returned object, which filters the data and ensures only the declared fields of the `response_model` are returned [1]."
+    },
+    {
+      "provider": "gemini",
+      "query_id": "golden::issue::2884",
+      "valid_citation_rate": 1.0,
+      "tier2_calls": 1,
+      "latency_ms": 17322.160999989137,
+      "answer_text": "To specify which database a table is defined for when using multiple databases (similar to Flask-SQLAlchemy's `__bind_key__`), you can configure a custom declarative base with a metaclass that handles the bind keys [5]. \n\nHere is how you can implement this in your code:\n\n1. **Define a custom metaclass and declarative base** that extracts the `__bind_key__` and assigns it to the table's info dictionary [5]:\n\n```python\nfrom sqlalchemy import String, Integer, Column\nfrom sqlalchemy.ext.declarative import declarative_base\n\nclass BindMetaMixin(object):\n    def __init__(cls, name, bases, d):\n        bind_key = (\n            d.pop('__bind_key__', None)\n            or getattr(cls, '__bind_key__', None)\n        )\n\n        super(BindMetaMixin, cls).__init__(name, bases, d)\n\n        if bind_key is not None and getattr(cls, '__table__', None) is not None:\n            cls.__table__.info['bind_key'] = bind_key\n\n\nclass DefaultMeta(BindMetaMixin):\n    pass\n\n\nBase = declarative_base(metaclass=DefaultMeta)\n```\n\n2. **Define your model** using the custom `Base` and specify the `__bind_key__` [5]:\n\n```python\nclass User(Base):\n    __bind_key__ = 'users'\n    __tablename__ = \"users\"\n    id = Column('id', Integer, primary_key=True)\n    username = Column('username', String(255), unique=True)\n```"
+    },
+    {
+      "provider": "gemini",
+      "query_id": "golden::issue::3212",
+      "valid_citation_rate": 1.0,
+      "tier2_calls": 0,
+      "latency_ms": 14333.300333993975,
+      "answer_text": "Based on the provided context, if you define multiple path operations that respond to the same method (such as `POST`) on the same route, FastAPI **always matches the first one** [8]. Defining multiple path operators for the same route with different signatures to handle different requests does not work [8]."
+    },
+    {
+      "provider": "gemini",
+      "query_id": "golden::issue::753",
+      "valid_citation_rate": 0.8333333333333334,
+      "tier2_calls": 0,
+      "latency_ms": 29064.467249962036,
+      "answer_text": "Based on the provided context, here is how you can declare dependencies at different levels in FastAPI:\n\n### 1. At the Application Level (`FastAPI`)\nYou can declare top-level dependencies that apply to the entire application by passing them to the `dependencies` parameter when instantiating the `FastAPI` class [3]. \n\n**Example:**\n```python\nfrom fastapi import FastAPI, Depends\n\nasync def some_dependency():\n    return\n\napp = FastAPI(dependencies=[Depends(some_dependency)])\n```\n*(This is useful for applying global configurations, such as global authentication [3].)*\n\n### 2. At the Router Level (`APIRouter`)\nYou can declare dependencies directly when creating an `APIRouter` instance [1][3]. This keeps related logic together in the same file as the router's path operations [3].\n\n**Example:**\n```python\nfrom fastapi import APIRouter, Depends\n\nasync def some_dependency():\n    return\n\nrouter = APIRouter(prefix=\"/users\", dependencies=[Depends(some_dependency)])\n```\n\n### 3. When Including a Router (`include_router`)\nYou can also declare dependencies when including a router using `include_router` [1][3]. This is particularly useful when you want to add options to a third-party router, a generic shared router, or when you need to override/increase configurations [1][3].\n\n**Example:**\n```python\nfrom fastapi import Depends, FastAPI\nfrom .dependencies import get_token_header\nfrom .internal import admin\n\napp = FastAPI()\n\napp.include_router(\n    admin.router,\n    prefix=\"/admin\",\n    dependencies=[Depends(get_token_header)],\n)\n```\n*(Note: FastAPI combines the router prefixes, dependencies, tags, and other metadata when handling requests [8].)*"
+    },
+    {
+      "provider": "gemini",
+      "query_id": "golden::issue::11104",
+      "valid_citation_rate": 0.0,
+      "tier2_calls": 1,
+      "latency_ms": 29335.235959035344,
+      "answer_text": "Based on the provided context, the issue regarding the upgrade of `python-multipart` to version `0.0.7` (which was done to fix a security issue with uploaded files) resulted in users frequently encountering a \"There was an error parsing the body\" error (or a 400 error) when uploading files [2]."
+    },
+    {
+      "provider": "gemini",
+      "query_id": "golden::issue::2786",
+      "valid_citation_rate": 1.0,
+      "tier2_calls": 0,
+      "latency_ms": 14133.88604199281,
+      "answer_text": "Based on the provided context, an `async` task can only be cancelled when it reaches an `await` statement [1]. \n\nIf an asynchronous generator (a function with `yield`) does not contain any `await` statements, it cannot be cancelled properly and may continue to run even after a cancellation request has been made [1]. \n\nTo ensure the event loop has an opportunity to handle cancellation properly, you can add `await anyio.sleep(0)` to your generator [1]. This practice becomes increasingly important when dealing with large or infinite streams [1]."
+    },
+    {
+      "provider": "gemini",
+      "query_id": "golden::issue::760",
+      "valid_citation_rate": 1.0,
+      "tier2_calls": 0,
+      "latency_ms": 18954.71170905512,
+      "answer_text": "Based on the provided documentation, you can use standard Python dataclasses with FastAPI by importing `dataclass` from the standard `dataclasses` library and decorating your classes [4]. \n\nHere is how you can declare and use a standard dataclass in a FastAPI application:\n\n```python\nfrom dataclasses import dataclass\nfrom fastapi import FastAPI\n\n@dataclass\nclass Item:\n    name: str\n    price: float\n    description: str | None = None\n    tax: float | None = None\n\napp = FastAPI()\n\n@app.post(\"/items/\")\nasync def create_item(item: Item):\n    return item\n```\n\n### Key Details:\n* **Under the Hood:** FastAPI supports standard dataclasses thanks to Pydantic, which has internal support for them [4]. FastAPI uses Pydantic underneath to convert standard dataclasses into Pydantic's own flavor of dataclasses [4]. This ensures you still get data validation, data serialization, and data documentation [4].\n* **Limitations:** Standard dataclasses cannot do everything Pydantic models can do, so you may still need to use Pydantic models in some scenarios [4].\n* **Pydantic Dataclasses as a Drop-in Replacement:** If you encounter issues (such as with automatically generated API documentation), you can swap standard `dataclasses` with `pydantic.dataclasses`, which acts as a drop-in replacement [3][6]:\n\n```python\nfrom dataclasses import field\nfrom fastapi import FastAPI\nfrom pydantic.dataclasses import dataclass\n\n@dataclass\nclass Item:\n    name: str\n    description: str | None = None\n\n@dataclass\nclass Author:\n    name: str\n    items: list[Item] = field(default_factory=list)\n\napp = FastAPI()\n\n@app.post(\"/authors/{author_id}/items/\", response_model=Author)\nasync def create_author_items(author_id: str, items: list[Item]):\n    return {\"name\": author_id, \"items\": items}\n```"
+    },
+    {
+      "provider": "gemini",
+      "query_id": "golden::issue::1767",
+      "valid_citation_rate": 1.0,
+      "tier2_calls": 0,
+      "latency_ms": 16999.008249957114,
+      "answer_text": "Based on the provided context, here is the history of how the `examples` field has been handled:\n\n* **Before OpenAPI 3.1.0:** The JSON Schema standard did not have an `examples` field [4]. Because of this, OpenAPI added its own custom, single `example` field to its modified version of JSON Schema [4]. OpenAPI also added `example` and `examples` fields to other parts of the specification, such as the `Parameter Object` (used by FastAPI's `Path()`, `Query()`, `Header()`, and `Cookie()`) and the `Request Body Object` (used by FastAPI's `Body()`, `File()`, and `Form()`) [4].\n* **Introduction of `examples` in JSON Schema:** JSON Schema eventually added an `examples` field to a newer version of its specification (specifically JSON Schema 2019-09) [10]. This new field is simply a `list` of examples, rather than a dictionary containing extra metadata [10].\n* **OpenAPI 3.1.0 Integration:** The OpenAPI 3.1.0 specification was updated to base itself on JSON Schema 2020-12, which officially includes this new `examples` field [8][10]. Under this specification, the new `examples` field takes precedence over the old, custom, single `example` field, which is now deprecated [10].\n* **FastAPI Adoption (Version 0.99.0):** Because Swagger UI did not initially support OpenAPI 3.1.0, versions of FastAPI prior to `0.99.0` continued to use older versions of OpenAPI [10]. FastAPI added support for OpenAPI 3.1.0 (and upgraded Swagger UI to version 5.x.x) in version `0.99.0` [6][8]. With this update, the `examples` field in functions like `Query()`, `Cookie()`, and `Body()` was updated to align with the latest JSON Schema and OpenAPI standards, meaning it now takes a list of examples included directly inside the JSON Schema [8].\n* **Introduction of `openapi_examples` (Version 0.103.0):** The older, OpenAPI-specific `examples` parameter was renamed to `openapi_examples` starting in FastAPI version `0.103.0` [4]. This parameter provides support for OpenAPI-specific examples across all FastAPI parameters [3]."
+    },
+    {
+      "provider": "gemini",
+      "query_id": "golden::issue::12965",
+      "valid_citation_rate": 0.0,
+      "tier2_calls": 1,
+      "latency_ms": 36595.511624997016,
+      "answer_text": "Based on the provided context, there is no information or official response indicating whether FastAPI will support the `QUERY` HTTP method or an `app.query` decorator in the future. \n\nThe context only contains the user's feature request and inquiry regarding the `QUERY` method [1], but it does not provide any answers, decisions, or statements from the FastAPI maintainers regarding if or when this feature might be implemented."
+    },
+    {
+      "provider": "gemini",
+      "query_id": "golden::issue::15764",
+      "valid_citation_rate": 0.25,
+      "tier2_calls": 2,
+      "latency_ms": 33270.99920902401,
+      "answer_text": "Based on the provided context, here is the explanation of the issue:\n\n### Summary of the Issue\nIn FastAPI version **0.137.0**, a type-checker regression was introduced where `APIRoute.tags` became invisible to static type checkers [2]. While the code still functions correctly at runtime, static type checkers (such as `ty` or Pyright) report an error stating that the `APIRoute` object has no attribute `tags` [2]. \n\nThis affects the documented pattern for customizing client generation, where a custom function reads `route.tags` to generate unique operation IDs [2][3].\n\n### Cause of the Regression\nThe issue was an unintended side-effect of pull request **#15745** (\"Refactor internals to preserve APIRouter and APIRoute instances\") [2]. \n\nDuring this refactoring:\n* `APIRoute.__init__` was changed to delegate its state-setting to an internal helper [2].\n* This helper receives `self` cast to an internal `_APIRouteLike` Protocol [2].\n* Because `APIRoute` itself no longer carries a class-level `tags` annotation, the attribute is invisible to static type checkers looking at the `APIRoute` type, even though it is still successfully assigned at runtime [2].\n\n### Affected Code Example\nThe standard documented pattern that triggers this type-checking error is [2][3]:\n\n```python\nfrom fastapi import FastAPI\nfrom fastapi.routing import APIRoute\n\ndef custom_generate_unique_id(route: APIRoute) -> str:\n    # This line fails static type checking in 0.137.0\n    return f\"{route.tags[0]}-{route.name}\"\n\napp = FastAPI(generate_unique_id_function=custom_generate_unique_id)\n```\n\n### Proposed Fix\nThe suggested resolution is to add the class-level annotation back to `APIRoute` (for example, `tags: list[str | Enum]`) so that it matches what the internal `_APIRouteLike` Protocol already declares, restoring visibility to static type checkers [2]."
+    },
+    {
+      "provider": "gemini",
+      "query_id": "golden::issue::5857",
+      "valid_citation_rate": 0.8333333333333334,
+      "tier2_calls": 3,
+      "latency_ms": 15565.490749955643,
+      "answer_text": "Based on the provided context, here are the details regarding the two specific issues mentioned:\n\n* **`add_api_route` failing with `FileResponse` in FastAPI 0.89.0:** \n  When upgrading to FastAPI `0.89.0` (it previously worked on `0.88.0`), returning a `FileResponse` as a type hint on a route (e.g., `def favicon() -> FileResponse:`) throws an exception [2]. The error traceback shows:\n  `fastapi.exceptions.FastAPIError: Invalid args for response field! Hint: check that <class 'starlette.responses.FileResponse'> is a valid pydantic field type` [2]. \n  This issue was reported on Python 3.7 across both Linux and Windows operating systems [2].\n\n* **Path converter issue in FastAPI 0.25.0:** \n  An issue was reported where the \"Path converter\" functionality from the official documentation was not working on Windows x86_64 using FastAPI `0.25.0` [3]. Specifically, making a request to a path like `http://127.0.0.1:8000/files//home/johndoe/myfile.txt` did not return the expected 200 status code [3]. This issue was subsequently resolved and closed [3]."
+    },
+    {
+      "provider": "gemini",
+      "query_id": "golden::issue::2934",
+      "valid_citation_rate": 0.5,
+      "tier2_calls": 2,
+      "latency_ms": 17010.76000003377,
+      "answer_text": "Based on the provided context, when you switch your default response class to `ORJSONResponse` and return a dictionary that uses integers as keys (e.g., `{1: 2}`), the application fails [2]. \n\n### Why this happens\n* **Default JSON Responses:** The default JSON response handling in FastAPI automatically casts integer keys to strings behind the scenes to produce valid JSON output [2].\n* **ORJSONResponse:** When using `ORJSONResponse`, the underlying `orjson` library refuses to serialize dictionaries with integer keys, causing the endpoint to fail [2]. \n\nThis behavior occurs because of how `orjson` itself is defined [2]."
+    }
+  ]
+}

@@ -7,7 +7,7 @@ index:
 	uv run python -m aegis.embedding.run
 
 eval:
-	uv run python -m aegis.eval.harness
+	uv run python -m aegis.eval.scorecard
 
 serve:
 	uv run uvicorn aegis.api.app:app --reload
