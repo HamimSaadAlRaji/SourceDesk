@@ -1,7 +1,7 @@
 # Aegis — Progress Log
 
 **Last updated:** 2026-09-26
-**Current phase:** Phase 12 — Caching, Delta Indexing & Cost (🟢 complete — all 6 units, exit criteria met). Phase 11 — Generation Eval, RAGAS & Judging the Judge (🟡 **wrapped up for this session** — every unit, fix, and root-cause investigation that could be done without waiting on quota is done and documented; exactly 2 real measurements are left, both **explicitly deferred to the user** to run themselves whenever quota allows, not queued as a future session's task; see "Phase 11 wrap-up" note below).
+**Current phase:** Phase 13 — Observability & the Latency Budget (🟡 in progress — build list complete, exit criteria 3 of 4 met -- p95 < 3 s unmet). Phase 12 — Caching, Delta Indexing & Cost (🟢 complete — all 6 units, exit criteria met). Phase 11 — Generation Eval, RAGAS & Judging the Judge (🟡 **wrapped up for this session** — every unit, fix, and root-cause investigation that could be done without waiting on quota is done and documented; exactly 2 real measurements are left, both **explicitly deferred to the user** to run themselves whenever quota allows, not queued as a future session's task; see "Phase 11 wrap-up" note below).
 
 ## Phase 12 — Caching, Delta Indexing & Cost
 
@@ -153,6 +153,176 @@ attribution, and the p95 < 3s budget gate. Its own per-stage measurements will b
 Unit 6's assembled cost-model numbers against real traced requests instead of numbers stitched together
 from separate experiments run at different times.
 
+## Phase 13 — Observability & the Latency Budget
+
+**Scope** (plan.md, Day 15, topics 31 & 35): 5 build items -- (1) Langfuse tracing every stage (routing,
+retrieved chunks w/ scores, rerank scores, confidence, prompt version, generation, validation result, cache
+status), (2) structured logging with a trace ID threaded throughout, (3) per-stage latency attribution
+(p50/p95/p99), (4) optimize against the p95 < 3s budget (parallelize dense/sparse retrieval, batch rerank,
+warm models at startup, stream earlier), (5) the audit-trail demo.
+
+**Unit 1 complete as of 2026-09-27** (design record 13, `src/aegis/config.py`'s new `LangfuseSettings`,
+`src/aegis/observability/tracing.py`, `experiments/13a_langfuse_smoke_test.py`). **Real capacity check before
+committing to an approach:** the build list says "Langfuse (self-hosted)," so checked its actual
+dependency footprint rather than assuming a quick `docker-compose` add, per this session's explicit
+instruction. Official v3 self-host stack is 6 containers (web, worker, Postgres, ClickHouse, Redis, MinIO),
+with Langfuse's own docs recommending 4 cores/16 GiB for that stack alone. Measured this machine: Docker
+Desktop allocated 7.75 GiB total, Qdrant already using ~750 MiB of it, and the host's full 16 GiB also has
+to leave headroom for MPS embedding inference running outside Docker. Real, load-bearing capacity conflict
+-- presented 3 options (full self-host, self-hosted v2/Postgres-only, Langfuse Cloud free tier) with a
+recommendation via `AskUserQuestion`; **user chose Langfuse Cloud**, a disclosed deviation from plan.md's
+literal "self-hosted" wording (Decision Log, 2026-09-26). `uv add langfuse` (v4, OTel-based SDK, clean
+install, no dependency conflicts) -- `LangfuseSettings` added following the project's existing per-group
+`BaseSettings` pattern, `get_tracer()` a process-wide `lru_cache`d singleton (the SDK owns its own
+background flush thread + OTel `TracerProvider`; more than one per process would mean two independent
+export threads to the same project).
+
+**Real live verification, 2026-09-27, two real bugs found and fixed before it passed clean:** (1) first run
+hit a real `401 Unauthorized` -- `LangfuseSettings` originally named the field `host` (reads
+`LANGFUSE_HOST`, unset), silently falling back to a hardcoded EU default (`cloud.langfuse.com`) against the
+user's real US-region project, whose correct URL was already in `.env` under `LANGFUSE_BASE_URL` (Langfuse's
+own dashboard snippet name) -- fixed by renaming the field to `base_url` so it reads that env var directly.
+(2) Second run hit a real `410 LEGACY_API_UNAVAILABLE_FOR_NEW_ORGANIZATION` -- this org (created 2026-09-27,
+after Langfuse's own 2026-09-16 API cutover) has no legacy single-trace endpoint at all; rewrote the
+verification readback from `client.api.trace.get()` to the current `client.api.observations.get_many(
+trace_id=..., from_start_time=..., to_start_time=...)`, and separately found (and fixed) a real
+async-ingestion race -- a 3-second wait after `flush()` returned zero observations, an isolated debug trace
+confirmed 0 at 3s vs. 1 at 8s, settled on an 8-second wait. Third run, real output: `auth_check() passed`,
+a real trace + 2 nested observations (`retrieval`, `generation`) round-tripped and confirmed via the live
+Langfuse Cloud API (not just "the SDK didn't raise"), trace URL:
+`https://us.cloud.langfuse.com/project/cmujtds4508cbad0dj9jedaxo/traces/1350343caaf045fcb70958e6e805b1f6`.
+`uv run pytest -q`: 455/455 passed throughout (unchanged -- this unit is configuration/wiring, no new logic
+needing a unit test; the real verification is this live integration run). Full detail: design record 13 SS5-6.
+
+**Unit 2 complete as of 2026-09-28** (design record 13b, `src/aegis/pipeline.py`, `tests/test_pipeline.py`,
+`experiments/13b_pipeline_live_trace.py`). **Real gap found before building:** no orchestrated end-to-end
+pipeline existed anywhere in this codebase -- Phases 5-12 each built and unit-tested one stage in isolation
+(router, retrieval, rerank, confidence, generation, citation validation, cache), wired together only ad hoc
+inside experiment scripts. Phase 13's own build item #1 ("tracing every stage") presupposes a real request
+to attach spans to; Phase 14 ("API, Streaming & UI") is where an orchestrator would normally get built.
+Flagged this directly (`AskUserQuestion`) rather than silently picking a scope; **user confirmed: build a
+minimal orchestrator now**, so Phase 14 wraps this exact object in FastAPI/SSE instead of rebuilding it.
+
+`AnswerPipeline.answer(query) -> PipelineResult` composes cache -> router -> retrieval -> confidence ->
+generation (stage order matches `router/classifier.py`'s own documented architecture), every collaborator
+dependency-injected including the tracer, mirroring `GenerationPipeline`/`RerankedRetriever`'s existing DI
+style. Each stage opens its own real Langfuse span (`as_type` per design record 13 SS6's mapping: retrieval
+-> `retriever`, confidence -> `evaluator`, generation -> `generation`, routing/escalation/validation ->
+`guardrail`). Two structural audit properties proven the same spy-based way `router/policy.py`/
+`guardrails/confidence.py` already prove theirs (a collaborator that raises if ever called): a cache hit
+never reaches the router or generation; an escalation (hard-route or low-confidence) never reaches
+generation. `corpus_version` deliberately kept as an honest placeholder string, not wired to
+`IndexManifest.corpus_version()` -- no manifest has ever actually been written for the live collections
+(`data/processed/manifests/` doesn't exist), so that hash would encode zero real content while looking
+real; resolving it for real means a deliberate, separate delta-indexing pass against production Qdrant, not
+a side effect of this unit. TDD'd first (RED confirmed via `ModuleNotFoundError`, then GREEN): 9 new tests.
+`uv run pytest -q`: 464/464 passed (+9 new).
+
+**Real live end-to-end run, 2026-09-28**, real corpus (19,236 chunks), real Qdrant, real Groq router +
+generation, one real golden-set query (`golden::issue::604`, "query parameters with hyphens"): cache miss ->
+`docs_howto` route -> real retrieval -> confidence 0.7953 (above tau) -> real Groq generation, single valid
+citation (`issue::4842::heading_aware::8`), grounded, correct answer. All 7 real spans (`answer_query`,
+`cache_lookup`, `routing`, `retrieval`, `confidence`, `generation`, `validation`) confirmed present in
+Langfuse Cloud. **A second real run against the same query correctly short-circuited to `exact_hit` with
+only 2 spans** -- the first run's write-through being served back, proving the cache+tracing composition
+together, not just each piece alone.
+
+**Two real, disclosed findings from this live run:** (1) ingestion latency scales with real trace size, not
+a fixed constant -- Unit 1's tiny synthetic trace was queryable at 8s, but this real 7-span trace (larger
+real payloads) still had 4 spans missing at 8s and wasn't complete until ~14s; rewrote the live-trace
+script's readback from a fixed sleep to a poll loop (every 5s, up to 30s). (2) The verification script's own
+first version had a real bug, not the pipeline -- its hardcoded "expect all 7 spans" check failed on the
+second run's legitimate 2-span cache-hit trace; fixed by making the expectation branch-aware on
+`result.cache_status`/`result.escalate`. Full detail: design record 13b SS5-6.
+
+**Next action:** Unit 3 -- per-stage latency attribution (p50/p95/p99) against a real batch of queries
+through this same pipeline, then Unit 4 (optimize against the p95 < 3s budget) and Unit 5 (the audit-trail
+demo, which now has a real `PipelineResult`/trace pair to reconstruct evidence from).
+
+**Unit 3 complete as of 2026-09-30** (design record 13c, `docs/results/latency-budget.md`,
+`src/aegis/observability/latency.py`, `experiments/13c_latency_attribution.py`/`13d_latency_report.py`).
+`PipelineResult.stage_latencies_ms` measured inside the pipeline (not read back from Langfuse, whose
+ingestion lags 8-14s); `GenerationPipeline.answer()` split into `generate()` + `validate()` so the two stages
+get honest separate timings; percentile aggregator TDD'd against hand-computed values. `uv run pytest -q`:
+471/471 passed (+7 new). **First measurement was wrong and was caught:** 25 back-to-back queries gave a
+generate-path p50 of 38,080 ms (routing, a ~10-token call, up to 14.4s) -- rerunning with 70s pauses gave
+4,012 ms p50 / 4,688 p95 (n=12), routing 251 ms. Likely cause: Groq free-tier per-minute token cap causing
+retry-after waits; supported by the effect only, 429s were not logged. Both datasets kept and labeled.
+**Baseline (paced, generate path p50/p95 ms):** confidence 2,520/3,233 (67% of p50), generation 920/1,443,
+routing 251/334, retrieval 44/66. Budget p95 < 3,000: pre-generation path 3,486 OVER, full generate path
+4,688 OVER, escalation path 3,128 OVER. Cold start: first query's confidence stage 17,435 ms (lazy reranker
+load). **Flagged, not resolved:** (1) Phase 12's cost model used 12.8 s per cache miss from earlier
+possibly-unpaced generation samples -- generation measures 0.9 s here; needs re-deriving. (2) `confidence`
+(local CPU, no LLM) was ~45% slower in the burst run for an unexplained reason.
+
+**Next action:** Unit 4, optimize against p95 < 3 s. Attribution says confidence scoring + cold start
+dominate; plan.md's "parallelize dense and sparse retrieval" targets a 44 ms stage and shipped retrieval is
+dense-only -- raise that scope question with the user before building.
+
+**Unit 4 done, budget NOT met, one cost unexplained -- 2026-09-30** (design record 13d,
+`docs/results/latency-budget.md` Unit 4 section, `AnswerPipeline.warm_up()`, experiments `13e`-`13g`).
+Only `warm_up()` was built: plan.md's "parallelize dense and sparse retrieval" has nothing to act on (shipped
+retrieval is dense-only, 37-44 ms), "batch rerank" already holds, and shrinking the rerank pool would change
+confidence values and invalidate Phase 10's tau. **Warm-up works:** first request 19,208 ms -> 2,957 ms wall
+(n=1 each side); cost moved to a 30.3 s startup. **Steady state did not improve** (generate path p50/p95
+4,012/4,688 -> 4,421/5,649 ms; pre-generation p95 4,030; all over 3,000 ms). **Wrong hypothesis, tested and
+refuted:** I suspected background load (an unrelated Docker stack was running during the baseline); it was gone
+for the re-run and confidence stayed ~2.4 s. Isolated `ConfidenceScorer`: 560 ms back-to-back, 1,031 ms after
+idle gaps; inside the pipeline with a real Langfuse tracer 926 ms (p95 6,070, one 11.3 s outlier) vs 502 ms with a
+no-op tracer -- suggestive that tracing costs latency, not established (different queries per arm, n=12). Also
+fixed en route: Docker Desktop itself had stopped (twice), taking Qdrant with it -- restarted, not a code issue.
+`uv run pytest -q`: 472/472.
+
+**Phase 13 is NOT done.** Remaining: structured logging with a trace ID threaded through (build item 2 -- NOT
+built; Unit 2 only threaded the ID through Langfuse spans), the audit-trail demo (item 5), and the p95 < 3 s exit
+criterion, which is unmet. **Open items:** (1) confidence stage ~2.4 s in pipeline vs 0.5-1.0 s isolated,
+unexplained; (2) Phase 12 cost model used 12.8 s/miss from possibly-throttled samples, generation measures ~1 s;
+(3) 429s/retries are not logged, so the rate-limit explanation for the burst run is unconfirmed.
+
+**Confidence-gap chase + structured logging + a silent router outage -- 2026-09-30** (design record 13e,
+`src/aegis/observability/logging.py`, `experiments/13h`/`13i`). **Structured logging built (build item 2):** stdlib
+JSON logging, trace ID via `ContextVar` attached to every record of a request, pipeline emits
+`request_start`/`escalated`/`request_end`; no new dependency. `uv run pytest -q`: 483/483 (+11). **Real incident
+found:** I exhausted `qwen/qwen3.8-27b`'s 200,000 tokens/day Groq cap (`Used 199902`); the router's
+`except APIError: return ""` fed its fail-safe, so *every* query silently escalated as `billing_account_legal` --
+no log anywhere. Fail-safe behavior kept; router now logs `router.api_error`/`router.unparseable_output`. **This
+consumed today's quota for the user's deferred Phase 9 sampling sweep (same model).** Result-level gap remains:
+an outage-driven escalation's `escalation_reason` still reads as a billing escalation.
+**Confidence gap, narrowed and two earlier claims retracted:** same-queries/paired experiments localize the extra
+time entirely to the cross-encoder call (encode ~2 ms), and rule out background load, the real tracer, 70 s idle
+gaps, the real router, and GPU wake-up (throwaway rerank: -127 ms typical but costs 199 ms itself). Earlier
+claims that idle gaps and the tracer each ~doubled the cost did **not replicate** and are retracted in 13d/
+latency-budget.md. Same query `2689`: 855-1,072 ms here vs 2,299-3,326 ms in the batches. **One difference left
+untested:** batches run real generation + validation in-process. Ready: `AEGIS_I_REAL_STACK=1 uv run python
+experiments/13i_gpu_wake_paired.py` -- blocked on Groq quota.
+
+**Phase 13 still NOT done.** Remaining: audit-trail demo (item 5); p95 < 3 s unmet. Structured logging: done.
+
+**Unit 5 (audit-trail demo) complete -- 2026-09-30** (design record 13f, `src/aegis/observability/audit.py`,
+`experiments/13j_audit_trail_demo.py`, `docs/results/audit-trail-example.md`). **Found first that the trace could
+not answer "what was [1]?"** -- it recorded top-10 retrieved and validated citation ids but not which chunks were
+packed into the prompt, their `[n]` numbering, truncation, or budget drops; fixed before building the reader
+(`ContextEntry` with `content_hash` on `PipelineResult.context` and the generation span's input, with prompt
+version + generation params). `build_audit_trail` (pure) / `resolve_evidence` (attaches chunk text; flags
+ok/changed/missing/unverified vs the recorded hash) / `render_markdown` / `fetch_observations` (polling; the v2 API
+omits `input`/`output` unless `fields="core,basic,io"` and returns JSON strings). Missing stages, a missing
+context map, and span-vs-root disagreement are reported as warnings/inconsistencies, never hidden. Tests generate
+observations from a real `AnswerPipeline` run so span-format drift breaks a test. `uv run pytest -q`: 496/496
+(+13). **Live, real, 3 queries (answered / hard-route escalation / confidence escalation `0.2295 < tau 0.5`):
+reconstructed from the stored Langfuse trace alone, then compared to the live pipeline's returned object: 0
+warnings, 0 inconsistencies, 0 differences on all three.** Known limits (13f SS6): no per-claim validation
+detail, no stored prompt text (deterministic, not stored), generation `model` field is the client class name,
+tau only inside the reason string, **Langfuse Cloud free tier retains 30 days -- not a legal artifact until
+exported to durable storage.** Incidental (n=1, not evidence): the live answered request took ~1.9 s end to end.
+
+**Phase 13 build list is complete; exit criteria 3 of 4 met.** Met: every request traced, `latency-budget.md`,
+worked audit-trail reconstruction. **Unmet: p95 < 3 s** (paced batches 4.4 s p50 / 5.6 s p95 generate path; cause
+of the ~2.4 s confidence stage in those batches still unexplained -- localized to the cross-encoder call, five
+candidate causes ruled out; the real-generation-in-process test remains unrun). Phase board stays 🟡 on that
+criterion. Open items carried: (1) that confidence-stage gap; (2) Phase 12 cost model's 12.8 s/miss vs ~1 s
+measured generation; (3) audit-trail retention/export; (4) an outage-driven escalation's `escalation_reason`
+still reads as a billing escalation.
+
 ### Phase 11 wrap-up (2026-09-26)
 
 Everything code-, analysis-, and documentation-side that doesn't require new LLM quota is complete: all 6
@@ -212,8 +382,8 @@ either. Open Questions #1 and #16 and the DoD tracker rows below reflect this ex
 | | |
 |---|---|
 | **Day** | 13 of 21 (in progress) |
-| **Phase** | 12 of 19 (in progress, Unit 1 of 6 complete). Phase 11 wrapped up (all 6 units + rubric fix + faithfulness root cause done; real paired κ deferred to the user, pending Gemini quota). Phase 9's sampling-sweep grid re-scoped and half-completed (2 of 4 configs real), remaining 2 also deferred to the user |
-| **Design records written** | 20 files across phases 0-12 (lettered sub-records inflate this past a literal 1-per-phase count; phases 13-19 have none yet) |
+| **Phase** | 13 of 19 (in progress, build list complete, 3 of 4 exit criteria met -- p95 < 3 s unmet). Phase 12 complete (all 6 units, exit criteria met). Phase 11 wrapped up (all 6 units + rubric fix + faithfulness root cause done; real paired κ deferred to the user, pending Gemini quota). Phase 9's sampling-sweep grid re-scoped and half-completed (2 of 4 configs real), remaining 2 also deferred to the user |
+| **Design records written** | 26 files across phases 0-13 (lettered sub-records inflate this past a literal 1-per-phase count; phases 14-19 have none yet) |
 | **Golden set** | 180 dev + 40 holdout, frozen and hashed (Phase 4) |
 | **Definition of Done** | 3 of 10 criteria met (#1: Recall@10 + MRR lift; #3: escalation confusion matrix; #8: LLM-judge agreement, measured — real result is **not met**, κ≈0 vs. ≥0.6 target, itself a valid, reported outcome). `make eval` (Unit 6) now surfaces this and the faithfulness miss automatically, in one command. |
 | **Blockers** | Both providers re-exhausted again as of 2026-09-26 running the real N=26 rubric-fix re-score: `openai/gpt-oss-120b` (TPD) and `gemini-3.5-flash` (20/day, which did not clear even across the calendar-day rollover — its quota-day boundary doesn't align with local midnight). Gemini has now returned **zero** real scores under the fixed rubric across two separate attempts — real inter-judge κ is still completely unmeasured. `qwen/qwen3.8-27b` (generation) is now *also* TPD-exhausted (200,000/day, newly discovered running the sampling sweep re-run) — 2 of 4 sweep configs got real data before the wall. Not currently blocking: Units 5 and 6 (custom metrics, scorecard — both zero LLM cost) shipped regardless, and both the groq-side refusal fix (N=26) and the temperature=0.0 sweep configs (N=20 each) are real-verified. |
@@ -239,7 +409,7 @@ Legend: ⬜ not started · 🟡 in progress · ✅ complete · ⏭️ cut
 | 10 | **Calibrated abstention** ⚑ | 12 | ✅ | The escalation confusion matrix |
 | 11 | **Generation eval + judge validation** ⚑ | 13 | 🟡 | RAGAS + Cohen's κ |
 | 12 | Caching, delta indexing & cost | 14 | 🟡 | Cache hit rate, cost table |
-| 13 | Observability & latency budget | 15 | ⬜ | p95 < 3s, per-stage breakdown |
+| 13 | Observability & latency budget | 15 | 🟡 | p95 < 3s, per-stage breakdown |
 | 14 | API, streaming & UI | 16–17 | ⬜ | Working demo w/ visible escalation |
 | 15 | Security hardening | 18½ | ⬜ | Adversarial suite |
 | 16 | **CI evaluation gate** ⚑ | 18½ | ⬜ | Gate that fails on regression |
@@ -484,6 +654,8 @@ Every non-obvious choice, its alternatives, and why. Append-only.
 | 2026-09-26 | Re-ran all 4 sampling-sweep configs fresh under `qwen/qwen3.8-27b`, rather than reusing Attempt 1's real (0.0, 0.5) number (0.6634, measured under `llama-3.3-70b-versatile`) for that one cell | Keep the old (0.0, 0.5) result and only measure the 3 remaining configs under the new model | Mixing two different models within one "temperature x top_p" sweep would confound the variable under test -- the whole point of the grid is isolating the sampling-parameter effect, which requires holding the model fixed. Restored `N_QUERIES` from 6 back to 20 in the same change, since the new model's per-minute (not per-day) caps afford it. |
 | 2026-09-26 | Killed the sampling-sweep run early (after 2 of 4 configs completed) rather than letting it finish grinding through the remaining, already-doomed calls | Let the script run to completion, since it degrades gracefully (per-query try/except, no crash risk) | Configs 3 and 4 were provably going to be 100% failures once `qwen/qwen3.8-27b`'s TPD wall was hit (every subsequent call gets an immediate 429, confirmed from the real error messages) -- letting it churn through 20 more paced, guaranteed-failing calls (~3 more minutes) would have produced zero new information. The two real, complete configs' data was already safely checkpointed to disk before the kill. |
 | 2026-09-26 | Added config-level resumability to `09a_sampling_sweep.py` before wrapping up Phase 11, even though no immediate re-run was planned this session | Leave the script as-is, since it already checkpoints incrementally per config | The user will run the remaining 2 configs themselves later, without this session's context -- as written, a plain re-run would have silently overwritten the 2 real, already-completed temperature=0.0 configs (no existing-file check before starting the grid). Fixed so the deferred task is safe to just run, not something that needs remembering an unwritten caveat about preserving data by hand first. |
+| 2026-09-26 | **Phase 13: Langfuse Cloud (free tier), not self-hosted** | Full self-hosted Langfuse v3 stack (web+worker+Postgres+ClickHouse+Redis+MinIO, per the official docker-compose); self-hosted Langfuse v2 (Postgres-only) | Measured, not assumed: Langfuse's own docs recommend 4 cores/16 GiB for the v3 self-host stack alone; this machine's Docker Desktop is allocated 7.75 GiB total, already sharing that with Qdrant (~750 MiB), and the host's full 16 GiB also has to cover MPS embedding inference outside Docker. Real capacity conflict, not routine. Presented all 3 options with a recommendation (`AskUserQuestion`, full stack recommended); **user chose Cloud** — a deliberate deviation from plan.md's literal "self-hosted" wording, disclosed here rather than silently substituted. Free tier (50k units/month, 30-day retention, no card) comfortably covers this project's real traffic scale (7 traced stages/query × a few hundred dev/eval queries, nowhere near 50k/month). Full reasoning: design record 13. |
+| 2026-09-28 | **Built a minimal end-to-end `AnswerPipeline` orchestrator inside Phase 13 (Unit 2), not deferred to Phase 14** | Trace at the experiment-script level only, without a real orchestrator; wait and let Phase 14 build it | No orchestrated request path existed anywhere in this codebase -- Phases 5-12 each shipped one stage in isolation, wired together only ad hoc inside experiment scripts. Phase 13's own build item #1 ("tracing every stage") presupposes a real request to attach spans to, and the audit-trail demo (build item #5) needs a real evidence object to reconstruct from -- neither is satisfiable against a batch script. Flagged the gap directly (`AskUserQuestion`) rather than silently picking a scope; user confirmed building it now. Phase 14 wraps this exact object in FastAPI/SSE rather than rebuilding it -- not duplicated scope, built at the point it was first actually needed. Full reasoning: design record 13b SS2-3. |
 
 ---
 

@@ -1,0 +1,515 @@
+[
+  {
+    "query_id": "golden::issue::11104",
+    "is_negative": false,
+    "cold_start": true,
+    "cache_status": "miss",
+    "escalate": false,
+    "route": "known_issue",
+    "provider": "groq",
+    "confidence": 0.6915535875942961,
+    "stage_latencies_ms": {
+      "cache_lookup": 1.165207999292761,
+      "routing": 269.8694170030649,
+      "retrieval": 128.63649999781046,
+      "confidence": 18569.805917002668,
+      "generation": 653.0145829965477,
+      "validation": 587.6626669996767
+    },
+    "wall_ms": 20216.25929199945,
+    "trace_id": "97e3ec73153f80199d195102c812caad",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::5857",
+    "is_negative": false,
+    "cold_start": false,
+    "cache_status": "miss",
+    "escalate": false,
+    "route": "known_issue",
+    "provider": "groq",
+    "confidence": 0.7378456269938427,
+    "stage_latencies_ms": {
+      "cache_lookup": 1.102667003578972,
+      "routing": 251.94462500076042,
+      "retrieval": 40.3974169967114,
+      "confidence": 1387.399541999912,
+      "generation": 24946.74637499702,
+      "validation": 1.485000000684522
+    },
+    "wall_ms": 26634.088416998566,
+    "trace_id": "357dafad241d5b071110e5c5013a1986",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::1266",
+    "is_negative": false,
+    "cold_start": false,
+    "cache_status": "miss",
+    "escalate": false,
+    "route": "docs_howto",
+    "provider": "groq",
+    "confidence": 0.6029921477747534,
+    "stage_latencies_ms": {
+      "cache_lookup": 0.7070830033626407,
+      "routing": 6347.781083000882,
+      "retrieval": 68.42999999935273,
+      "confidence": 10736.983417002193,
+      "generation": 22770.637666995754,
+      "validation": 1.7839160063886084
+    },
+    "wall_ms": 39932.87945799966,
+    "trace_id": "85711939650215c011e63956b74e1561",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::12965",
+    "is_negative": false,
+    "cold_start": false,
+    "cache_status": "miss",
+    "escalate": false,
+    "route": "docs_howto",
+    "provider": "groq",
+    "confidence": 0.6725458054178146,
+    "stage_latencies_ms": {
+      "cache_lookup": 1.5197920001810417,
+      "routing": 14385.651583994331,
+      "retrieval": 113.14279100042768,
+      "confidence": 3645.9967080008937,
+      "generation": 26797.368791994813,
+      "validation": 3522.5884590036003
+    },
+    "wall_ms": 48476.3289170005,
+    "trace_id": "88b3e1b4f5d96727bc46c8651f05c84c",
+    "error": null
+  },
+  {
+    "query_id": "negative::adversarial_injection::1",
+    "is_negative": true,
+    "cold_start": false,
+    "cache_status": "miss",
+    "escalate": true,
+    "route": "billing_account_legal",
+    "provider": null,
+    "confidence": null,
+    "stage_latencies_ms": {
+      "cache_lookup": 1.084415998775512,
+      "routing": 4329.156082996633,
+      "escalation": 0.2463749988237396
+    },
+    "wall_ms": 4331.188166994252,
+    "trace_id": "c564c98da46d15cbc8b1368a4eccb82a",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::1743",
+    "is_negative": false,
+    "cold_start": false,
+    "cache_status": "miss",
+    "escalate": false,
+    "route": "docs_howto",
+    "provider": "groq",
+    "confidence": 0.6810338474776486,
+    "stage_latencies_ms": {
+      "cache_lookup": 1.3706250028917566,
+      "routing": 10375.980875003734,
+      "retrieval": 56.48812499566702,
+      "confidence": 5905.031624999538,
+      "generation": 37188.392291995115,
+      "validation": 3278.575791999174
+    },
+    "wall_ms": 56819.66545799514,
+    "trace_id": "02b0480f6d3a55a148a5286383665759",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::2934",
+    "is_negative": false,
+    "cold_start": false,
+    "cache_status": "miss",
+    "escalate": false,
+    "route": "known_issue",
+    "provider": "groq",
+    "confidence": 0.6997505254281491,
+    "stage_latencies_ms": {
+      "cache_lookup": 1.2223340017953888,
+      "routing": 9413.610832998529,
+      "retrieval": 75.96816600562306,
+      "confidence": 5928.852291996009,
+      "generation": 33802.451166993706,
+      "validation": 2.257749998534564
+    },
+    "wall_ms": 49233.32504100108,
+    "trace_id": "1c7005c5c248a34923a7f2cbdce486c4",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::1653",
+    "is_negative": false,
+    "cold_start": false,
+    "cache_status": "miss",
+    "escalate": false,
+    "route": "docs_howto",
+    "provider": "groq",
+    "confidence": 0.6003978249565732,
+    "stage_latencies_ms": {
+      "cache_lookup": 1.626958000997547,
+      "routing": 5345.297332998598,
+      "retrieval": 52.70412499521626,
+      "confidence": 5455.606291994627,
+      "generation": 22987.599208005122,
+      "validation": 1.915999993798323
+    },
+    "wall_ms": 33852.44270900148,
+    "trace_id": "43f72c348d92631e8458338fd4cedfd4",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::2786",
+    "is_negative": false,
+    "cold_start": false,
+    "cache_status": "miss",
+    "escalate": false,
+    "route": "known_issue",
+    "provider": "groq",
+    "confidence": 0.6810163022044949,
+    "stage_latencies_ms": {
+      "cache_lookup": 1.9760420036618598,
+      "routing": 7315.943916000833,
+      "retrieval": 69.35483300185297,
+      "confidence": 3265.4523339951993,
+      "generation": 29709.094833000563,
+      "validation": 3.5710829979507253
+    },
+    "wall_ms": 40371.18379099411,
+    "trace_id": "c4313480df73b703c2f62d8975bbead4",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::2689",
+    "is_negative": false,
+    "cold_start": false,
+    "cache_status": "miss",
+    "escalate": true,
+    "route": "known_issue",
+    "provider": null,
+    "confidence": 0.2294946600820999,
+    "stage_latencies_ms": {
+      "cache_lookup": 2.660875004949048,
+      "routing": 6392.727209000441,
+      "retrieval": 51.27320899919141,
+      "confidence": 3326.0518749957555,
+      "escalation": 0.9152910060947761
+    },
+    "wall_ms": 9775.6942920023,
+    "trace_id": "2089fd2ba28a08daf51b3d6120afb8b1",
+    "error": null
+  },
+  {
+    "query_id": "negative::billing_legal::4",
+    "is_negative": true,
+    "cold_start": false,
+    "cache_status": "miss",
+    "escalate": true,
+    "route": "billing_account_legal",
+    "provider": null,
+    "confidence": null,
+    "stage_latencies_ms": {
+      "cache_lookup": 2.4720830042497255,
+      "routing": 260.15545800328255,
+      "escalation": 0.19616699864855036
+    },
+    "wall_ms": 263.18712499778485,
+    "trace_id": "a41b091f7910b56d1b3018687598da51",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::2855",
+    "is_negative": false,
+    "cold_start": false,
+    "cache_status": "miss",
+    "escalate": false,
+    "route": "docs_howto",
+    "provider": "groq",
+    "confidence": 0.6620950648041601,
+    "stage_latencies_ms": {
+      "cache_lookup": 0.5512499992619269,
+      "routing": 4251.422791996447,
+      "retrieval": 51.24604100274155,
+      "confidence": 2050.537874994916,
+      "generation": 19927.564750003512,
+      "validation": 4791.7133340015425
+    },
+    "wall_ms": 31082.49737499864,
+    "trace_id": "3accb99a9b7c02232cc8b1bbd3d515b9",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::753",
+    "is_negative": false,
+    "cold_start": false,
+    "cache_status": "miss",
+    "escalate": false,
+    "route": "docs_howto",
+    "provider": "groq",
+    "confidence": 0.6096835244128507,
+    "stage_latencies_ms": {
+      "cache_lookup": 1.2790420005330816,
+      "routing": 5445.927332999418,
+      "retrieval": 50.11062500125263,
+      "confidence": 4589.731790998485,
+      "generation": 26005.60837500234,
+      "validation": 5.073249994893558
+    },
+    "wall_ms": 36105.77750000084,
+    "trace_id": "a9e355d47d13f74d23c1e6c12042464c",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::3212",
+    "is_negative": false,
+    "cold_start": false,
+    "cache_status": "miss",
+    "escalate": true,
+    "route": "docs_howto",
+    "provider": null,
+    "confidence": 0.037671749386431676,
+    "stage_latencies_ms": {
+      "cache_lookup": 1.9645840002340265,
+      "routing": 4298.004208998464,
+      "retrieval": 59.659124999598134,
+      "confidence": 2907.5015419948613,
+      "escalation": 1.06733400025405
+    },
+    "wall_ms": 7270.298708994233,
+    "trace_id": "3d55469ff5cbe1f7211e0446d5006149",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::15764",
+    "is_negative": false,
+    "cold_start": false,
+    "cache_status": "miss",
+    "escalate": false,
+    "route": "known_issue",
+    "provider": "groq",
+    "confidence": 0.6793123941486581,
+    "stage_latencies_ms": {
+      "cache_lookup": 1.7577500038896687,
+      "routing": 7455.829124999582,
+      "retrieval": 34.17404099309351,
+      "confidence": 3666.2629160055076,
+      "generation": 30980.122875000234,
+      "validation": 2.6311659967177548
+    },
+    "wall_ms": 42151.17758300039,
+    "trace_id": "9128835293f2374c242d8ad62338e9cd",
+    "error": null
+  },
+  {
+    "query_id": "negative::unanswerable::8",
+    "is_negative": true,
+    "cold_start": false,
+    "cache_status": "miss",
+    "escalate": true,
+    "route": "billing_account_legal",
+    "provider": null,
+    "confidence": null,
+    "stage_latencies_ms": {
+      "cache_lookup": 2.598708000732586,
+      "routing": 3302.262040997448,
+      "escalation": 0.7515000033890828
+    },
+    "wall_ms": 3306.4450830061105,
+    "trace_id": "9981391b4685bc3fbc884126fb996235",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::2735",
+    "is_negative": false,
+    "cold_start": false,
+    "cache_status": "miss",
+    "escalate": false,
+    "route": "known_issue",
+    "provider": "groq",
+    "confidence": 0.6861367242702089,
+    "stage_latencies_ms": {
+      "cache_lookup": 1.5718750000814907,
+      "routing": 4322.689583001193,
+      "retrieval": 44.09675000351854,
+      "confidence": 2477.1042080028565,
+      "generation": 31106.594208999013,
+      "validation": 2.8684169956250116
+    },
+    "wall_ms": 37962.70316700247,
+    "trace_id": "98d8b5cf46433b61cd504f46be946b7b",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::58",
+    "is_negative": false,
+    "cold_start": false,
+    "cache_status": "miss",
+    "escalate": false,
+    "route": "docs_howto",
+    "provider": "groq",
+    "confidence": 0.6678427260349064,
+    "stage_latencies_ms": {
+      "cache_lookup": 1.8440420026308857,
+      "routing": 3296.086374997685,
+      "retrieval": 28.27270800480619,
+      "confidence": 5009.843125000771,
+      "generation": 23050.62812500546,
+      "validation": 2.854250000382308
+    },
+    "wall_ms": 31397.80724999582,
+    "trace_id": "0c527eddd1dcbf5927afa64c47a89617",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::2884",
+    "is_negative": false,
+    "cold_start": false,
+    "cache_status": "miss",
+    "escalate": false,
+    "route": "docs_howto",
+    "provider": "groq",
+    "confidence": 0.584490657660059,
+    "stage_latencies_ms": {
+      "cache_lookup": 2.6780409971252084,
+      "routing": 4256.579291999515,
+      "retrieval": 55.89841600158252,
+      "confidence": 2314.968750004482,
+      "generation": 39547.00291700283,
+      "validation": 8901.64208299393
+    },
+    "wall_ms": 55089.814875005686,
+    "trace_id": "45a9335a18d9a396bab1da5f42927847",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::1767",
+    "is_negative": false,
+    "cold_start": false,
+    "cache_status": "miss",
+    "escalate": false,
+    "route": "docs_howto",
+    "provider": "groq",
+    "confidence": 0.5336602939297912,
+    "stage_latencies_ms": {
+      "cache_lookup": 1.3661670018336736,
+      "routing": 5334.060417000728,
+      "retrieval": 61.02566700428724,
+      "confidence": 4844.984582996403,
+      "generation": 25705.921708999085,
+      "validation": 2257.849542002077
+    },
+    "wall_ms": 38213.425207999535,
+    "trace_id": "364dd646e250ca95b66811c34f45d10a",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::219",
+    "is_negative": false,
+    "cold_start": false,
+    "cache_status": "miss",
+    "escalate": false,
+    "route": "known_issue",
+    "provider": "groq",
+    "confidence": 0.6799784191470588,
+    "stage_latencies_ms": {
+      "cache_lookup": 1.5784169954713434,
+      "routing": 9407.330041998648,
+      "retrieval": 54.850084001373034,
+      "confidence": 4249.099791995832,
+      "generation": 30030.267624999397,
+      "validation": 1.8138329978683032
+    },
+    "wall_ms": 43753.538832999766,
+    "trace_id": "0fe85fcde4950c7559fb3fe08c43894f",
+    "error": null
+  },
+  {
+    "query_id": "negative::out_of_corpus::9",
+    "is_negative": true,
+    "cold_start": false,
+    "cache_status": "miss",
+    "escalate": false,
+    "route": "docs_howto",
+    "provider": "groq",
+    "confidence": 0.6019394130416056,
+    "stage_latencies_ms": {
+      "cache_lookup": 2.150791995518375,
+      "routing": 3402.8324159953627,
+      "retrieval": 48.24704199563712,
+      "confidence": 2387.429874994268,
+      "generation": 25751.13495899859,
+      "validation": 5.107458004204091
+    },
+    "wall_ms": 31605.144957997254,
+    "trace_id": "ab9c3f8ec49a07da8a0ece4768f0935d",
+    "error": null
+  },
+  {
+    "query_id": "negative::out_of_corpus::7",
+    "is_negative": true,
+    "cold_start": false,
+    "cache_status": "miss",
+    "escalate": true,
+    "route": "docs_howto",
+    "provider": null,
+    "confidence": 0.20093130993324168,
+    "stage_latencies_ms": {
+      "cache_lookup": 2.4479999992763624,
+      "routing": 3272.38070799649,
+      "retrieval": 26.287624998076353,
+      "confidence": 2113.0318340001395,
+      "escalation": 0.36941700091119856
+    },
+    "wall_ms": 5417.516334004176,
+    "trace_id": "0932f773758c4907a5c4140dbe233a0e",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::760",
+    "is_negative": false,
+    "cold_start": false,
+    "cache_status": "miss",
+    "escalate": false,
+    "route": "docs_howto",
+    "provider": "groq",
+    "confidence": 0.7163918491646271,
+    "stage_latencies_ms": {
+      "cache_lookup": 1.1250000025029294,
+      "routing": 3646.417375006422,
+      "retrieval": 50.79524999746354,
+      "confidence": 2555.759250004485,
+      "generation": 27132.142457994632,
+      "validation": 2.8095419984310865
+    },
+    "wall_ms": 33396.76429199608,
+    "trace_id": "e780f6843da34212f979c1dcb0d9ae8f",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::2549",
+    "is_negative": false,
+    "cold_start": false,
+    "cache_status": "miss",
+    "escalate": false,
+    "route": "docs_howto",
+    "provider": "groq",
+    "confidence": 0.6166240901912684,
+    "stage_latencies_ms": {
+      "cache_lookup": 1.5455829998245463,
+      "routing": 5361.682875001861,
+      "retrieval": 72.19333299872233,
+      "confidence": 3097.7898749988526,
+      "generation": 20253.945707998355,
+      "validation": 5897.829749999801
+    },
+    "wall_ms": 34693.79412499984,
+    "trace_id": "730129aba326884e646cc7825bf2e395",
+    "error": null
+  }
+]

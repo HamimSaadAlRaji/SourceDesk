@@ -535,6 +535,36 @@ class CacheSettings(BaseSettings):
     semantic_cache_db_path: Path = REPO_ROOT / "data" / "cache" / "semantic_cache.sqlite"
 
 
+class LangfuseSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="LANGFUSE_", env_file=".env", extra="ignore")
+
+    # Phase 13: Langfuse Cloud, not self-hosted -- a real resource conflict
+    # ruled out self-hosting on this machine. The official v3 self-host stack
+    # (web + worker + Postgres + ClickHouse + Redis + MinIO) recommends 4
+    # cores/16GiB for itself alone (langfuse.com/self-hosting/deployment/
+    # docker-compose), but Docker Desktop here is only allocated 7.75GiB
+    # total, of which Qdrant already uses ~750MiB -- and the host's full
+    # 16GiB also has to cover MPS embedding inference outside Docker. Cloud's
+    # free tier (50k units/month, 30-day retention, no card) comfortably
+    # covers a portfolio project's dev/eval traffic. See Decision Log,
+    # 2026-09-26, and design record 13.
+    public_key: str = ""
+    secret_key: str = ""
+
+    # Field name matches Langfuse's own dashboard env-var snippet
+    # (`LANGFUSE_BASE_URL`), not the SDK constructor's `host` kwarg name --
+    # Langfuse Cloud is multi-region (US/EU, different subdomains per
+    # project), and a field named `host` silently fell back to this EU
+    # default against a real US-region project (401, found via the live
+    # smoke test, see design record 13 SS6).
+    base_url: str = "https://cloud.langfuse.com"
+
+    # Separates this project's dev tracing from anything else in the same
+    # Langfuse project, and lets later phases (e.g. Phase 16's CI gate) filter
+    # traces by environment without a second project.
+    environment: str = "dev"
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
@@ -555,6 +585,7 @@ class Settings(BaseSettings):
     judge: JudgeSettings = JudgeSettings()
     eval: EvalSettings = EvalSettings()
     cache: CacheSettings = CacheSettings()
+    langfuse: LangfuseSettings = LangfuseSettings()
 
 
 settings = Settings()

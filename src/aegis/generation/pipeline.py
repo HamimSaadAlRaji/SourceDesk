@@ -36,6 +36,17 @@ class GenerationResult(BaseModel):
     citations: list[str]  # chunk ids actually cited *and* validated as supported
 
 
+class DraftAnswer(BaseModel):
+    """Generated text before citation validation -- the seam that lets the
+    end-to-end pipeline (`aegis.pipeline`) time and trace LLM generation and
+    validation as two separate stages instead of one opaque `.answer()`."""
+
+    query: Query
+    text: str
+    context: PackedContext
+    provider: str | None
+
+
 class GenerationPipeline:
     def __init__(
         self,
@@ -55,7 +66,7 @@ class GenerationPipeline:
         self.top_p = top_p
         self.max_tokens = max_tokens
 
-    def answer(self, query: Query, retrieved: list[Retrieved]) -> GenerationResult:
+    def generate(self, query: Query, retrieved: list[Retrieved]) -> DraftAnswer:
         context = pack_context(retrieved, self.budget_tokens)
         context_block = format_context(context)
         messages = self.prompt.build_messages(query.text, context_block)
@@ -63,13 +74,22 @@ class GenerationPipeline:
         text, provider = self.llm.generate_with_provider(
             messages, temperature=self.temperature, top_p=self.top_p, max_tokens=self.max_tokens
         )
+        return DraftAnswer(query=query, text=text, context=context, provider=provider)
 
-        validation = self.validator.validate(text, context)
-        citations = _supported_citation_chunk_ids(context, validation)
-
+    def validate(self, draft: DraftAnswer) -> GenerationResult:
+        validation = self.validator.validate(draft.text, draft.context)
+        citations = _supported_citation_chunk_ids(draft.context, validation)
         return GenerationResult(
-            query=query, text=text, context=context, validation=validation, provider=provider, citations=citations
+            query=draft.query,
+            text=draft.text,
+            context=draft.context,
+            validation=validation,
+            provider=draft.provider,
+            citations=citations,
         )
+
+    def answer(self, query: Query, retrieved: list[Retrieved]) -> GenerationResult:
+        return self.validate(self.generate(query, retrieved))
 
 
 _SUPPORTED = {ClaimStatus.SUPPORTED_LEXICAL, ClaimStatus.SUPPORTED_ENTAILMENT}

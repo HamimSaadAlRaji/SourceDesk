@@ -18,10 +18,15 @@ fake (`tests/test_classifier.py`), the same treatment as `DenseIndex`/
 from __future__ import annotations
 
 import json
+import logging
 from collections.abc import Callable
 from enum import StrEnum
 
 from aegis.config import settings
+from aegis.observability.logging import get_logger, log_event
+
+
+_log = get_logger("router")
 
 
 class Route(StrEnum):
@@ -94,7 +99,15 @@ def _default_classify_fn(model: str, temperature: float, max_tokens: int) -> Cla
                     {"role": "user", "content": query},
                 ],
             )
-        except APIError:
+        except APIError as exc:
+            # Fail-safe behavior is unchanged, but it must not be invisible:
+            # a Groq quota outage once turned every query into a silent
+            # billing_account_legal escalation with no log line anywhere.
+            log_event(
+                _log, logging.WARNING, "router.api_error",
+                error_type=type(exc).__name__, status_code=getattr(exc, "status_code", None),
+                detail=str(exc)[:300],
+            )
             # e.g. Groq's JSON-mode grammar constraint hitting
             # `json_validate_failed` before a valid document closes
             # (observed on the Phase 8 router eval). Returns "" so
@@ -123,6 +136,8 @@ class RouterClassifier:
             parsed = json.loads(raw)
             return Route(parsed["route"])
         except (json.JSONDecodeError, KeyError, ValueError, TypeError):
+            if raw:  # "" means the API-error path already logged its own event
+                log_event(_log, logging.WARNING, "router.unparseable_output", raw=raw[:200])
             # Fail safe, not fail open: unparseable/out-of-vocabulary model
             # output defaults to the hard-escalate route. Worst case is an
             # unnecessary human handoff; the alternative (silently treating

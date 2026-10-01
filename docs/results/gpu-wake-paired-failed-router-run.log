@@ -1,0 +1,17 @@
+Loading weights:   0%|          | 0/393 [00:00<?, ?it/s]Loading weights: 100%|██████████| 393/393 [00:00<00:00, 6250.21it/s]
+warm_up: {'retrieval': 13.405791993136518, 'confidence': 16285.05445799965}
+ 0 wake  :issue::2689 route=billing_account_legal confidence=None wake=454.60920900222845
+ 1 plain :issue::2689 route=billing_account_legal confidence=None wake=None
+ 2 plain :issue::2884 route=docs_howto confidence=1462.9633330041543 wake=None
+ 3 wake  :issue::2884 route=docs_howto confidence=635.2451669954462 wake=1697.1489999996265
+ 4 wake  :issue::3212 route=billing_account_legal confidence=None wake=294.2311249935301
+ 5 plain :issue::3212 route=billing_account_legal confidence=None wake=None
+ 6 plain ::issue::753 route=billing_account_legal confidence=None wake=None
+ 7 wake  ::issue::753 route=docs_howto confidence=838.8607079978101 wake=968.0733750137733
+ 8 wake  ::issue::219 route=billing_account_legal confidence=None wake=252.90716599556617
+ 9 plain ::issue::219 route=billing_account_legal confidence=None wake=None
+10 plain issue::11104 route=billing_account_legal confidence=None wake=None
+11 wake  issue::11104 route=known_issue confidence=406.3739999983227 wake=892.1127500070725
+plain n=1 confidence p50=1463 mean=1463 max=1463 all=[1463]
+wake  n=3 confidence p50=635 mean=627 max=839 all=[635, 839, 406]
+wake throwaway cost: p50=673 max=1697 ms

@@ -1,0 +1,110 @@
+[
+  {
+    "k": 0,
+    "arm": "wake",
+    "query_id": "golden::issue::2689",
+    "route": "docs_howto",
+    "confidence_stage_ms": 855.317916997592,
+    "wake_ms": 61.27537500287872,
+    "routing_ms": 0.21762499818578362
+  },
+  {
+    "k": 1,
+    "arm": "plain",
+    "query_id": "golden::issue::2689",
+    "route": "docs_howto",
+    "confidence_stage_ms": 1072.1470420103287,
+    "wake_ms": null,
+    "routing_ms": 0.3079169982811436
+  },
+  {
+    "k": 2,
+    "arm": "plain",
+    "query_id": "golden::issue::2884",
+    "route": "docs_howto",
+    "confidence_stage_ms": 522.6350839948282,
+    "wake_ms": null,
+    "routing_ms": 0.309290990117006
+  },
+  {
+    "k": 3,
+    "arm": "wake",
+    "query_id": "golden::issue::2884",
+    "route": "docs_howto",
+    "confidence_stage_ms": 444.0768329950515,
+    "wake_ms": 202.021541990689,
+    "routing_ms": 0.14570800703950226
+  },
+  {
+    "k": 4,
+    "arm": "wake",
+    "query_id": "golden::issue::3212",
+    "route": "docs_howto",
+    "confidence_stage_ms": 349.79299998667557,
+    "wake_ms": 196.38137498986907,
+    "routing_ms": 0.1460839994251728
+  },
+  {
+    "k": 5,
+    "arm": "plain",
+    "query_id": "golden::issue::3212",
+    "route": "docs_howto",
+    "confidence_stage_ms": 435.3001670097001,
+    "wake_ms": null,
+    "routing_ms": 0.13845801004208624
+  },
+  {
+    "k": 6,
+    "arm": "plain",
+    "query_id": "golden::issue::753",
+    "route": "docs_howto",
+    "confidence_stage_ms": 790.0335000013001,
+    "wake_ms": null,
+    "routing_ms": 0.25158299831673503
+  },
+  {
+    "k": 7,
+    "arm": "wake",
+    "query_id": "golden::issue::753",
+    "route": "docs_howto",
+    "confidence_stage_ms": 544.751333000022,
+    "wake_ms": 120.70220899477135,
+    "routing_ms": 0.11604100291151553
+  },
+  {
+    "k": 8,
+    "arm": "wake",
+    "query_id": "golden::issue::219",
+    "route": "docs_howto",
+    "confidence_stage_ms": 843.0012079916196,
+    "wake_ms": 791.904790996341,
+    "routing_ms": 0.11408400314394385
+  },
+  {
+    "k": 9,
+    "arm": "plain",
+    "query_id": "golden::issue::219",
+    "route": "docs_howto",
+    "confidence_stage_ms": 952.8004999883706,
+    "wake_ms": null,
+    "routing_ms": 0.26149999757763
+  },
+  {
+    "k": 10,
+    "arm": "plain",
+    "query_id": "golden::issue::11104",
+    "route": "docs_howto",
+    "confidence_stage_ms": 376.61875000048894,
+    "wake_ms": null,
+    "routing_ms": 0.9017499978654087
+  },
+  {
+    "k": 11,
+    "arm": "wake",
+    "query_id": "golden::issue::11104",
+    "route": "docs_howto",
+    "confidence_stage_ms": 232.2171249979874,
+    "wake_ms": 224.10116699757054,
+    "routing_ms": 0.09604200022295117
+  }
+]

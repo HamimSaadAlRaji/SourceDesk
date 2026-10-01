@@ -1,0 +1,29 @@
+warm_up: {'retrieval': 15.348791988799348, 'confidence': 17134.694917011075}
+gap=10s q0 stage=   843 rerank=   840 encode=    2 other=    1 routing= 1026
+gap=10s q1 stage=   511 rerank=   506 encode=    4 other=    1 routing=  360
+gap=10s q2 stage=   548 rerank=   543 encode=    3 other=    2 routing=  212
+gap=10s q3 stage=   798 rerank=   793 encode=    4 other=    1 routing=  221
+gap=10s q4 stage=  1207 rerank=  1204 encode=    2 other=    1 routing=  306
+gap=10s q5 stage=   449 rerank=   445 encode=    2 other=    1 routing=  292
+gap=10s q6 stage=   996 rerank=   992 encode=    3 other=    1 routing=  708
+gap=10s q7 stage=   638 rerank=   635 encode=    2 other=    1 routing= 1213
+gap= 0s q0 stage=   740 rerank=   738 encode=    2 other=    1 routing=  220
+gap= 0s q1 stage=   368 rerank=   364 encode=    2 other=    1 routing=  226
+gap= 0s q2 stage=   274 rerank=   270 encode=    2 other=    2 routing=  177
+gap= 0s q3 stage=   469 rerank=   466 encode=    1 other=    2 routing=  182
+gap= 0s q4 stage=   969 rerank=   966 encode=    1 other=    1 routing=  418
+gap= 0s q5 stage=   263 rerank=   258 encode=    3 other=    1 routing=  198
+gap= 0s q6 stage=   761 rerank=   759 encode=    1 other=    1 routing=  550
+gap= 0s q7 stage=   596 rerank=   595 encode=    0 other=    1 routing=  500
+gap=70s q0 stage=   722 rerank=   721 encode=    0 other=    1 routing=  225
+gap=70s q1 stage=  1497 rerank=  1494 encode=    2 other=    1 routing=  851
+gap=70s q2 stage=  1656 rerank=  1653 encode=    2 other=    1 routing=  463
+gap=70s q3 stage=   722 rerank=   719 encode=    2 other=    1 routing=  297
+Traceback (most recent call last):
+  File "/Users/admin/Desktop/Projects/SourceDesk/experiments/13h_confidence_localize.py", line 125, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/Users/admin/Desktop/Projects/SourceDesk/experiments/13h_confidence_localize.py", line 106, in main
+    "confidence_stage_ms": r.stage_latencies_ms["confidence"],
+                           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+KeyError: 'confidence'

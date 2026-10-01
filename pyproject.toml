@@ -11,6 +11,7 @@ dependencies = [
     "groq>=1.6.0",
     "instructor[google-genai]>=1.15.4",
     "langchain-community<0.4",
+    "langfuse>=4.15.6",
     "matplotlib>=3.11.1",
     "pydantic>=2.13.4",
     "pydantic-settings>=2.14.2",
