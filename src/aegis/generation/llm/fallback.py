@@ -20,13 +20,22 @@ of silently switching providers -- splicing a second provider's fresh
 generation onto a first provider's partial output would produce an answer
 no single model actually wrote, undermining the citation-grounding premise
 this whole phase exists for.
+
+Every failed attempt and every failover is logged (`llm.provider_failed`,
+`llm.failover`): a cold browser run was once answered by Gemini with nothing
+anywhere saying why Groq had been skipped (design record 14e/14f).
 """
 
 from __future__ import annotations
 
+import logging
+import time
 from collections.abc import Iterator
 
 from aegis.generation.llm.base import ProviderClient
+from aegis.observability.logging import get_logger, log_event
+
+_log = get_logger("llm")
 
 
 class AllProvidersFailedError(Exception):
@@ -59,15 +68,32 @@ class FallbackLLMClient:
         that pattern invites on a shared instance)."""
         attempts: list[tuple[str, Exception]] = []
 
-        for provider in self.providers:
-            gen = provider.stream(messages, temperature=temperature, top_p=top_p, max_tokens=max_tokens)
+        for attempt, provider in enumerate(self.providers, start=1):
+            start = time.perf_counter()
             try:
+                # Inside the try: a provider may raise from stream() itself, not only from next().
+                gen = provider.stream(messages, temperature=temperature, top_p=top_p, max_tokens=max_tokens)
                 first = next(gen)
             except StopIteration:
                 return  # provider produced a well-formed, merely empty response -- not a failure
             except Exception as exc:  # noqa: BLE001 -- deliberately broad: any provider SDK's own exception type
                 attempts.append((provider.name, exc))
+                # Detail is truncated, and stays in the log: provider errors can carry org ids.
+                log_event(
+                    _log, logging.WARNING, "llm.provider_failed",
+                    provider=provider.name, attempt=attempt, error_type=type(exc).__name__,
+                    # Groq's SDK names it status_code, google-genai's names it code.
+                    status_code=getattr(exc, "status_code", None) or getattr(exc, "code", None),
+                    detail=str(exc)[:300],
+                    elapsed_ms=round((time.perf_counter() - start) * 1000.0, 1),
+                )
                 continue
+
+            if attempts:
+                log_event(
+                    _log, logging.WARNING, "llm.failover",
+                    provider=provider.name, skipped=[name for name, _ in attempts],
+                )
 
             # First token obtained -- this provider is committed to for the
             # rest of the stream. A later exception propagates rather than

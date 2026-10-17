@@ -37,6 +37,7 @@ itself.
 from __future__ import annotations
 
 import json
+import logging
 import re
 from collections.abc import Callable, Iterator
 from enum import StrEnum
@@ -47,6 +48,9 @@ from aegis.chunking.segments import split_code_segments
 from aegis.chunking.semantic import split_sentences
 from aegis.config import settings
 from aegis.generation.budgeter import PackedContext
+from aegis.observability.logging import get_logger, log_event
+
+_log = get_logger("citations")
 
 _CITATION_RE = re.compile(r"\[(\d+)\]")
 _WORD_RE = re.compile(r"[a-z0-9]+")
@@ -145,7 +149,13 @@ def _default_entailment_fn(model: str, temperature: float) -> EntailmentFn:
                     {"role": "user", "content": f"Context:\n{chunk_text}\n\nClaim:\n{claim}"},
                 ],
             )
-        except APIError:
+        except APIError as exc:
+            # Logged: otherwise a quota outage is indistinguishable from "every
+            # claim unsupported" (same lesson as the router, design record 14f).
+            log_event(
+                _log, logging.WARNING, "citation.entailment_api_error",
+                error_type=type(exc).__name__, status_code=getattr(exc, "status_code", None), detail=str(exc)[:300],
+            )
             return False  # fail closed: an unverifiable citation counts as unsupported, not passed
         raw = completion.choices[0].message.content or ""
         try:

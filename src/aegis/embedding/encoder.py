@@ -61,6 +61,14 @@ class Encoder:
         self.cache = cache
         self._encode_fn = encode_fn or _default_encode_fn(self.model_name, self.device, self.batch_size)
 
+    def warm_up(self, text: str) -> None:
+        """Load the model and run one forward pass, bypassing the embedding
+        cache in both directions. `encode()` can't warm anything when its input
+        is already cached -- which the fixed warm-up query always is after the
+        first run -- so the model would otherwise load on the first real query
+        (measured: 10.5 s, design record 14h)."""
+        self._encode_fn([text])
+
     def encode(self, texts: list[str]) -> np.ndarray:
         if not texts:
             return np.zeros((0, 0), dtype=np.float32)

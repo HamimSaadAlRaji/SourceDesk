@@ -109,3 +109,27 @@ def test_no_cache_means_every_call_recomputes():
     encoder.encode(["a", "b"])
 
     assert fake.total_texts_encoded == 4
+
+
+def test_warm_up_runs_the_model_even_when_the_text_is_cached(tmp_path):
+    # The pipeline's warm-up query was already in the on-disk embedding cache,
+    # so "warming" via encode() never loaded the model: the first real query
+    # then paid ~10.5 s inside cache_lookup (design record 14h).
+    fake = _CountingFakeEncoder()
+    encoder = Encoder(model_name="fake-model", encode_fn=fake, cache=EmbeddingCache(tmp_path / "cache.sqlite"))
+    encoder.encode(["warm me"])
+
+    encoder.warm_up("warm me")
+
+    assert fake.calls == [["warm me"], ["warm me"]]
+
+
+def test_warm_up_writes_nothing_to_the_embedding_cache(tmp_path):
+    from aegis.ingest.hashing import content_hash
+
+    cache = EmbeddingCache(tmp_path / "cache.sqlite")
+    encoder = Encoder(model_name="fake-model", encode_fn=_CountingFakeEncoder(), cache=cache)
+
+    encoder.warm_up("a warm-up only text")
+
+    assert cache.get_many("fake-model", [content_hash("a warm-up only text")]) == {}

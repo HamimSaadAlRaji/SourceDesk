@@ -47,6 +47,12 @@ class DenseIndex:
         self.encoder = encoder
         self.client = client or get_client()
 
+    def warm_up(self, text: str) -> None:
+        """Load the query encoder's model (see `AnswerPipeline.warm_up`)."""
+        warm = getattr(self.encoder, "warm_up", None)
+        if warm is not None:
+            warm(text)
+
     def search(
         self,
         query: str,

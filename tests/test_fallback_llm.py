@@ -9,6 +9,8 @@ The one test that matters most here (mirroring `test_router_policy.py`'s
 output getting spliced into one answer.
 """
 
+import logging
+
 import pytest
 
 from aegis.generation.llm.fallback import AllProvidersFailedError, FallbackLLMClient
@@ -139,3 +141,58 @@ def test_generate_with_provider_is_none_when_the_winning_stream_is_empty():
 
     assert text == ""
     assert provider_name is None
+
+
+# --- Phase 14 build item 6: failover must be visible (design record 14f) ---
+# The cold-browser run in design record 14e was answered by Gemini and nothing
+# recorded why Groq was skipped. Every failed attempt and every failover is a
+# structured log event; the client's behavior is unchanged.
+
+
+def _events(caplog, name: str) -> list[logging.LogRecord]:
+    return [r for r in caplog.records if r.getMessage() == name]
+
+
+def test_failed_attempt_is_logged_with_provider_and_error_type(caplog):
+    primary = _FakeProvider("primary", fail_before_first=True)
+    secondary = _FakeProvider("secondary", chunks=["ok"])
+    client = FallbackLLMClient([primary, secondary])
+
+    with caplog.at_level(logging.WARNING, logger="aegis"):
+        "".join(client.stream(_messages()))
+
+    (rec,) = _events(caplog, "llm.provider_failed")
+    fields = rec.aegis_fields
+    assert fields["provider"] == "primary" and fields["error_type"] == "RuntimeError"
+    assert fields["attempt"] == 1 and fields["elapsed_ms"] >= 0
+
+
+def test_failover_names_the_provider_that_answered_and_the_ones_skipped(caplog):
+    primary = _FakeProvider("primary", fail_before_first=True)
+    secondary = _FakeProvider("secondary", chunks=["ok"])
+    client = FallbackLLMClient([primary, secondary])
+
+    with caplog.at_level(logging.WARNING, logger="aegis"):
+        "".join(client.stream(_messages()))
+
+    (rec,) = _events(caplog, "llm.failover")
+    assert rec.aegis_fields["provider"] == "secondary" and rec.aegis_fields["skipped"] == ["primary"]
+
+
+def test_primary_success_logs_nothing_at_warning(caplog):
+    client = FallbackLLMClient([_FakeProvider("primary", chunks=["ok"])])
+
+    with caplog.at_level(logging.WARNING, logger="aegis"):
+        "".join(client.stream(_messages()))
+
+    assert caplog.records == []
+
+
+def test_all_failed_logs_each_attempt_then_raises(caplog):
+    client = FallbackLLMClient([_FakeProvider("a", fail_before_first=True), _FakeProvider("b", fail_before_first=True)])
+
+    with caplog.at_level(logging.WARNING, logger="aegis"), pytest.raises(AllProvidersFailedError):
+        "".join(client.stream(_messages()))
+
+    assert [r.aegis_fields["provider"] for r in _events(caplog, "llm.provider_failed")] == ["a", "b"]
+    assert _events(caplog, "llm.failover") == []

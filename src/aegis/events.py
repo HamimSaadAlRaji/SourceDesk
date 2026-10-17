@@ -36,8 +36,14 @@ class CitationEvent(BaseModel):
     text: str
 
 
+EscalationCause = Literal["policy", "low_confidence", "provider_unavailable"]
+
+
 class EscalationEvent(BaseModel):
     type: Literal["escalation"] = "escalation"
+    # Why a person is taking over, as a closed set the UI can explain without
+    # parsing `reason` (which is free text for the trace and the human agent).
+    cause: EscalationCause
     reason: str
     message: str
     route: str | None = None

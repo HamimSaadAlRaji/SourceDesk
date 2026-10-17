@@ -75,7 +75,7 @@ def test_chat_streams_typed_events_in_order_as_sse():
 
 
 def test_escalation_is_its_own_event_type():
-    pipe = _FakePipeline([EscalationEvent(reason="low_confidence", message="m", after_retrieval=True), _DONE])
+    pipe = _FakePipeline([EscalationEvent(cause="low_confidence", reason="low_confidence", message="m", after_retrieval=True), _DONE])
     with TestClient(create_app(pipe)) as client:
         frames = _frames(client.post("/chat", json={"query": "q"}).text)
     assert [n for n, _ in frames] == ["escalation", "done"]
@@ -139,7 +139,7 @@ def test_chat_records_interaction_so_feedback_can_attach(tmp_path):
 
 
 def test_escalation_message_is_recorded_as_the_answer(tmp_path):
-    esc = EscalationEvent(reason="low_confidence", message="escalated", after_retrieval=True)
+    esc = EscalationEvent(cause="low_confidence", reason="low_confidence", message="escalated", after_retrieval=True)
     app, store = _app(tmp_path, [esc, DoneEvent(trace_id=_TID, cache_status="miss", escalate=True)])
     with TestClient(app) as c:
         c.post("/chat", json={"query": "q"})
@@ -222,3 +222,39 @@ def test_rewritten_query_is_recorded_with_the_interaction(tmp_path):
         c.post("/feedback", json={"trace_id": _TID, "rating": "up"})
     [row] = store.list_feedback()
     assert (row.query_text, row.rewritten_query) == ("follow up", "standalone q")
+
+
+# --- rate limiting (Phase 14 build item 6, design record 14f) ---
+
+
+def _limited_app(pipe, capacity=2, per_minute=6.0):
+    from aegis.api.ratelimit import TokenBucketLimiter
+
+    return create_app(pipe, limiter=TokenBucketLimiter(capacity, per_minute, max_clients=100))
+
+
+def test_chat_over_the_limit_is_429_with_retry_after_and_never_reaches_the_pipeline():
+    pipe = _FakePipeline([_DONE])
+    with TestClient(_limited_app(pipe, capacity=2)) as client:
+        codes = [client.post("/chat", json={"query": f"q{i}"}).status_code for i in range(2)]
+        r = client.post("/chat", json={"query": "q3"})
+    assert codes == [200, 200]
+    assert r.status_code == 429
+    assert int(r.headers["retry-after"]) == 10  # one token per 10 s at 6/min, rounded up to whole seconds
+    assert len(pipe.queries) == 2
+
+
+def test_invalid_requests_do_not_spend_rate_limit_tokens():
+    pipe = _FakePipeline([_DONE])
+    with TestClient(_limited_app(pipe, capacity=1)) as client:
+        assert client.post("/chat", json={"query": "   "}).status_code == 422
+        assert client.post("/chat", json={"query": "real question"}).status_code == 200
+
+
+def test_rate_limit_does_not_apply_to_health_or_feedback():
+    pipe = _FakePipeline([_DONE])
+    with TestClient(_limited_app(pipe, capacity=1)) as client:
+        client.post("/chat", json={"query": "q"})
+        assert client.post("/chat", json={"query": "q"}).status_code == 429
+        assert client.get("/health").status_code == 200
+        assert client.post("/feedback", json={"trace_id": "0" * 32, "rating": "up"}).status_code == 404  # unknown trace, not 429

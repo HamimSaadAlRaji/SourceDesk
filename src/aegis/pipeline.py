@@ -34,9 +34,11 @@ from pydantic import BaseModel
 
 from aegis.cache.exact_match import CachedAnswer, CitedChunk
 from aegis.config import settings
-from aegis.events import CitationEvent, DoneEvent, ErrorEvent, EscalationEvent, PipelineEvent, TokenEvent
+from aegis.events import (
+    CitationEvent, DoneEvent, ErrorEvent, EscalationCause, EscalationEvent, PipelineEvent, TokenEvent,
+)
 from aegis.observability.logging import bind_trace_id, get_logger, log_event
-from aegis.generation.pipeline import GenerationPipeline
+from aegis.generation.pipeline import DraftAnswer, GenerationPipeline
 from aegis.guardrails.confidence import (
     ConfidenceResult,
     ConfidenceScorer,
@@ -45,7 +47,8 @@ from aegis.guardrails.confidence import (
     decide_escalation,
 )
 from aegis.query.rewrite import History
-from aegis.router.classifier import Route
+from aegis.generation.llm.fallback import AllProvidersFailedError
+from aegis.router.classifier import Route, RouterUnavailableError
 from aegis.router.policy import decide as decide_route
 from aegis.types import Chunk, Query, Retrieved
 
@@ -142,6 +145,10 @@ _log = get_logger("pipeline")
 # identifiers (a Groq 429 includes the org id), so details go to the log only.
 _ERROR_MESSAGE = "The request could not be completed."
 _ESCALATION_MESSAGE = "This request has been escalated to a human agent."
+# An LLM stage failed on every provider before any text reached the user. Handed
+# to a person rather than ended with an error (user decision, design record
+# 14f); the stage name keeps router and generation outages apart in the trace.
+_PROVIDER_UNAVAILABLE_REASON = "provider_unavailable: the {stage} LLM call failed on every provider"
 _WARM_UP_QUERY = "how do I declare a query parameter"
 
 
@@ -158,7 +165,7 @@ class AnswerPipeline:
     def __init__(
         self,
         exact_cache: _Cache,
-        semantic_cache: _Cache,
+        semantic_cache: _Cache | None,
         router: _Router,
         retriever: _Retriever,
         confidence_scorer: ConfidenceScorer,
@@ -200,6 +207,17 @@ class AnswerPipeline:
             candidates = self.retriever.search(_WARM_UP_QUERY, top_k=self.retrieval_top_k)
         with _timed(timings, "confidence"):
             self.confidence_scorer.score(_WARM_UP_QUERY, candidates)
+        # The query encoder (dense retrieval's, shared with the semantic cache
+        # when that is on) needs its own pass: retrieval above can't load it,
+        # because the warm-up query's embedding is already in the on-disk cache,
+        # so the model used to load on the first real query (8.4-10.5 s, design
+        # record 14h). Last, not first: the first CPU encoder pass after the
+        # cross-encoder's first MPS run costs a further ~1.3-1.7 s once
+        # (measured, mechanism not established), and this is where it gets paid.
+        warm_encoder = getattr(self.retriever, "warm_up", None)
+        if warm_encoder is not None:
+            with _timed(timings, "encoder"):
+                warm_encoder(_WARM_UP_QUERY)
         return timings
 
     def answer(
@@ -298,12 +316,19 @@ class AnswerPipeline:
                 provider=cached.provider,
             )
 
-        with _timed(timings, "routing"):
-            route = self._route(query)
+        try:
+            with _timed(timings, "routing"):
+                route = self._route(query)
+        except RouterUnavailableError:
+            with _timed(timings, "escalation"):
+                return self._escalate(
+                    query, status, emit, route=None, cause="provider_unavailable",
+                    reason=_PROVIDER_UNAVAILABLE_REASON.format(stage="routing"),
+                )
         route_outcome = decide_route(route)
         if route_outcome.escalate:
             with _timed(timings, "escalation"):
-                return self._escalate(query, status, emit, route=route, reason=route_outcome.reason)
+                return self._escalate(query, status, emit, route=route, cause="policy", reason=route_outcome.reason)
 
         with _timed(timings, "retrieval"):
             candidates = self._retrieve(query)
@@ -318,6 +343,7 @@ class AnswerPipeline:
                     status,
                     emit,
                     route=route,
+                    cause="low_confidence",
                     reason=escalation_outcome.reason,
                     candidates=candidates,
                     confidence=confidence,
@@ -341,7 +367,7 @@ class AnswerPipeline:
                 span.update(output={"cache_status": CacheStatus.EXACT_HIT.value})
                 return exact, CacheStatus.EXACT_HIT
 
-            semantic = self.semantic_cache.get(query.text, self.corpus_version)
+            semantic = self.semantic_cache.get(query.text, self.corpus_version) if self.semantic_cache else None
             if semantic is not None:
                 span.update(output={"cache_status": CacheStatus.SEMANTIC_HIT.value})
                 return semantic, CacheStatus.SEMANTIC_HIT
@@ -381,7 +407,8 @@ class AnswerPipeline:
         query: Query,
         status: CacheStatus,
         emit: EventSink | None,
-        route: Route,
+        route: Route | None,
+        cause: EscalationCause,
         reason: str,
         candidates: list[tuple[Chunk, float]] | None = None,
         confidence: ConfidenceResult | None = None,
@@ -389,16 +416,17 @@ class AnswerPipeline:
     ) -> PipelineResult:
         log_event(
             _log, logging.WARNING, "pipeline.escalated",
-            query_id=query.id, route=route.value, reason=reason, after_retrieval=candidates is not None,
+            query_id=query.id, route=route.value if route else None, cause=cause, reason=reason,
+            after_retrieval=candidates is not None,
         )
         with self.tracer.start_as_current_observation(
-            name="escalation", as_type="guardrail", input={"reason": reason}
+            name="escalation", as_type="guardrail", input={"reason": reason, "cause": cause}
         ) as span:
-            span.update(output={"escalated": True, "reason": reason})
+            span.update(output={"escalated": True, "reason": reason, "cause": cause})
             if emit is not None:
                 emit(
                     EscalationEvent(
-                        reason=reason, message=_ESCALATION_MESSAGE, route=route.value,
+                        cause=cause, reason=reason, message=_ESCALATION_MESSAGE, route=route.value if route else None,
                         after_retrieval=candidates is not None,
                     )
                 )
@@ -414,18 +442,9 @@ class AnswerPipeline:
                 escalation_payload=payload,
             )
 
-    def _generate(
-        self,
-        query: Query,
-        status: CacheStatus,
-        route: Route,
-        candidates: list[tuple[Chunk, float]],
-        confidence: ConfidenceResult,
-        timings: dict[str, float],
-        emit: EventSink | None,
-    ) -> PipelineResult:
-        retrieved = [Retrieved(chunk=c, score=s, rank=i) for i, (c, s) in enumerate(candidates, start=1)]
-
+    def _generate_draft(
+        self, query: Query, retrieved: list[Retrieved], timings: dict[str, float], emit: EventSink | None
+    ) -> tuple[DraftAnswer, list[ContextEntry]]:
         with _timed(timings, "generation"):
             with self.tracer.start_as_current_observation(
                 name="generation",
@@ -455,6 +474,32 @@ class AnswerPipeline:
                     },
                     output={"text": draft.text, "provider": draft.provider},
                 )
+        return draft, context
+
+    def _generate(
+        self,
+        query: Query,
+        status: CacheStatus,
+        route: Route,
+        candidates: list[tuple[Chunk, float]],
+        confidence: ConfidenceResult,
+        timings: dict[str, float],
+        emit: EventSink | None,
+    ) -> PipelineResult:
+        retrieved = [Retrieved(chunk=c, score=s, rank=i) for i, (c, s) in enumerate(candidates, start=1)]
+
+        try:
+            draft, context = self._generate_draft(query, retrieved, timings, emit)
+        except AllProvidersFailedError:
+            # Raised only when no provider produced a first token, so nothing has
+            # been shown: escalating is still honest. A failure after the first
+            # token is a different exception and stays a terminal `error`.
+            with _timed(timings, "escalation"):
+                return self._escalate(
+                    query, status, emit, route=route, cause="provider_unavailable",
+                    reason=_PROVIDER_UNAVAILABLE_REASON.format(stage="generation"),
+                    candidates=candidates, confidence=confidence,
+                )
 
         with _timed(timings, "validation"):
             with self.tracer.start_as_current_observation(name="validation", as_type="guardrail") as val_span:
@@ -480,7 +525,8 @@ class AnswerPipeline:
             text=gen_result.text, citations=gen_result.citations, provider=gen_result.provider, cited=cited
         )
         self.exact_cache.set(query.text, self.corpus_version, answer)
-        self.semantic_cache.set(query.text, self.corpus_version, answer)
+        if self.semantic_cache is not None:
+            self.semantic_cache.set(query.text, self.corpus_version, answer)
 
         return PipelineResult(
             query=query,

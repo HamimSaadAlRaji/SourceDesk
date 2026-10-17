@@ -17,7 +17,7 @@ from collections.abc import Callable
 from aegis.config import settings
 from aegis.observability.logging import get_logger, log_event
 
-_log = get_logger(__name__)
+_log = get_logger("rewrite")
 
 # (role, text) turns, oldest first. Only the user's own prior turns matter
 # for resolving "it"/"that"/ellipsis -- assistant turns are included too

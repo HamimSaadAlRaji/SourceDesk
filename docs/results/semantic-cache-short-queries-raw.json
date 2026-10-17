@@ -1,0 +1,244 @@
+{
+  "n_titles": 150,
+  "n_pairs": 11175,
+  "title_pair_similarity": {
+    "p50": 0.5274986028671265,
+    "p99": 0.7270092368125916,
+    "max": 0.8507265448570251
+  },
+  "hardest": [
+    {
+      "similarity": 0.8507,
+      "a": [
+        "golden::issue::1779",
+        "\"POST /items/ HTTP/1.1\" 422 Unprocessable Entity"
+      ],
+      "b": [
+        "golden::issue::3065",
+        "UploadFile with requests get 422 Unprocessable Entity"
+      ]
+    },
+    {
+      "similarity": 0.8301,
+      "a": [
+        "golden::issue::763",
+        "routing.py::serialize_response does not respect \"by_alias\" before validation"
+      ],
+      "b": [
+        "golden::issue::1810",
+        "response_model_by_alias not respected by swagger schema"
+      ]
+    },
+    {
+      "similarity": 0.8205,
+      "a": [
+        "golden::issue::1490",
+        "Generate openapi schema without running server"
+      ],
+      "b": [
+        "golden::issue::332",
+        "OpenAPI schema generation sometimes fails"
+      ]
+    },
+    {
+      "similarity": 0.8192,
+      "a": [
+        "golden::issue::1320",
+        "Generated OpenAPI schema does not reflect pydantic dynamic models."
+      ],
+      "b": [
+        "golden::issue::332",
+        "OpenAPI schema generation sometimes fails"
+      ]
+    },
+    {
+      "similarity": 0.8085,
+      "a": [
+        "golden::issue::5532",
+        "Failed when using FastAPI (uvicorn) worker"
+      ],
+      "b": [
+        "golden::issue::2600",
+        "Upgrading from fastapi 0.60.1 -> 0.63.0 and uvicorn 0.11.6 -> 0.13.2 with gunicorn 20.0.4"
+      ]
+    },
+    {
+      "similarity": 0.7976,
+      "a": [
+        "golden::issue::711",
+        "FastAPI throw 'exception_handlers' attribute error"
+      ],
+      "b": [
+        "golden::issue::5857",
+        "In fastapi==0.89.0 add_api_route fails with FileResponse"
+      ]
+    },
+    {
+      "similarity": 0.7957,
+      "a": [
+        "golden::issue::23",
+        "FastAPI debugging"
+      ],
+      "b": [
+        "golden::issue::711",
+        "FastAPI throw 'exception_handlers' attribute error"
+      ]
+    },
+    {
+      "similarity": 0.7941,
+      "a": [
+        "golden::issue::11104",
+        "[BUG] Upgrade python-mulipart==0.0.7 from low version fastapi upload file may be 400"
+      ],
+      "b": [
+        "golden::issue::5602",
+        "performance latency after updating to Fastapi > 0.82.0"
+      ]
+    },
+    {
+      "similarity": 0.794,
+      "a": [
+        "golden::issue::1320",
+        "Generated OpenAPI schema does not reflect pydantic dynamic models."
+      ],
+      "b": [
+        "golden::issue::3155",
+        "OpenApi docs for subclass of list of pydantic BaseModel"
+      ]
+    },
+    {
+      "similarity": 0.7925,
+      "a": [
+        "golden::issue::2780",
+        "Using Django ORM with FastAPI (Connection Issue)"
+      ],
+      "b": [
+        "golden::issue::2286",
+        "Comparing django with fastapi ?"
+      ]
+    },
+    {
+      "similarity": 0.7903,
+      "a": [
+        "golden::issue::5532",
+        "Failed when using FastAPI (uvicorn) worker"
+      ],
+      "b": [
+        "golden::issue::2151",
+        "Slower behavior using Fast API (same gunicorn config) Gunicorn with uvicorn.workers.UvicornWorker than using default one"
+      ]
+    },
+    {
+      "similarity": 0.7895,
+      "a": [
+        "golden::issue::11104",
+        "[BUG] Upgrade python-mulipart==0.0.7 from low version fastapi upload file may be 400"
+      ],
+      "b": [
+        "golden::issue::5857",
+        "In fastapi==0.89.0 add_api_route fails with FileResponse"
+      ]
+    },
+    {
+      "similarity": 0.7872,
+      "a": [
+        "golden::issue::5602",
+        "performance latency after updating to Fastapi > 0.82.0"
+      ],
+      "b": [
+        "golden::issue::2600",
+        "Upgrading from fastapi 0.60.1 -> 0.63.0 and uvicorn 0.11.6 -> 0.13.2 with gunicorn 20.0.4"
+      ]
+    },
+    {
+      "similarity": 0.7866,
+      "a": [
+        "golden::issue::12402",
+        "[BUG] In version 0.115.0 of FastAPI, the pydantic model that has declared an alias cannot correctly receive query parameters"
+      ],
+      "b": [
+        "golden::issue::1320",
+        "Generated OpenAPI schema does not reflect pydantic dynamic models."
+      ]
+    },
+    {
+      "similarity": 0.7862,
+      "a": [
+        "golden::issue::23",
+        "FastAPI debugging"
+      ],
+      "b": [
+        "golden::issue::167",
+        "How could I run some sevirce along with fastapi"
+      ]
+    }
+  ],
+  "paraphrase_similarities": [
+    0.7441,
+    0.8751,
+    0.9443,
+    0.9481,
+    0.9004,
+    0.8217,
+    0.8916,
+    0.9478,
+    0.8709,
+    0.844,
+    0.8866,
+    0.9269,
+    0.9125,
+    0.9442,
+    0.6202
+  ],
+  "collision": [
+    {
+      "a": "How do I make a query parameter required in FastAPI?",
+      "b": "How do I declare a query parameter?",
+      "similarity": 0.8248
+    },
+    {
+      "a": "How do I make a query parameter required in FastAPI?",
+      "b": "how do I declare a query parameter",
+      "similarity": 0.8129
+    }
+  ],
+  "sweep": [
+    {
+      "threshold": 0.85,
+      "hardest15_false_positives": 1,
+      "all_title_pairs_above": 1,
+      "true_positives_of_15": 11
+    },
+    {
+      "threshold": 0.88,
+      "hardest15_false_positives": 0,
+      "all_title_pairs_above": 0,
+      "true_positives_of_15": 9
+    },
+    {
+      "threshold": 0.9,
+      "hardest15_false_positives": 0,
+      "all_title_pairs_above": 0,
+      "true_positives_of_15": 7
+    },
+    {
+      "threshold": 0.92,
+      "hardest15_false_positives": 0,
+      "all_title_pairs_above": 0,
+      "true_positives_of_15": 5
+    },
+    {
+      "threshold": 0.94,
+      "hardest15_false_positives": 0,
+      "all_title_pairs_above": 0,
+      "true_positives_of_15": 4
+    },
+    {
+      "threshold": 0.96,
+      "hardest15_false_positives": 0,
+      "all_title_pairs_above": 0,
+      "true_positives_of_15": 0
+    }
+  ],
+  "shipped_threshold": 0.88
+}

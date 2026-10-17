@@ -532,6 +532,14 @@ class CacheSettings(BaseSettings):
     # negative just costs one extra real pipeline call.
     # docs/results/semantic-cache-threshold.md
     semantic_similarity_threshold: float = 0.88
+    # Off by default since 2026-10-17 (design record 14h; user decision). The
+    # 0.88 above was tuned against long issue-body negatives; short rewritten
+    # follow-ups share one template ("How do I ... in FastAPI?") and a real
+    # different-question pair from the 14e session scored 0.9354. A semantic
+    # hit serves an answer with no routing, confidence or citation check on
+    # *this* question, for 0.2-1.6% of simulated traffic (design record 12c).
+    # Code and tests kept; set CACHE_SEMANTIC_CACHE_ENABLED=true to measure it.
+    semantic_cache_enabled: bool = False
     semantic_cache_db_path: Path = REPO_ROOT / "data" / "cache" / "semantic_cache.sqlite"
 
 
@@ -596,6 +604,21 @@ class ApiSettings(BaseSettings):
     # design record 13b). 20 s covers that with margin; a trace still absent
     # after it is reported as not found / not yet ingested rather than hanging.
     trace_max_wait_s: float = 20.0
+
+    # /chat rate limit: a token bucket per client IP (aegis.api.ratelimit).
+    # Guard rails, not tuned values -- no real traffic exists to tune against.
+    # Sized from what one fresh request costs: up to 3 Groq calls before any
+    # answer (rewrite, router, generation) plus one per claim for tier-2
+    # citation entailment, all drawn from one shared free-tier quota. A burst
+    # of 5 lets a person ask a quick run of follow-ups; 6/min (one every 10 s)
+    # is faster than a person reads a streamed answer, slower than a script
+    # can drain the quota. Cache hits are counted too (one rule, no lookup
+    # before the limiter). Keyed on the socket peer address: behind a proxy
+    # every client would share one bucket, and X-Forwarded-For is
+    # client-controlled, so it is deliberately not trusted (Phase 15).
+    chat_rate_capacity: int = 5
+    chat_rate_per_minute: float = 6.0
+    rate_limit_max_clients: int = 10000
 
 
 class Settings(BaseSettings):

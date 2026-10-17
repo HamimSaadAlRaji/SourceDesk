@@ -1,7 +1,7 @@
 # Aegis — Progress Log
 
-**Last updated:** 2026-09-26
-**Current phase:** Phase 13 — Observability & the Latency Budget (🟡 in progress — build list complete, exit criteria 3 of 4 met -- p95 < 3 s unmet). Phase 12 — Caching, Delta Indexing & Cost (🟢 complete — all 6 units, exit criteria met). Phase 11 — Generation Eval, RAGAS & Judging the Judge (🟡 **wrapped up for this session** — every unit, fix, and root-cause investigation that could be done without waiting on quota is done and documented; exactly 2 real measurements are left, both **explicitly deferred to the user** to run themselves whenever quota allows, not queued as a future session's task; see "Phase 11 wrap-up" note below).
+**Last updated:** 2026-10-17
+**Current phase:** Phase 15 — Security Hardening (⬜ not started). Phase 14 — API, Streaming & UI (🟢 complete 2026-10-17 — all 6 build items, all 5 exit criteria met). Phase 13 — Observability & the Latency Budget (🟡 in progress — build list complete, exit criteria 3 of 4 met -- p95 < 3 s unmet). Phase 12 — Caching, Delta Indexing & Cost (🟢 complete — all 6 units, exit criteria met). Phase 11 — Generation Eval, RAGAS & Judging the Judge (🟡 **wrapped up for this session** — every unit, fix, and root-cause investigation that could be done without waiting on quota is done and documented; exactly 2 real measurements are left, both **explicitly deferred to the user** to run themselves whenever quota allows, not queued as a future session's task; see "Phase 11 wrap-up" note below).
 
 ## Phase 12 — Caching, Delta Indexing & Cost
 
@@ -421,8 +421,80 @@ logs nothing). Not checked: dark mode, mobile, a11y, mid-stream failure in brows
 router-internal. Phase 14 exit: streaming ✔, clickable citations ✔, escalation distinct ✔, feedback persists ✔,
 **multi-turn correct: open** (wiring works; regime-C eval owed; cache-collision example above).
 
-**Next action:** user's choice among: review queue + golden-candidate export; rate limiting + graceful provider
-failure (+ log fallback failover); semantic-cache collision / cold cache_lookup investigation; regime-C multi-turn eval.
+**Unit 6 complete as of 2026-10-17** (design record 14f, `src/aegis/api/ratelimit.py`, `api/app.py`,
+`generation/llm/fallback.py`, `router/classifier.py`, `guardrails/citations.py`, `pipeline.py`, `events.py`,
+`static/app.js`, `experiments/14c_provider_failure_real.py`). Plan build item 6. **(1) Rate limit:** hand-rolled
+per-client-IP token bucket on `/chat` (user chose it over `slowapi`), 429 + `Retry-After`, burst 5 / 6 per min
+(guard rails sized from Groq calls per request, not tuned), checked after body validation so 422s cost nothing.
+**(2) Outage -> escalation (user decision, `AskUserQuestion`):** when the router or generation LLM fails on every
+provider before any text is shown, the request escalates with new `EscalationEvent.cause="provider_unavailable"`
+(closed set: `policy | low_confidence | provider_unavailable`; UI explains each). The router now raises
+`RouterUnavailableError` on API errors instead of returning a disguised `billing_account_legal` (closes Phase 13 open
+item 4); unparseable model output still fails safe to billing. Mid-stream failure stays a terminal `error`.
+**(3) No silent failures:** `llm.provider_failed` / `llm.failover` / `citation.entailment_api_error` /
+`api.rate_limited` log events. `uv run pytest -q`: **563/563** (+21; Qdrant up). **Real, n=1 each (invalid keys
+to force real SDK errors):** failover Gemini 400 -> Groq answered (1.0 s); router outage -> `provider_unavailable`
+escalation, no retrieval (162 ms); generation outage (Groq 401 + Gemini 400) -> escalation after retrieval in
+1.0 s, not cached. **Real HTTP:** 6 x 200 (1 miss 11.1 s + 5 exact hits; the slow miss refilled the bucket), then
+3 back-to-back -> 429 `Retry-After: 1`, `/health` fine. Bug caught by the tests: the limiter defines `__len__`, so
+`limiter or default` silently replaced an injected empty limiter. Also fixed doubled logger names (`aegis.aegis.*`).
+Not handled / flagged (14f SS6): SDK-internal 429 retries could make failover slow (unmeasured); a tier-2
+entailment outage still serves the answer with all citations struck through; `08a_router_eval.py` now stops on an
+outage (intended, no checkpointing); proxy-aware keying -> Phase 15.
+
+**Unit 7 complete as of 2026-10-17 -- all 6 Phase 14 build items now built** (design record 14g,
+`src/aegis/eval/review_queue.py`, `api/store.py`, `tests/test_review_queue.py`). Plan build item 5's second half:
+voted interactions -> review queue (👎 first) -> terminal review (positive + stratum / negative + category / reject)
+-> `--export` to `data/golden/candidates_feedback.jsonl` (`split="candidate"`, golden-set schema validated, full
+provenance). Frozen golden set never touched. **Guards:** system citations are NOT exported as suggested labels
+(12e label-bias finding); every candidate checked against dev AND holdout (normalized exact text) -> `duplicate_of`;
+follow-ups export their rewritten standalone text. Terminal tool, not an API page (no auth until Phase 15).
+`uv run pytest -q`: **576/576** (+13). **Real end-to-end** (real server, throwaway DB): 2 real HTTP votes + 1 real
+holdout query -> queue ordered 👎 first -> exported 3; holdout item flagged `duplicate_of golden::issue::11134
+(holdout)`. **Findings:** the first real 👎 was on a *correct* billing hard-escalation ("I just wanted to know who to
+contact") -- a vote is not a label, rules out auto-promotion; the text-only stratum heuristic agrees with the frozen
+strata on only **138/180**, so it is a hint, not an Enter-to-accept default. The real store has 0 votes so far:
+the loop is built and verified, not yet fed. Labeling a v2 needs `label_cli` path changes (not done).
+
+**Unit 8 complete as of 2026-10-17 -- both 14e findings root-caused and fixed** (design record 14h,
+`experiments/14d_semantic_cache_short_queries.py`, `config.py`, `factory.py`, `pipeline.py`, `embedding/encoder.py`,
+`retrieval/dense.py`). **Collision:** recovered the real 14e texts from Langfuse (the 14e write-up's guess omitted
+"in FastAPI"): "How do I make a query parameter required in FastAPI?" vs cached "How do I declare a query parameter in
+FastAPI?" = **0.9354** (> 0.88). Cause: the rewriter's shared "How do I ... in FastAPI?" template dominates short
+embeddings; Phase 12's sweep used long issue-body negatives. First hypothesis (short queries collide in general)
+refuted: 11,175 real short-title pairs max 0.8507. **Decision (user, `AskUserQuestion`): semantic tier OFF by default**
+(`CacheSettings.semantic_cache_enabled=False`; code/tests kept; worth 0.2-1.6% of simulated traffic and a hit skips
+routing/confidence/validation). Addendum added to `docs/results/cache-performance.md`. **Cold start:** two stacked
+causes. (1) warm-up never loaded bge-large -- its query embedding was in the on-disk cache (0.1 ms, no model load);
+first real query paid 10.5 s. Fixed with `Encoder.warm_up` (bypasses cache both ways). (2) the first CPU encoder pass
+after the cross-encoder's first MPS run costs ~1.3-1.7 s once (mechanism not established) -- fixed by warming the
+encoder last. Refuted along the way: per-thread init, embedding-cache I/O, Langfuse span cost. **Real server:** first
+request `cache_lookup` 8,447-8,669 ms -> **166 ms**; replayed 14e conversation: follow-up now a miss with a specific,
+correct answer; cold first request stages ~2.0 s (n=1) vs 22.7 s first text in 14e. Startup ~25 s (all model loads,
+now logged as `api.warm_up`). `uv run pytest -q`: **581/581** (+5). Possibly relevant to Phase 13's unexplained
+confidence variance (same order-dependent CPU/MPS shape) -- not tested.
+
+**Unit 9 complete as of 2026-10-17 -- PHASE 14 COMPLETE** (design record 14i, `experiments/14e_multiturn_regime_c.py`,
+raw `docs/results/multiturn-regime-c-raw.json`). Regime-C eval, all 24 items of the Phase 8 multi-turn set (user chose
+to spend the qwen quota today; Phase 9 sweep slides a day). Phase 8's protocol (exclude source issue, ranx) + served
+path (router + confidence). **Leg A reproduced Phase 8 exactly** (0.1995/0.0897/0.2861). NDCG@5 / R@10 / MRR /
+escalated: A 0.1995/0.0897/0.2861/12 of 24; B 0.2805/0.1103/0.4347/9; **C 0.3116/0.1246/0.4816/8**. Paired bootstrap
+NDCG@5: C-A +0.1121 [+0.0220, +0.2110]; C-B +0.0312 [-0.0004, +0.0664]; B-A +0.0810 [-0.0025, +0.1715].
+**Pre-registered criterion MET** (thin: C-B lower bound -0.0004). Where turn1 was answered (n=14) C >= B on all 14.
+Caveats: synthetic set; 8/24 follow-ups still escalate; Phase 8's regime B only partly reproduced (0.2805 vs 0.3045,
+rewriter model changed) and B-A is not significant at n=24.
+
+**Phase 14 exit criteria: all 5 met** -- streaming in a browser (14e), clickable citations to real source text (14e),
+escalation visibly distinct (14e; now with a cause-specific explanation, 14f), multi-turn resolves (14i, pre-registered,
+thin margin), feedback persists (14c) and feeds a review queue (14g). All 6 build items built.
+
+**Carried to Phase 15:** `/chat`, `/trace`, `/feedback` unauthenticated; `/trace` returns query + chunk text and holds a
+worker up to 20 s; rate limit keyed on socket peer (no trusted proxy); feedback candidates hold raw user text.
+**Carried, other:** semantic cache off pending a templated-negative re-tune (14h SS7); tier-2 entailment outage serves
+answers with all citations struck (14f); Phase 13 p95 < 3 s still unmet (14h's CPU/MPS first-pass finding may bear on it).
+
+**Next action:** Phase 15 -- Security Hardening (plan.md). Deferred-to-user items unchanged: Phase 11 judge kappa,
+Phase 9 sampling sweep (qwen quota used today by 14i -- run tomorrow).
 
 ### Phase 11 wrap-up (2026-09-26)
 
@@ -483,7 +555,7 @@ either. Open Questions #1 and #16 and the DoD tracker rows below reflect this ex
 | | |
 |---|---|
 | **Day** | 13 of 21 (in progress) |
-| **Phase** | 13 of 19 (in progress, build list complete, 3 of 4 exit criteria met -- p95 < 3 s unmet). Phase 12 complete (all 6 units, exit criteria met). Phase 11 wrapped up (all 6 units + rubric fix + faithfulness root cause done; real paired κ deferred to the user, pending Gemini quota). Phase 9's sampling-sweep grid re-scoped and half-completed (2 of 4 configs real), remaining 2 also deferred to the user |
+| **Phase** | 15 of 19 (not started). Phase 14 complete (all 6 build items, 5 of 5 exit criteria). Phase 13 build list complete, 3 of 4 exit criteria met -- p95 < 3 s unmet. Phase 12 complete (all 6 units, exit criteria met). Phase 11 wrapped up (all 6 units + rubric fix + faithfulness root cause done; real paired κ deferred to the user, pending Gemini quota). Phase 9's sampling-sweep grid re-scoped and half-completed (2 of 4 configs real), remaining 2 also deferred to the user |
 | **Design records written** | 27 files across phases 0-13 (lettered sub-records inflate this past a literal 1-per-phase count; phases 14-19 have none yet) |
 | **Golden set** | 180 dev + 40 holdout, frozen and hashed (Phase 4) |
 | **Definition of Done** | 3 of 10 criteria met (#1: Recall@10 + MRR lift; #3: escalation confusion matrix; #8: LLM-judge agreement, measured — real result is **not met**, κ≈0 vs. ≥0.6 target, itself a valid, reported outcome). `make eval` (Unit 6) now surfaces this and the faithfulness miss automatically, in one command. |
@@ -511,7 +583,7 @@ Legend: ⬜ not started · 🟡 in progress · ✅ complete · ⏭️ cut
 | 11 | **Generation eval + judge validation** ⚑ | 13 | 🟡 | RAGAS + Cohen's κ |
 | 12 | Caching, delta indexing & cost | 14 | 🟡 | Cache hit rate, cost table |
 | 13 | Observability & latency budget | 15 | 🟡 | p95 < 3s, per-stage breakdown |
-| 14 | API, streaming & UI | 16–17 | 🟡 | Working demo w/ visible escalation |
+| 14 | API, streaming & UI | 16–17 | 🟢 | Working demo w/ visible escalation |
 | 15 | Security hardening | 18½ | ⬜ | Adversarial suite |
 | 16 | **CI evaluation gate** ⚑ | 18½ | ⬜ | Gate that fails on regression |
 | 17 | LangGraph port & framework comparison | 19 | ⬜ | Comparison writeup, both paths pass eval |
@@ -758,6 +830,9 @@ Every non-obvious choice, its alternatives, and why. Append-only.
 | 2026-09-26 | **Phase 13: Langfuse Cloud (free tier), not self-hosted** | Full self-hosted Langfuse v3 stack (web+worker+Postgres+ClickHouse+Redis+MinIO, per the official docker-compose); self-hosted Langfuse v2 (Postgres-only) | Measured, not assumed: Langfuse's own docs recommend 4 cores/16 GiB for the v3 self-host stack alone; this machine's Docker Desktop is allocated 7.75 GiB total, already sharing that with Qdrant (~750 MiB), and the host's full 16 GiB also has to cover MPS embedding inference outside Docker. Real capacity conflict, not routine. Presented all 3 options with a recommendation (`AskUserQuestion`, full stack recommended); **user chose Cloud** — a deliberate deviation from plan.md's literal "self-hosted" wording, disclosed here rather than silently substituted. Free tier (50k units/month, 30-day retention, no card) comfortably covers this project's real traffic scale (7 traced stages/query × a few hundred dev/eval queries, nowhere near 50k/month). Full reasoning: design record 13. |
 | 2026-09-28 | **Built a minimal end-to-end `AnswerPipeline` orchestrator inside Phase 13 (Unit 2), not deferred to Phase 14** | Trace at the experiment-script level only, without a real orchestrator; wait and let Phase 14 build it | No orchestrated request path existed anywhere in this codebase -- Phases 5-12 each shipped one stage in isolation, wired together only ad hoc inside experiment scripts. Phase 13's own build item #1 ("tracing every stage") presupposes a real request to attach spans to, and the audit-trail demo (build item #5) needs a real evidence object to reconstruct from -- neither is satisfiable against a batch script. Flagged the gap directly (`AskUserQuestion`) rather than silently picking a scope; user confirmed building it now. Phase 14 wraps this exact object in FastAPI/SSE rather than rebuilding it -- not duplicated scope, built at the point it was first actually needed. Full reasoning: design record 13b SS2-3. |
 | 2026-10-01 | **Phase 14: stream tokens live, validate citations after** (`/chat` events: `token`, then `citation`s, then `done`) | Validate first then replay as a stream; stream live and retract/escalate on validation failure | Confirmed with the user (`AskUserQuestion`, recommended option). The non-streaming pipeline already serves answer text regardless of claim validation (validation only decides which citations are listed), so streaming live doesn't weaken the guarantee; replay-after-validation would make streaming cosmetic (first visible text ~0.6 s later, measured) without changing what is served; retraction changes Phase 9/10 behavior and exceeds plan.md's Phase 14 scope. Full reasoning: design record 14. |
+| 2026-10-17 | **LLM outage before any text is shown escalates with `cause=provider_unavailable`**; router API errors raise `RouterUnavailableError` instead of returning a disguised `billing_account_legal` | Keep the all-providers-failed terminal `error` and only fix labels/logging | Confirmed with the user (`AskUserQuestion`, recommended option). A support desk hands an unanswerable-right-now request to a person, same as low-confidence abstention; nothing has been shown yet (AllProvidersFailedError is pre-first-token by construction), so the handoff contradicts nothing. The old router path reported a billing question nobody asked in the trace, the UI and the router eval. Mid-stream failures stay a terminal `error`. Design record 14f. |
+| 2026-10-17 | **Hand-rolled token bucket for `/chat` rate limiting** | `slowapi` | Confirmed with the user (`AskUserQuestion`). One process, no Redis: the library's shared-store feature buys nothing, and it adds a dependency plus a decorator signature per route; the mechanism is one formula (~40 lines, TDD'd with an injected clock). Design record 14f. |
+| 2026-10-17 | **Semantic cache tier off by default** (`semantic_cache_enabled=False`), exact tier kept | Skip semantic tier for follow-ups only; raise threshold to 0.94 | Confirmed with the user (`AskUserQuestion`, recommended option). A real 14e pair of different questions scored 0.9354 (> 0.88) because the rewriter's template dominates short embeddings; a semantic hit skips routing, confidence and validation for the question actually asked; the tier is worth 0.2-1.6% of simulated traffic. Follow-up-only bypass misses the same collision typed directly; 0.94 clears the real pair by 0.005 on n=1 and drops paraphrase recall 9/15 -> 4/15. Design record 14h. |
 
 ---
 
@@ -779,7 +854,7 @@ Every non-obvious choice, its alternatives, and why. Append-only.
 | 11 | `evaluating-generation.md` — written as 7 lettered sub-records instead (CLAUDE.md §3 convention): `11-groq-model-replacement-and-ragas-wiring.md`, `11b-cohens-kappa-utility.md`, `11c-llm-as-judge.md`, `11d-judge-agreement-batch.md`, `11e-eval-scorecard.md`, `11f-judge-rubric-refusal-fix.md`, `11h-faithfulness-root-cause.md` | 11 | ✅ |
 | 12 | `caching-delta-indexing-and-cost.md` — written as lettered sub-records instead (CLAUDE.md §3 convention): `12-exact-match-cache.md`, `12b-semantic-cache.md`; more units to follow | 12 | 🟡 |
 | 13 | `observability-and-latency.md` | 13 | ⬜ |
-| 14 | `serving-streaming-and-ux.md` — lettered sub-records: `14-streaming-pipeline.md`, `14b-api-sse.md`, `14c-trace-and-feedback.md`, `14d-conversation-memory.md`, `14e-static-ui.md`; more to follow | 14 | 🟡 |
+| 14 | `serving-streaming-and-ux.md` — lettered sub-records: `14-streaming-pipeline.md`, `14b-api-sse.md`, `14c-trace-and-feedback.md`, `14d-conversation-memory.md`, `14e-static-ui.md`, `14f-rate-limiting-and-provider-failure.md`, `14g-feedback-review-queue.md`, `14h-semantic-cache-collision-and-cold-start.md`, `14i-multiturn-regime-c-eval.md` | 14 | ✅ |
 | 15 | `rag-security.md` | 15 | ⬜ |
 | 16 | `ci-eval-gates.md` | 16 | ⬜ |
 | 17 | `frameworks-and-orchestration.md` | 17 | ⬜ |
@@ -832,6 +907,8 @@ Tracks what's actually implemented from scratch vs. imported, so the ratio state
 | Exact-match cache | Build (plan.md Phase 12 step 1) | Build (~65 lines, `cache/exact_match.py` -- sqlite-backed, same thread-safety pattern as `EmbeddingCache`; TDD'd, 10 tests) | 12 |
 | Semantic cache | Build (plan.md Phase 12 step 2) | Build (~85 lines, `cache/semantic.py` -- brute-force cosine similarity, sqlite-persisted; reuses Phase 3's `Encoder`/bge-large rather than a new model) + real threshold tuning (`experiments/12a_semantic_cache_threshold_sweep.py`, zero LLM cost); TDD'd (10 tests: fake deterministic encoder + one real integration test against the actual hardest near-miss pair) | 12 |
 | Tracing | Import (Langfuse) | — | 13 |
+| Feedback review queue + golden-candidate export | Build (plan.md Phase 14 step 5) | Build (~190 lines, `eval/review_queue.py` + `reviews` table in `api/store.py`; terminal tool, TDD'd) | 14 |
+| `/chat` rate limiter | Build (plan.md Phase 14 step 6; not named in §1) | Build (~40 lines, `api/ratelimit.py` -- per-client token bucket, injected clock, TDD'd; `slowapi` rejected, design record 14f) | 14 |
 
 ---
 

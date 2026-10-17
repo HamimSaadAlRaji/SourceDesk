@@ -11,12 +11,13 @@ no-sse-starlette reasoning.
 from __future__ import annotations
 
 import logging
+import math
 import uuid
 from collections.abc import Callable
 from contextlib import asynccontextmanager
 from typing import Iterator, Protocol
 
-from fastapi import FastAPI, HTTPException, Path
+from fastapi import FastAPI, HTTPException, Path, Request
 from pathlib import Path as FsPath
 
 from fastapi.responses import FileResponse, StreamingResponse
@@ -25,12 +26,13 @@ from pydantic import BaseModel, Field, field_validator
 from typing import Any, Literal
 
 from aegis.config import settings
+from aegis.api.ratelimit import TokenBucketLimiter
 from aegis.api.store import InteractionStore
 from aegis.events import DoneEvent, ErrorEvent, EscalationEvent, PipelineEvent, TokenEvent
 from aegis.observability.logging import get_logger, log_event
 from aegis.types import Query
 
-_log = get_logger(__name__)
+_log = get_logger("api")
 
 
 class _Pipeline(Protocol):
@@ -81,7 +83,13 @@ def create_app(
     pipeline: _Pipeline | None = None,
     store: InteractionStore | None = None,
     audit: Callable[[str], dict[str, Any] | None] | None = None,
+    limiter: TokenBucketLimiter | None = None,
 ) -> FastAPI:
+    # `is None`, not `or`: the limiter defines __len__, so an empty one is falsy.
+    chat_limiter = limiter if limiter is not None else TokenBucketLimiter(
+        settings.api.chat_rate_capacity, settings.api.chat_rate_per_minute, settings.api.rate_limit_max_clients
+    )
+
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         if pipeline is None:
@@ -90,7 +98,8 @@ def create_app(
             app.state.pipeline = build_pipeline()
         else:
             app.state.pipeline = pipeline
-        app.state.pipeline.warm_up()
+        warm = app.state.pipeline.warm_up()
+        log_event(_log, logging.INFO, "api.warm_up", stage_latencies_ms={k: round(v, 1) for k, v in warm.items()})
         app.state.store = store or InteractionStore(settings.api.interactions_db_path)
         app.state.audit = audit  # None -> built on first /trace call, so startup doesn't load the corpus twice
         yield
@@ -109,7 +118,17 @@ def create_app(
         return {"status": "ok"}
 
     @app.post("/chat")
-    def chat(req: ChatRequest) -> StreamingResponse:
+    def chat(req: ChatRequest, request: Request) -> StreamingResponse:
+        # After body validation (FastAPI rejects a bad body before this runs),
+        # so a malformed request costs the client no tokens.
+        client = request.client.host if request.client else "unknown"
+        allowed, retry_after = chat_limiter.acquire(client)
+        if not allowed:
+            log_event(_log, logging.WARNING, "api.rate_limited", client=client, retry_after_s=retry_after)
+            raise HTTPException(
+                status_code=429, detail="rate limit exceeded",
+                headers={"Retry-After": str(math.ceil(retry_after))},
+            )
         query = Query(id=uuid.uuid4().hex, text=req.query)
 
         def frames() -> Iterator[str]:

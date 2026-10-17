@@ -56,3 +56,15 @@ cost-per-query model (Unit 6) have their own dedicated docs, linked below rather
 
 `docs/explainers/12-exact-match-cache.md`, `12b-semantic-cache.md`, `12c-hit-rate-simulation.md`,
 `12d-delta-indexing.md`, `12e-quantization-tradeoff.md`, `12f-cost-per-query-model.md`.
+
+## Addendum, 2026-10-17: semantic tier off by default (design record 14h)
+
+The numbers above are unchanged and still describe what was measured. **The shipped configuration changed:**
+`CacheSettings.semantic_cache_enabled=False`. A real chat session (design record 14e) served a follow-up the
+cached answer to a different question. Recovered from Langfuse: "How do I make a query parameter required in
+FastAPI?" vs. the cached "How do I declare a query parameter in FastAPI?" scores **0.9354** on bge-large, above
+the 0.88 threshold. The threshold sweep here compared short positives against long issue-body negatives. On
+short questions sharing the rewriter's "… in FastAPI?" template, different questions land above 0.88. Since
+the semantic tier was worth 0.2–1.6% of simulated traffic (Unit 3), and a semantic hit skips routing,
+confidence and validation for the question actually asked, it is off; the exact tier stays. Raw:
+`docs/results/semantic-cache-short-queries-raw.json`.

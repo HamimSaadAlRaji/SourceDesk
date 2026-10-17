@@ -6,6 +6,12 @@ const queryEl = document.getElementById("query");
 const sendBtn = document.getElementById("send");
 const MAX_HISTORY = 20; // server rejects longer histories (ApiSettings.max_history_messages)
 let history = [];
+// Keyed on EscalationEvent.cause (aegis/events.py); the reason text is shown below it.
+const ESCALATION_WHY = {
+  policy: "Why: this kind of request is always handed to a person.",
+  low_confidence: "Why: the system searched the docs but wasn't confident enough that the sources answer this.",
+  provider_unavailable: "Why: the answering service is unavailable right now, so a person will take this instead of a guess.",
+};
 
 const el = (tag, cls, text) => {
   const n = document.createElement(tag);
@@ -118,9 +124,7 @@ async function ask(text) {
       box.setAttribute("role", "status");
       box.append(el("h2", "", "⚠ Escalated to a human — no answer was generated"));
       box.append(el("p", "", d.message));
-      box.append(el("p", "note", d.after_retrieval
-        ? "Why: the system searched the docs but wasn't confident enough that the sources answer this."
-        : "Why: this kind of request is always handed to a person."));
+      box.append(el("p", "note", ESCALATION_WHY[d.cause] || "Why: this request was handed to a person."));
       if (d.reason) box.append(el("p", "note", d.reason));
       assistantText = d.message;
       turn._box = box;
@@ -149,6 +153,13 @@ async function ask(text) {
       method: "POST", headers: { "content-type": "application/json" },
       body: JSON.stringify({ query: text, history }),
     });
+    if (resp.status === 429) {
+      failed = true;
+      meta.remove();
+      const wait = resp.headers.get("retry-after");
+      card.append(el("div", "error", `Too many questions in a short time — try again${wait ? ` in ${wait} s` : " shortly"}.`));
+      return;
+    }
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const reader = resp.body.getReader();
     const dec = new TextDecoder();

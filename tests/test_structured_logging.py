@@ -100,10 +100,13 @@ def test_router_api_failure_is_logged_not_silently_swallowed(monkeypatch):
     monkeypatch.setattr(groq, "Groq", _FakeGroq)
     logger, stream = _capture("aegis.router")
 
-    with bind_trace_id("trace-router"):
-        route = RouterClassifier().classify("how do I declare a query parameter")
+    from aegis.router.classifier import RouterUnavailableError
 
-    assert route == Route.BILLING_ACCOUNT_LEGAL  # fail-safe behavior unchanged
+    with bind_trace_id("trace-router"), pytest.raises(RouterUnavailableError):
+        RouterClassifier().classify("how do I declare a query parameter")
+
+    # An outage is no longer folded into the billing fail-safe (design record
+    # 14f): it raises, and AnswerPipeline escalates it with its own cause.
     events = [r for r in _records(stream) if r["event"] == "router.api_error"]
     assert len(events) == 1
     assert events[0]["level"] == "WARNING"
@@ -123,11 +126,37 @@ def test_router_unparseable_output_is_logged_with_a_snippet_and_still_fails_safe
     assert rec["level"] == "WARNING" and rec["raw"] == "not json at all"
 
 
-def test_router_empty_output_after_an_api_error_is_not_double_logged():
-    from aegis.router.classifier import RouterClassifier
+def test_router_empty_output_is_logged_and_fails_safe():
+    # "" used to be the API-error sentinel and was deliberately not re-logged.
+    # Outages now raise RouterUnavailableError, so "" is a real empty completion.
+    from aegis.router.classifier import Route, RouterClassifier
 
     logger, stream = _capture("aegis.router")
 
-    RouterClassifier(classify_fn=lambda q: "").classify("some query")
+    route = RouterClassifier(classify_fn=lambda q: "").classify("some query")
 
-    assert [r["event"] for r in _records(stream)] == []  # the API-error path already logged; "" is not re-reported
+    assert route == Route.BILLING_ACCOUNT_LEGAL
+    assert [r["event"] for r in _records(stream)] == ["router.unparseable_output"]
+
+
+def test_citation_entailment_api_failure_is_logged_and_still_fails_closed(monkeypatch):
+    # Tier-2 entailment returned False on an API error with no log line, so a
+    # quota outage looked like "every claim unsupported" (design record 14f).
+    import groq
+
+    from aegis.guardrails.citations import _default_entailment_fn
+
+    class _FakeCompletions:
+        def create(self, **kwargs):
+            raise groq.APIError("quota exhausted", httpx.Request("POST", "http://x"), body=None)
+
+    class _FakeGroq:
+        def __init__(self, api_key=None):
+            self.chat = type("C", (), {"completions": _FakeCompletions()})()
+
+    monkeypatch.setattr(groq, "Groq", _FakeGroq)
+    logger, stream = _capture("aegis.citations")
+
+    assert _default_entailment_fn("m", 0.0)("a claim", "a chunk") is False
+    (rec,) = [r for r in _records(stream) if r["event"] == "citation.entailment_api_error"]
+    assert rec["level"] == "WARNING" and rec["error_type"] == "APIError"

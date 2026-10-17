@@ -57,7 +57,7 @@ def build_pipeline(cache_dir: Path | None = None, corpus_version: str = DEFAULT_
         exact_cache=ExactMatchCache(exact_path),
         semantic_cache=SemanticCache(
             semantic_path, encoder=encoder, threshold=settings.cache.semantic_similarity_threshold
-        ),
+        ) if settings.cache.semantic_cache_enabled else None,
         router=RouterClassifier(),
         retriever=DenseIndex(load_chunks(), settings.qdrant.collection_bge_large, encoder),
         confidence_scorer=ConfidenceScorer(reranker=CrossEncoderReranker(), encode_fn=encoder.encode),

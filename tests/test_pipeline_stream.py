@@ -173,3 +173,79 @@ def test_non_streaming_answer_is_unchanged_and_still_works_without_a_callback():
     result = pipeline.answer(Query(id="s3", text="how do I use dependency injection"))
 
     assert result.text == "Use Depends [1] for this." and result.citations == ["c1"]
+
+
+# --- provider outage -> escalation (Phase 14 build item 6, design record 14f) ---
+# User decision (2026-10-17): when an LLM stage fails on every provider before
+# any text was shown, the request is handed to a human with its own cause --
+# not a dead-end error, and not disguised as a billing escalation.
+
+from aegis.generation.llm.fallback import AllProvidersFailedError
+from aegis.router.classifier import RouterUnavailableError
+
+
+class _DownLLM:
+    def stream_with_provider(self, messages, temperature, top_p, max_tokens):
+        raise AllProvidersFailedError([("groq", RuntimeError("429")), ("gemini", RuntimeError("503"))])
+        yield  # pragma: no cover -- makes this a generator
+
+    def generate_with_provider(self, messages, temperature, top_p, max_tokens):
+        raise AllProvidersFailedError([("groq", RuntimeError("429"))])
+
+
+class _DownRouter:
+    def classify(self, query: str) -> Route:
+        raise RouterUnavailableError("router call failed")
+
+
+class _RaisingCache(_FakeCache):
+    def set(self, query_text, corpus_version, answer):
+        raise AssertionError("an outage escalation must never be cached")
+
+
+def test_generation_outage_streams_an_escalation_not_an_error():
+    pipeline, _ = _pipeline(confidence=1.0, tau=0.1, llm=_DownLLM(), exact_cache=_RaisingCache(), semantic_cache=_RaisingCache())
+
+    events = _stream(pipeline)
+
+    assert [e.type for e in events] == ["escalation", "done"]
+    esc = events[0]
+    assert esc.cause == "provider_unavailable" and esc.after_retrieval is True
+    assert "billing" not in esc.reason
+    assert events[1].escalate is True
+
+
+def test_generation_outage_in_the_blocking_path_is_an_escalated_result_with_its_evidence():
+    pipeline, _ = _pipeline(confidence=1.0, tau=0.1, llm=_DownLLM())
+
+    result = pipeline.answer(Query(id="o1", text="how do I use dependency injection"))
+
+    assert result.escalate is True and result.escalation_reason.startswith("provider_unavailable")
+    assert result.retrieved and result.confidence is not None  # what a human would pick up from
+
+
+def test_router_outage_escalates_as_provider_unavailable_not_billing():
+    pipeline, _ = _pipeline(router=_DownRouter(), retriever=_RaisingRetriever())
+
+    events = _stream(pipeline)
+
+    assert [e.type for e in events] == ["escalation", "done"]
+    assert events[0].cause == "provider_unavailable" and events[0].route is None
+    assert events[0].after_retrieval is False
+
+
+def test_mid_stream_failure_stays_a_terminal_error():
+    # Text already shown can't be retracted by escalating; the client is told the answer is incomplete.
+    pipeline, _ = _pipeline(confidence=1.0, tau=0.1, llm=_StreamLLM(_ANSWER, fail_after=2))
+
+    kinds = [e.type for e in _stream(pipeline)]
+
+    assert kinds == ["token", "token", "error"]
+
+
+def test_policy_and_confidence_escalations_carry_their_own_causes():
+    billing, _ = _pipeline(router=_FixedRouter(Route.BILLING_ACCOUNT_LEGAL), retriever=_RaisingRetriever())
+    low, _ = _pipeline(confidence=0.0, tau=0.9)
+
+    assert _stream(billing)[0].cause == "policy"
+    assert _stream(low)[0].cause == "low_confidence"

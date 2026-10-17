@@ -1,0 +1,4562 @@
+[
+  {
+    "id": "rewrite_eval::golden::issue::257",
+    "stratum": "how_to",
+    "turn1_escalated": false,
+    "turn1_answer": "Yes, you can pass an entire path to a route as a parameter in FastAPI by using the `path` type in the path variable declaration [4][7]. This is achieved using internal tools from Starlette, as OpenAPI does not natively support declaring a path parameter to contain a path inside [6]. For example, you can define a route like `@app.get(\"/{any_path:path}\")` to capture the remaining path segments into the `any_path` variable [7].",
+    "turn1_provider": "groq",
+    "A": {
+      "query": "Is it possible to achieve this using the `path` type as described in the Starlette issue #525?",
+      "eval_run": [
+        [
+          "doc::tutorial/path-params.md::heading_aware::18",
+          0.7673734
+        ],
+        [
+          "issue::4449::heading_aware::8",
+          0.76008356
+        ],
+        [
+          "issue::1681::heading_aware::1",
+          0.74606913
+        ],
+        [
+          "issue::5164::heading_aware::3",
+          0.7327156
+        ],
+        [
+          "doc::tutorial/path-params.md::heading_aware::17",
+          0.73053956
+        ],
+        [
+          "issue::323::heading_aware::2",
+          0.7299376
+        ],
+        [
+          "doc::tutorial/static-files.md::heading_aware::4",
+          0.725145
+        ],
+        [
+          "issue::1633::heading_aware::5",
+          0.7247227
+        ],
+        [
+          "issue::4435::heading_aware::9",
+          0.7218187
+        ],
+        [
+          "issue::961::heading_aware::1",
+          0.72032094
+        ]
+      ],
+      "served_ids": [
+        "issue::257::heading_aware::0",
+        "doc::tutorial/path-params.md::heading_aware::18",
+        "issue::4449::heading_aware::8",
+        "issue::1681::heading_aware::1",
+        "issue::5164::heading_aware::3",
+        "doc::tutorial/path-params.md::heading_aware::17",
+        "issue::323::heading_aware::2",
+        "doc::tutorial/static-files.md::heading_aware::4",
+        "issue::1633::heading_aware::5",
+        "issue::4435::heading_aware::9"
+      ],
+      "served_self_matches": 1,
+      "route": "docs_howto",
+      "confidence": 0.6886411353156028,
+      "escalate": false
+    },
+    "B": {
+      "query": "Is it possible to pass an entire path to a route as a parameter in FastAPI using the `path` type as described in the Starlette issue #525?",
+      "eval_run": [
+        [
+          "doc::tutorial/path-params.md::heading_aware::17",
+          0.8352008
+        ],
+        [
+          "issue::2333::heading_aware::3",
+          0.8127097
+        ],
+        [
+          "issue::230::heading_aware::1",
+          0.80068964
+        ],
+        [
+          "issue::1928::heading_aware::2",
+          0.7987707
+        ],
+        [
+          "issue::1750::heading_aware::0",
+          0.79718935
+        ],
+        [
+          "doc::tutorial/path-params.md::heading_aware::0",
+          0.7928417
+        ],
+        [
+          "issue::1681::heading_aware::3",
+          0.79220164
+        ],
+        [
+          "issue::4673::heading_aware::3",
+          0.79113185
+        ],
+        [
+          "issue::9387::heading_aware::10",
+          0.7889097
+        ],
+        [
+          "doc::tutorial/path-params.md::heading_aware::18",
+          0.787215
+        ]
+      ],
+      "served_ids": [
+        "issue::257::heading_aware::0",
+        "doc::tutorial/path-params.md::heading_aware::17",
+        "issue::2333::heading_aware::3",
+        "issue::230::heading_aware::1",
+        "issue::1928::heading_aware::2",
+        "issue::1750::heading_aware::0",
+        "doc::tutorial/path-params.md::heading_aware::0",
+        "issue::1681::heading_aware::3",
+        "issue::4673::heading_aware::3",
+        "issue::9387::heading_aware::10"
+      ],
+      "served_self_matches": 1,
+      "route": "docs_howto",
+      "confidence": 0.7082786641505753,
+      "escalate": false
+    },
+    "C": {
+      "query": "Is it possible to pass an entire path to a route as a parameter in FastAPI using the `path` type as described in the Starlette issue #525?",
+      "eval_run": [
+        [
+          "doc::tutorial/path-params.md::heading_aware::17",
+          0.8352008
+        ],
+        [
+          "issue::2333::heading_aware::3",
+          0.8127097
+        ],
+        [
+          "issue::230::heading_aware::1",
+          0.80068964
+        ],
+        [
+          "issue::1928::heading_aware::2",
+          0.7987707
+        ],
+        [
+          "issue::1750::heading_aware::0",
+          0.79718935
+        ],
+        [
+          "doc::tutorial/path-params.md::heading_aware::0",
+          0.7928417
+        ],
+        [
+          "issue::1681::heading_aware::3",
+          0.79220164
+        ],
+        [
+          "issue::4673::heading_aware::3",
+          0.79113185
+        ],
+        [
+          "issue::9387::heading_aware::10",
+          0.7889097
+        ],
+        [
+          "doc::tutorial/path-params.md::heading_aware::18",
+          0.787215
+        ]
+      ],
+      "served_ids": [
+        "issue::257::heading_aware::0",
+        "doc::tutorial/path-params.md::heading_aware::17",
+        "issue::2333::heading_aware::3",
+        "issue::230::heading_aware::1",
+        "issue::1928::heading_aware::2",
+        "issue::1750::heading_aware::0",
+        "doc::tutorial/path-params.md::heading_aware::0",
+        "issue::1681::heading_aware::3",
+        "issue::4673::heading_aware::3",
+        "issue::9387::heading_aware::10"
+      ],
+      "served_self_matches": 1,
+      "route": "docs_howto",
+      "confidence": 0.7082786641505753,
+      "escalate": false
+    }
+  },
+  {
+    "id": "rewrite_eval::golden::issue::58",
+    "stratum": "how_to",
+    "turn1_escalated": false,
+    "turn1_answer": "FastAPI supports streaming files through its request files feature, allowing you to stream large files using patterns like `StreamingResponse` and `request.stream()` [1][3].",
+    "turn1_provider": "groq",
+    "A": {
+      "query": "What is the correct pattern for streaming a large file, like in the request files example?",
+      "eval_run": [
+        [
+          "doc::advanced/stream-data.md::heading_aware::2",
+          0.7822722
+        ],
+        [
+          "issue::4739::heading_aware::3",
+          0.75663763
+        ],
+        [
+          "issue::334::heading_aware::0",
+          0.7496548
+        ],
+        [
+          "issue::1552::heading_aware::2",
+          0.7379035
+        ],
+        [
+          "doc::tutorial/stream-json-lines.md::heading_aware::0",
+          0.7267714
+        ],
+        [
+          "issue::1552::heading_aware::4",
+          0.7220758
+        ],
+        [
+          "doc::advanced/stream-data.md::heading_aware::4",
+          0.7213054
+        ],
+        [
+          "doc::advanced/custom-response.md::heading_aware::14",
+          0.7086439
+        ],
+        [
+          "doc::advanced/stream-data.md::heading_aware::1",
+          0.7054221
+        ],
+        [
+          "doc::advanced/stream-data.md::heading_aware::10",
+          0.7052893
+        ]
+      ],
+      "served_ids": [
+        "doc::advanced/stream-data.md::heading_aware::2",
+        "issue::58::heading_aware::0",
+        "issue::4739::heading_aware::3",
+        "issue::334::heading_aware::0",
+        "issue::1552::heading_aware::2",
+        "doc::tutorial/stream-json-lines.md::heading_aware::0",
+        "issue::1552::heading_aware::4",
+        "doc::advanced/stream-data.md::heading_aware::4",
+        "doc::advanced/custom-response.md::heading_aware::14",
+        "doc::advanced/stream-data.md::heading_aware::1"
+      ],
+      "served_self_matches": 1,
+      "route": "docs_howto",
+      "confidence": 0.7729920759494268,
+      "escalate": false
+    },
+    "B": {
+      "query": "What is the correct pattern for streaming a large file in FastAPI, as demonstrated in the request files example?",
+      "eval_run": [
+        [
+          "issue::1552::heading_aware::4",
+          0.82228845
+        ],
+        [
+          "doc::advanced/custom-response.md::heading_aware::14",
+          0.7879437
+        ],
+        [
+          "issue::362::heading_aware::0",
+          0.78749216
+        ],
+        [
+          "issue::1552::heading_aware::2",
+          0.78344613
+        ],
+        [
+          "issue::1552::heading_aware::3",
+          0.7813355
+        ],
+        [
+          "issue::3921::heading_aware::2",
+          0.77007174
+        ],
+        [
+          "issue::3364::heading_aware::1",
+          0.76232827
+        ],
+        [
+          "issue::343::heading_aware::0",
+          0.76216096
+        ],
+        [
+          "issue::4879::heading_aware::3",
+          0.761739
+        ],
+        [
+          "issue::5803::heading_aware::2",
+          0.7593388
+        ]
+      ],
+      "served_ids": [
+        "issue::58::heading_aware::0",
+        "issue::1552::heading_aware::4",
+        "doc::advanced/custom-response.md::heading_aware::14",
+        "issue::362::heading_aware::0",
+        "issue::1552::heading_aware::2",
+        "issue::1552::heading_aware::3",
+        "issue::3921::heading_aware::2",
+        "issue::3364::heading_aware::1",
+        "issue::343::heading_aware::0",
+        "issue::4879::heading_aware::3"
+      ],
+      "served_self_matches": 1,
+      "route": "docs_howto",
+      "confidence": 0.6843495819210288,
+      "escalate": false
+    },
+    "C": {
+      "query": "What is the correct pattern for streaming a large file using FastAPI's request files feature, such as with `StreamingResponse` and `request.stream()`?",
+      "eval_run": [
+        [
+          "issue::1552::heading_aware::4",
+          0.83238924
+        ],
+        [
+          "doc::advanced/custom-response.md::heading_aware::14",
+          0.80759126
+        ],
+        [
+          "issue::362::heading_aware::0",
+          0.78937083
+        ],
+        [
+          "issue::1552::heading_aware::2",
+          0.7812805
+        ],
+        [
+          "issue::1552::heading_aware::3",
+          0.7745205
+        ],
+        [
+          "issue::3921::heading_aware::2",
+          0.7719122
+        ],
+        [
+          "issue::4879::heading_aware::3",
+          0.767988
+        ],
+        [
+          "issue::3364::heading_aware::1",
+          0.7654033
+        ],
+        [
+          "issue::3921::heading_aware::3",
+          0.7626426
+        ],
+        [
+          "issue::940::heading_aware::0",
+          0.76219285
+        ]
+      ],
+      "served_ids": [
+        "issue::58::heading_aware::0",
+        "issue::1552::heading_aware::4",
+        "doc::advanced/custom-response.md::heading_aware::14",
+        "issue::362::heading_aware::0",
+        "issue::1552::heading_aware::2",
+        "issue::1552::heading_aware::3",
+        "issue::3921::heading_aware::2",
+        "issue::4879::heading_aware::3",
+        "issue::3364::heading_aware::1",
+        "issue::3921::heading_aware::3"
+      ],
+      "served_self_matches": 1,
+      "route": "docs_howto",
+      "confidence": 0.6313024456822962,
+      "escalate": false
+    }
+  },
+  {
+    "id": "rewrite_eval::golden::issue::1005",
+    "stratum": "how_to",
+    "turn1_escalated": false,
+    "turn1_answer": "The provided context does not contain enough information to describe the specific advanced tools FastAPI provides for handling concurrent HTTP requests [1][4][5][6][9].",
+    "turn1_provider": "groq",
+    "A": {
+      "query": "How do I access the total count of in-flight requests with it?",
+      "eval_run": [
+        [
+          "issue::1439::heading_aware::1",
+          0.7078205
+        ],
+        [
+          "issue::664::heading_aware::0",
+          0.6912136
+        ],
+        [
+          "issue::1828::heading_aware::0",
+          0.6720726
+        ],
+        [
+          "issue::3357::heading_aware::0",
+          0.6661634
+        ],
+        [
+          "issue::2295::heading_aware::2",
+          0.66034955
+        ],
+        [
+          "issue::5204::heading_aware::2",
+          0.6539016
+        ],
+        [
+          "issue::1268::heading_aware::2",
+          0.65228844
+        ],
+        [
+          "issue::1062::heading_aware::1",
+          0.64867246
+        ],
+        [
+          "issue::4676::heading_aware::3",
+          0.64708364
+        ],
+        [
+          "issue::4696::heading_aware::3",
+          0.6460678
+        ]
+      ],
+      "served_ids": [
+        "issue::1005::heading_aware::1",
+        "issue::1439::heading_aware::1",
+        "issue::664::heading_aware::0",
+        "issue::1828::heading_aware::0",
+        "issue::3357::heading_aware::0",
+        "issue::2295::heading_aware::2",
+        "issue::5204::heading_aware::2",
+        "issue::1268::heading_aware::2",
+        "issue::1062::heading_aware::1",
+        "issue::4676::heading_aware::3"
+      ],
+      "served_self_matches": 1,
+      "route": "docs_howto",
+      "confidence": 0.7492215478739234,
+      "escalate": false
+    },
+    "B": {
+      "query": "How do I access the total count of in-flight requests in FastAPI?",
+      "eval_run": [
+        [
+          "issue::1575::heading_aware::0",
+          0.72169924
+        ],
+        [
+          "issue::4031::heading_aware::3",
+          0.71524036
+        ],
+        [
+          "issue::1180::heading_aware::2",
+          0.712901
+        ],
+        [
+          "issue::3357::heading_aware::0",
+          0.70948446
+        ],
+        [
+          "issue::3210::heading_aware::2",
+          0.70824546
+        ],
+        [
+          "issue::3514::heading_aware::0",
+          0.70751846
+        ],
+        [
+          "issue::1087::heading_aware::5",
+          0.7042401
+        ],
+        [
+          "issue::3524::heading_aware::2",
+          0.70339143
+        ],
+        [
+          "issue::3678::heading_aware::2",
+          0.70033705
+        ],
+        [
+          "issue::1173::heading_aware::3",
+          0.69941944
+        ]
+      ],
+      "served_ids": [
+        "issue::1575::heading_aware::0",
+        "issue::4031::heading_aware::3",
+        "issue::1180::heading_aware::2",
+        "issue::3357::heading_aware::0",
+        "issue::3210::heading_aware::2",
+        "issue::3514::heading_aware::0",
+        "issue::1087::heading_aware::5",
+        "issue::3524::heading_aware::2",
+        "issue::3678::heading_aware::2",
+        "issue::1173::heading_aware::3"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.07060872807920611,
+      "escalate": true
+    },
+    "C": {
+      "query": "How do I access the total count of in-flight requests with FastAPI's advanced tools for handling concurrent HTTP requests?",
+      "eval_run": [
+        [
+          "issue::1575::heading_aware::0",
+          0.77708244
+        ],
+        [
+          "issue::3137::heading_aware::3",
+          0.72163886
+        ],
+        [
+          "issue::3652::heading_aware::4",
+          0.7143136
+        ],
+        [
+          "issue::4031::heading_aware::3",
+          0.7127204
+        ],
+        [
+          "issue::3357::heading_aware::0",
+          0.71177477
+        ],
+        [
+          "issue::3311::heading_aware::0",
+          0.71101314
+        ],
+        [
+          "issue::1180::heading_aware::2",
+          0.7090053
+        ],
+        [
+          "issue::3707::heading_aware::5",
+          0.7086348
+        ],
+        [
+          "issue::701::heading_aware::2",
+          0.7084669
+        ],
+        [
+          "issue::3921::heading_aware::2",
+          0.70576733
+        ]
+      ],
+      "served_ids": [
+        "issue::1575::heading_aware::0",
+        "issue::3137::heading_aware::3",
+        "issue::3652::heading_aware::4",
+        "issue::4031::heading_aware::3",
+        "issue::3357::heading_aware::0",
+        "issue::3311::heading_aware::0",
+        "issue::1180::heading_aware::2",
+        "issue::3707::heading_aware::5",
+        "issue::701::heading_aware::2",
+        "issue::3921::heading_aware::2"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.12797900609923465,
+      "escalate": true
+    }
+  },
+  {
+    "id": "rewrite_eval::golden::issue::2467",
+    "stratum": "how_to",
+    "turn1_escalated": true,
+    "turn1_answer": "This request has been escalated to a human agent.",
+    "turn1_provider": null,
+    "A": {
+      "query": "How do I globally access the JWT token from the request in this implementation?",
+      "eval_run": [
+        [
+          "doc::tutorial/security/simple-oauth2.md::heading_aware::4",
+          0.7159007
+        ],
+        [
+          "doc::advanced/security/oauth2-scopes.md::heading_aware::8",
+          0.7118432
+        ],
+        [
+          "issue::4489::heading_aware::2",
+          0.707001
+        ],
+        [
+          "issue::1529::heading_aware::1",
+          0.70447385
+        ],
+        [
+          "doc::tutorial/security/oauth2-jwt.md::heading_aware::11",
+          0.7000797
+        ],
+        [
+          "issue::4098::heading_aware::5",
+          0.6928052
+        ],
+        [
+          "doc::tutorial/security/simple-oauth2.md::heading_aware::14",
+          0.6918837
+        ],
+        [
+          "issue::5601::heading_aware::2",
+          0.6898137
+        ],
+        [
+          "issue::5219::heading_aware::3",
+          0.68782043
+        ],
+        [
+          "issue::1418::heading_aware::1",
+          0.68719953
+        ]
+      ],
+      "served_ids": [
+        "doc::tutorial/security/simple-oauth2.md::heading_aware::4",
+        "issue::2467::heading_aware::0",
+        "doc::advanced/security/oauth2-scopes.md::heading_aware::8",
+        "issue::4489::heading_aware::2",
+        "issue::1529::heading_aware::1",
+        "doc::tutorial/security/oauth2-jwt.md::heading_aware::11",
+        "issue::4098::heading_aware::5",
+        "doc::tutorial/security/simple-oauth2.md::heading_aware::14",
+        "issue::5601::heading_aware::2",
+        "issue::5219::heading_aware::3"
+      ],
+      "served_self_matches": 1,
+      "route": "docs_howto",
+      "confidence": 0.5861036371548325,
+      "escalate": false
+    },
+    "B": {
+      "query": "How do I globally access the JWT token from the request in a JWT authentication implementation?",
+      "eval_run": [
+        [
+          "doc::advanced/security/oauth2-scopes.md::heading_aware::8",
+          0.70815563
+        ],
+        [
+          "doc::tutorial/security/oauth2-jwt.md::heading_aware::11",
+          0.6983552
+        ],
+        [
+          "doc::tutorial/security/simple-oauth2.md::heading_aware::4",
+          0.6976603
+        ],
+        [
+          "doc::tutorial/security/simple-oauth2.md::heading_aware::14",
+          0.6968585
+        ],
+        [
+          "issue::1529::heading_aware::1",
+          0.69544065
+        ],
+        [
+          "issue::5219::heading_aware::3",
+          0.69016093
+        ],
+        [
+          "doc::tutorial/security/oauth2-jwt.md::heading_aware::16",
+          0.6874591
+        ],
+        [
+          "issue::4098::heading_aware::5",
+          0.6843599
+        ],
+        [
+          "doc::tutorial/security/oauth2-jwt.md::heading_aware::17",
+          0.6811247
+        ],
+        [
+          "issue::4489::heading_aware::2",
+          0.6805735
+        ]
+      ],
+      "served_ids": [
+        "issue::2467::heading_aware::0",
+        "doc::advanced/security/oauth2-scopes.md::heading_aware::8",
+        "doc::tutorial/security/oauth2-jwt.md::heading_aware::11",
+        "doc::tutorial/security/simple-oauth2.md::heading_aware::4",
+        "doc::tutorial/security/simple-oauth2.md::heading_aware::14",
+        "issue::1529::heading_aware::1",
+        "issue::5219::heading_aware::3",
+        "doc::tutorial/security/oauth2-jwt.md::heading_aware::16",
+        "issue::4098::heading_aware::5",
+        "doc::tutorial/security/oauth2-jwt.md::heading_aware::17"
+      ],
+      "served_self_matches": 1,
+      "route": "docs_howto",
+      "confidence": 0.6469066591699515,
+      "escalate": false
+    },
+    "C": {
+      "query": "How do I globally access the JWT token from the request in the JWT authentication implementation described in the documentation?",
+      "eval_run": [
+        [
+          "doc::advanced/security/oauth2-scopes.md::heading_aware::8",
+          0.7175444
+        ],
+        [
+          "doc::tutorial/security/simple-oauth2.md::heading_aware::4",
+          0.7089386
+        ],
+        [
+          "doc::tutorial/security/oauth2-jwt.md::heading_aware::16",
+          0.70788693
+        ],
+        [
+          "doc::tutorial/security/simple-oauth2.md::heading_aware::14",
+          0.7061919
+        ],
+        [
+          "doc::tutorial/security/oauth2-jwt.md::heading_aware::11",
+          0.7057473
+        ],
+        [
+          "issue::5219::heading_aware::3",
+          0.70063263
+        ],
+        [
+          "issue::1529::heading_aware::1",
+          0.70039296
+        ],
+        [
+          "issue::1639::heading_aware::2",
+          0.69684803
+        ],
+        [
+          "issue::4098::heading_aware::2",
+          0.6967062
+        ],
+        [
+          "issue::1418::heading_aware::1",
+          0.69628894
+        ]
+      ],
+      "served_ids": [
+        "issue::2467::heading_aware::0",
+        "doc::advanced/security/oauth2-scopes.md::heading_aware::8",
+        "doc::tutorial/security/simple-oauth2.md::heading_aware::4",
+        "doc::tutorial/security/oauth2-jwt.md::heading_aware::16",
+        "doc::tutorial/security/simple-oauth2.md::heading_aware::14",
+        "doc::tutorial/security/oauth2-jwt.md::heading_aware::11",
+        "issue::5219::heading_aware::3",
+        "issue::1529::heading_aware::1",
+        "issue::1639::heading_aware::2",
+        "issue::4098::heading_aware::2"
+      ],
+      "served_self_matches": 1,
+      "route": "docs_howto",
+      "confidence": 0.6935905733033559,
+      "escalate": false
+    }
+  },
+  {
+    "id": "rewrite_eval::golden::issue::1490",
+    "stratum": "error_debugging",
+    "turn1_escalated": false,
+    "turn1_answer": "You can generate the OpenAPI schema programmatically without starting the web server by calling the `get_openapi()` utility function directly [8]. This function accepts parameters such as `title`, `version`, `summary`, `description`, and `routes` (typically passed as `app.routes`) to build the schema [8].\n\nHere is how you can do it:\n\n```python\nfrom fastapi import FastAPI\nfrom fastapi.openapi.utils import get_openapi\n\napp = FastAPI()\n\n@app.get(\"/items/\")\nasync def read_items():\n    return [{\"name\": \"Foo\"}]\n\n# Generate the schema without running the server\nopenapi_schema = get_openapi(\n    title=\"My API\",\n    version=\"1.0.0\",\n    routes=app.routes\n)\n\n# You can now save or process openapi_schema as needed\n```\n\nThe `get_openapi()` function is the same utility that FastAPI uses internally to generate the schema when the application starts [8]. By calling it directly with your app's routes, you can obtain the full OpenAPI schema object in your Python environment without needing to start the ASGI server or make HTTP requests to the `/openapi.json` endpoint [8].",
+    "turn1_provider": "groq",
+    "A": {
+      "query": "How can I access the OpenAPI schema without running the web server?",
+      "eval_run": [
+        [
+          "doc::how-to/extending-openapi.md::heading_aware::6",
+          0.78898656
+        ],
+        [
+          "doc::how-to/extending-openapi.md::heading_aware::4",
+          0.7873694
+        ],
+        [
+          "issue::2877::heading_aware::1",
+          0.77589625
+        ],
+        [
+          "issue::872::heading_aware::0",
+          0.7683171
+        ],
+        [
+          "doc::tutorial/body.md::heading_aware::5",
+          0.75392103
+        ],
+        [
+          "issue::4855::heading_aware::3",
+          0.7499113
+        ],
+        [
+          "doc::advanced/generate-clients.md::heading_aware::3",
+          0.7478581
+        ],
+        [
+          "issue::4191::heading_aware::3",
+          0.7355868
+        ],
+        [
+          "issue::1457::heading_aware::1",
+          0.733971
+        ],
+        [
+          "doc::release-notes.md::heading_aware::257",
+          0.73389924
+        ]
+      ],
+      "served_ids": [
+        "issue::1490::heading_aware::0",
+        "doc::how-to/extending-openapi.md::heading_aware::6",
+        "doc::how-to/extending-openapi.md::heading_aware::4",
+        "issue::2877::heading_aware::1",
+        "issue::872::heading_aware::0",
+        "doc::tutorial/body.md::heading_aware::5",
+        "issue::4855::heading_aware::3",
+        "doc::advanced/generate-clients.md::heading_aware::3",
+        "issue::4191::heading_aware::3",
+        "issue::1457::heading_aware::1"
+      ],
+      "served_self_matches": 1,
+      "route": "docs_howto",
+      "confidence": 0.7386404700078512,
+      "escalate": false
+    },
+    "B": {
+      "query": "How can I programmatically access the OpenAPI schema without running the web server so I can generate it without having to start the FastAPI service?",
+      "eval_run": [
+        [
+          "doc::how-to/extending-openapi.md::heading_aware::4",
+          0.83563614
+        ],
+        [
+          "doc::how-to/extending-openapi.md::heading_aware::6",
+          0.8306873
+        ],
+        [
+          "doc::tutorial/first-steps.md::heading_aware::6",
+          0.8028203
+        ],
+        [
+          "issue::4855::heading_aware::3",
+          0.79805046
+        ],
+        [
+          "issue::2877::heading_aware::1",
+          0.7932736
+        ],
+        [
+          "doc::tutorial/first-steps.md::heading_aware::12",
+          0.7711808
+        ],
+        [
+          "doc::release-notes.md::heading_aware::257",
+          0.761037
+        ],
+        [
+          "doc::how-to/extending-openapi.md::heading_aware::1",
+          0.7599887
+        ],
+        [
+          "doc::tutorial/path-params.md::heading_aware::5",
+          0.7584952
+        ],
+        [
+          "issue::5787::heading_aware::2",
+          0.75525725
+        ]
+      ],
+      "served_ids": [
+        "doc::how-to/extending-openapi.md::heading_aware::4",
+        "doc::how-to/extending-openapi.md::heading_aware::6",
+        "doc::tutorial/first-steps.md::heading_aware::6",
+        "issue::4855::heading_aware::3",
+        "issue::2877::heading_aware::1",
+        "doc::tutorial/first-steps.md::heading_aware::12",
+        "doc::release-notes.md::heading_aware::257",
+        "doc::how-to/extending-openapi.md::heading_aware::1",
+        "doc::tutorial/path-params.md::heading_aware::5",
+        "issue::5787::heading_aware::2"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.6972894143500422,
+      "escalate": false
+    },
+    "C": {
+      "query": "How can I programmatically access the OpenAPI schema without running the web server so I can generate it without having to start the FastAPI service?",
+      "eval_run": [
+        [
+          "doc::how-to/extending-openapi.md::heading_aware::4",
+          0.83563614
+        ],
+        [
+          "doc::how-to/extending-openapi.md::heading_aware::6",
+          0.8306873
+        ],
+        [
+          "doc::tutorial/first-steps.md::heading_aware::6",
+          0.8028203
+        ],
+        [
+          "issue::4855::heading_aware::3",
+          0.79805046
+        ],
+        [
+          "issue::2877::heading_aware::1",
+          0.7932736
+        ],
+        [
+          "doc::tutorial/first-steps.md::heading_aware::12",
+          0.7711808
+        ],
+        [
+          "doc::release-notes.md::heading_aware::257",
+          0.761037
+        ],
+        [
+          "doc::how-to/extending-openapi.md::heading_aware::1",
+          0.7599887
+        ],
+        [
+          "doc::tutorial/path-params.md::heading_aware::5",
+          0.7584952
+        ],
+        [
+          "issue::5787::heading_aware::2",
+          0.75525725
+        ]
+      ],
+      "served_ids": [
+        "doc::how-to/extending-openapi.md::heading_aware::4",
+        "doc::how-to/extending-openapi.md::heading_aware::6",
+        "doc::tutorial/first-steps.md::heading_aware::6",
+        "issue::4855::heading_aware::3",
+        "issue::2877::heading_aware::1",
+        "doc::tutorial/first-steps.md::heading_aware::12",
+        "doc::release-notes.md::heading_aware::257",
+        "doc::how-to/extending-openapi.md::heading_aware::1",
+        "doc::tutorial/path-params.md::heading_aware::5",
+        "issue::5787::heading_aware::2"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.6972894143500422,
+      "escalate": false
+    }
+  },
+  {
+    "id": "rewrite_eval::golden::issue::1732",
+    "stratum": "error_debugging",
+    "turn1_escalated": false,
+    "turn1_answer": "To reference folders outside the main directory in a FastAPI application, you can use Python's `pathlib` module to navigate up the directory tree from the current file's location [3]. For example, if your main file is in a subdirectory, you can resolve the current file path and then move up to the parent directory to access external folders [3].\n\nHere is an example of how to do this:\n\n```python\nfrom pathlib import Path\n\ncurrent_file_path = Path(__file__)\nimage_path = current_file_path.resolve().parent.parent / \"folder1\" / \"image1.jpg\"\n```\n\nThis approach allows you to reference files in directories outside your immediate application folder without relying on `os.path` [3]. Note that this is a general Python technique rather than a specific FastAPI feature [3].",
+    "turn1_provider": "groq",
+    "A": {
+      "query": "How can I modify the path to reference a folder located in the parent directory of main.py?",
+      "eval_run": [
+        [
+          "doc::how-to/custom-docs-ui-assets.md::heading_aware::9",
+          0.71804094
+        ],
+        [
+          "issue::11707::heading_aware::2",
+          0.7068757
+        ],
+        [
+          "issue::4656::heading_aware::3",
+          0.7052993
+        ],
+        [
+          "issue::815::heading_aware::2",
+          0.70252705
+        ],
+        [
+          "doc::deployment/docker.md::heading_aware::11",
+          0.69526255
+        ],
+        [
+          "doc::advanced/sub-applications.md::heading_aware::4",
+          0.6855824
+        ],
+        [
+          "issue::5846::heading_aware::2",
+          0.68462753
+        ],
+        [
+          "issue::861::heading_aware::2",
+          0.6812269
+        ],
+        [
+          "doc::advanced/sub-applications.md::heading_aware::3",
+          0.68120444
+        ],
+        [
+          "issue::11707::heading_aware::1",
+          0.6764371
+        ]
+      ],
+      "served_ids": [
+        "doc::how-to/custom-docs-ui-assets.md::heading_aware::9",
+        "issue::11707::heading_aware::2",
+        "issue::4656::heading_aware::3",
+        "issue::815::heading_aware::2",
+        "doc::deployment/docker.md::heading_aware::11",
+        "doc::advanced/sub-applications.md::heading_aware::4",
+        "issue::5846::heading_aware::2",
+        "issue::861::heading_aware::2",
+        "doc::advanced/sub-applications.md::heading_aware::3",
+        "issue::11707::heading_aware::1"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.06397548448802251,
+      "escalate": true
+    },
+    "B": {
+      "query": "How can I modify the default app path in FastAPI to reference a folder located in the parent directory of main.py?",
+      "eval_run": [
+        [
+          "issue::11707::heading_aware::1",
+          0.8483919
+        ],
+        [
+          "issue::829::heading_aware::5",
+          0.8160968
+        ],
+        [
+          "issue::5660::heading_aware::2",
+          0.810717
+        ],
+        [
+          "issue::5353::heading_aware::3",
+          0.8090749
+        ],
+        [
+          "doc::advanced/sub-applications.md::heading_aware::3",
+          0.80789244
+        ],
+        [
+          "doc::fastapi-cli.md::heading_aware::4",
+          0.7861075
+        ],
+        [
+          "doc::tutorial/bigger-applications.md::heading_aware::16",
+          0.77953076
+        ],
+        [
+          "doc::fastapi-cli.md::heading_aware::3",
+          0.77922696
+        ],
+        [
+          "issue::3534::heading_aware::1",
+          0.76073444
+        ],
+        [
+          "doc::tutorial/first-steps.md::heading_aware::26",
+          0.7554984
+        ]
+      ],
+      "served_ids": [
+        "issue::11707::heading_aware::1",
+        "issue::829::heading_aware::5",
+        "issue::1732::heading_aware::2",
+        "issue::5660::heading_aware::2",
+        "issue::5353::heading_aware::3",
+        "doc::advanced/sub-applications.md::heading_aware::3",
+        "doc::fastapi-cli.md::heading_aware::4",
+        "doc::tutorial/bigger-applications.md::heading_aware::16",
+        "doc::fastapi-cli.md::heading_aware::3",
+        "issue::3534::heading_aware::1"
+      ],
+      "served_self_matches": 1,
+      "route": "docs_howto",
+      "confidence": 0.7599121056812586,
+      "escalate": false
+    },
+    "C": {
+      "query": "How can I modify the path in a FastAPI application to reference a folder located in the parent directory of main.py?",
+      "eval_run": [
+        [
+          "issue::11707::heading_aware::1",
+          0.84100425
+        ],
+        [
+          "doc::advanced/behind-a-proxy.md::heading_aware::5",
+          0.8151134
+        ],
+        [
+          "doc::advanced/sub-applications.md::heading_aware::3",
+          0.8063162
+        ],
+        [
+          "issue::5660::heading_aware::2",
+          0.8033254
+        ],
+        [
+          "issue::5353::heading_aware::3",
+          0.80216324
+        ],
+        [
+          "issue::829::heading_aware::5",
+          0.80201095
+        ],
+        [
+          "doc::fastapi-cli.md::heading_aware::4",
+          0.7775827
+        ],
+        [
+          "doc::tutorial/bigger-applications.md::heading_aware::16",
+          0.7711228
+        ],
+        [
+          "issue::925::heading_aware::0",
+          0.7669115
+        ],
+        [
+          "issue::3534::heading_aware::1",
+          0.7615661
+        ]
+      ],
+      "served_ids": [
+        "issue::11707::heading_aware::1",
+        "issue::1732::heading_aware::2",
+        "doc::advanced/behind-a-proxy.md::heading_aware::5",
+        "doc::advanced/sub-applications.md::heading_aware::3",
+        "issue::5660::heading_aware::2",
+        "issue::5353::heading_aware::3",
+        "issue::829::heading_aware::5",
+        "doc::fastapi-cli.md::heading_aware::4",
+        "doc::tutorial/bigger-applications.md::heading_aware::16",
+        "issue::925::heading_aware::0"
+      ],
+      "served_self_matches": 1,
+      "route": "docs_howto",
+      "confidence": 0.716083907358286,
+      "escalate": false
+    }
+  },
+  {
+    "id": "rewrite_eval::golden::issue::4391",
+    "stratum": "error_debugging",
+    "turn1_escalated": false,
+    "turn1_answer": "The provided context does not contain any information about stack overflow errors in FastAPI, their causes, or how to resolve them [1][2][3][4][5][6][7][8][9][10]. The context blocks only list environment details (OS, FastAPI version, Python version) from various GitHub issues and do not describe specific error behaviors or solutions [1][2][3][4][5][6][7][8][9][10]. Therefore, I cannot answer your question based on the available context.",
+    "turn1_provider": "groq",
+    "A": {
+      "query": "Could you tell me more about the specific scenario where this error occurs, like the function or endpoint that causes the overflow?",
+      "eval_run": [
+        [
+          "issue::5065::heading_aware::8",
+          0.7335418
+        ],
+        [
+          "issue::2253::heading_aware::3",
+          0.73158985
+        ],
+        [
+          "issue::4210::heading_aware::3",
+          0.7302917
+        ],
+        [
+          "issue::4946::heading_aware::3",
+          0.7268814
+        ],
+        [
+          "issue::3993::heading_aware::3",
+          0.71495914
+        ],
+        [
+          "issue::4834::heading_aware::3",
+          0.71192694
+        ],
+        [
+          "issue::3137::heading_aware::0",
+          0.7087166
+        ],
+        [
+          "issue::5264::heading_aware::5",
+          0.7084547
+        ],
+        [
+          "issue::3545::heading_aware::3",
+          0.7048978
+        ],
+        [
+          "issue::790::heading_aware::5",
+          0.70359075
+        ]
+      ],
+      "served_ids": [
+        "issue::5065::heading_aware::8",
+        "issue::2253::heading_aware::3",
+        "issue::4210::heading_aware::3",
+        "issue::4946::heading_aware::3",
+        "issue::3993::heading_aware::3",
+        "issue::4834::heading_aware::3",
+        "issue::3137::heading_aware::0",
+        "issue::5264::heading_aware::5",
+        "issue::3545::heading_aware::3",
+        "issue::790::heading_aware::5"
+      ],
+      "served_self_matches": 0,
+      "route": "known_issue",
+      "confidence": 0.08036068150942302,
+      "escalate": true
+    },
+    "B": {
+      "query": "Could you tell me more about the specific scenario where the stack overflow error occurs in your FastAPI application, such as the function or endpoint that causes the overflow?",
+      "eval_run": [
+        [
+          "issue::3985::heading_aware::3",
+          0.80694485
+        ],
+        [
+          "issue::3707::heading_aware::5",
+          0.7710189
+        ],
+        [
+          "issue::4025::heading_aware::8",
+          0.7643022
+        ],
+        [
+          "issue::878::heading_aware::0",
+          0.7636682
+        ],
+        [
+          "issue::3163::heading_aware::3",
+          0.76320875
+        ],
+        [
+          "issue::1850::heading_aware::2",
+          0.7625846
+        ],
+        [
+          "issue::1407::heading_aware::0",
+          0.7612101
+        ],
+        [
+          "issue::1085::heading_aware::0",
+          0.7612101
+        ],
+        [
+          "issue::923::heading_aware::0",
+          0.7612101
+        ],
+        [
+          "issue::1049::heading_aware::0",
+          0.7608389
+        ]
+      ],
+      "served_ids": [
+        "issue::3985::heading_aware::3",
+        "issue::3707::heading_aware::5",
+        "issue::4025::heading_aware::8",
+        "issue::878::heading_aware::0",
+        "issue::3163::heading_aware::3",
+        "issue::1850::heading_aware::2",
+        "issue::1407::heading_aware::0",
+        "issue::1085::heading_aware::0",
+        "issue::923::heading_aware::0",
+        "issue::1049::heading_aware::0"
+      ],
+      "served_self_matches": 0,
+      "route": "known_issue",
+      "confidence": 0.27033140151753676,
+      "escalate": true
+    },
+    "C": {
+      "query": "Could you tell me more about the specific scenario where the FastAPI stack overflow error occurs, such as the function or endpoint that causes the overflow?",
+      "eval_run": [
+        [
+          "issue::3985::heading_aware::3",
+          0.8232265
+        ],
+        [
+          "issue::3707::heading_aware::5",
+          0.79257333
+        ],
+        [
+          "issue::4025::heading_aware::8",
+          0.77805394
+        ],
+        [
+          "issue::3163::heading_aware::3",
+          0.77385247
+        ],
+        [
+          "issue::878::heading_aware::0",
+          0.7729962
+        ],
+        [
+          "issue::1407::heading_aware::0",
+          0.7708745
+        ],
+        [
+          "issue::923::heading_aware::0",
+          0.7708745
+        ],
+        [
+          "issue::1085::heading_aware::0",
+          0.7708745
+        ],
+        [
+          "issue::3368::heading_aware::3",
+          0.76856834
+        ],
+        [
+          "issue::1119::heading_aware::0",
+          0.76847476
+        ]
+      ],
+      "served_ids": [
+        "issue::3985::heading_aware::3",
+        "issue::3707::heading_aware::5",
+        "issue::4025::heading_aware::8",
+        "issue::3163::heading_aware::3",
+        "issue::878::heading_aware::0",
+        "issue::1407::heading_aware::0",
+        "issue::923::heading_aware::0",
+        "issue::1085::heading_aware::0",
+        "issue::3368::heading_aware::3",
+        "issue::1119::heading_aware::0"
+      ],
+      "served_self_matches": 0,
+      "route": "known_issue",
+      "confidence": 0.31063278276674566,
+      "escalate": true
+    }
+  },
+  {
+    "id": "rewrite_eval::golden::issue::2735",
+    "stratum": "error_debugging",
+    "turn1_escalated": false,
+    "turn1_answer": "The provided context does not contain enough information to explain why the FastAPI documentation is not loading due to issues with the Swagger UI bundle or to provide a specific technical solution for this error [1][2].\n\nThe context only indicates that users have historically experienced trouble loading Swagger resources [1]. One user suggested that a potential workaround involves using CSS and JavaScript files stored in a local 'static' folder and modifying the URL in the `fastapi/openapi/docs.py` file, though this user noted they did not consider modifying source code to be a good idea [1]. Another user requested that the `swagger-ui-bundle.js` and `swagger-ui.css` files be included in the project to allow offline rendering, as they were previously loaded via a CDN [2]. A resolution comment mentions that documentation regarding self-hosting JavaScript and CSS for docs was moved to a new URL, but the context does not provide the actual steps or code required to fix the loading issue [2].",
+    "turn1_provider": "groq",
+    "A": {
+      "query": "What's the exact CDN URL causing the problem?",
+      "eval_run": [
+        [
+          "issue::4924::heading_aware::3",
+          0.7380028
+        ],
+        [
+          "issue::5560::heading_aware::8",
+          0.70458376
+        ],
+        [
+          "issue::2560::heading_aware::2",
+          0.70416254
+        ],
+        [
+          "issue::2581::heading_aware::4",
+          0.70079446
+        ],
+        [
+          "issue::2586::heading_aware::1",
+          0.69341004
+        ],
+        [
+          "issue::5319::heading_aware::10",
+          0.6932505
+        ],
+        [
+          "issue::2978::heading_aware::2",
+          0.68996346
+        ],
+        [
+          "issue::1814::heading_aware::1",
+          0.6876111
+        ],
+        [
+          "issue::2746::heading_aware::0",
+          0.68261915
+        ],
+        [
+          "issue::2182::heading_aware::2",
+          0.6816315
+        ]
+      ],
+      "served_ids": [
+        "issue::4924::heading_aware::3",
+        "issue::5560::heading_aware::8",
+        "issue::2560::heading_aware::2",
+        "issue::2581::heading_aware::4",
+        "issue::2586::heading_aware::1",
+        "issue::5319::heading_aware::10",
+        "issue::2978::heading_aware::2",
+        "issue::1814::heading_aware::1",
+        "issue::2746::heading_aware::0",
+        "issue::2182::heading_aware::2"
+      ],
+      "served_self_matches": 0,
+      "route": "known_issue",
+      "confidence": 0.03508914219717547,
+      "escalate": true
+    },
+    "B": {
+      "query": "What is the exact CDN URL causing the Swagger UI bundle loading issue in the FastAPI documentation?",
+      "eval_run": [
+        [
+          "doc::how-to/custom-docs-ui-assets.md::heading_aware::13",
+          0.80194855
+        ],
+        [
+          "issue::536::heading_aware::1",
+          0.79999214
+        ],
+        [
+          "issue::4950::heading_aware::3",
+          0.79850304
+        ],
+        [
+          "issue::382::heading_aware::0",
+          0.791458
+        ],
+        [
+          "issue::608::heading_aware::0",
+          0.7872389
+        ],
+        [
+          "issue::110::heading_aware::0",
+          0.78097284
+        ],
+        [
+          "issue::536::heading_aware::2",
+          0.7777922
+        ],
+        [
+          "doc::how-to/custom-docs-ui-assets.md::heading_aware::14",
+          0.7725079
+        ],
+        [
+          "doc::how-to/custom-docs-ui-assets.md::heading_aware::17",
+          0.76426566
+        ],
+        [
+          "doc::how-to/custom-docs-ui-assets.md::heading_aware::0",
+          0.76195765
+        ]
+      ],
+      "served_ids": [
+        "doc::how-to/custom-docs-ui-assets.md::heading_aware::13",
+        "issue::536::heading_aware::1",
+        "issue::4950::heading_aware::3",
+        "issue::382::heading_aware::0",
+        "issue::608::heading_aware::0",
+        "issue::110::heading_aware::0",
+        "issue::536::heading_aware::2",
+        "doc::how-to/custom-docs-ui-assets.md::heading_aware::14",
+        "doc::how-to/custom-docs-ui-assets.md::heading_aware::17",
+        "doc::how-to/custom-docs-ui-assets.md::heading_aware::0"
+      ],
+      "served_self_matches": 0,
+      "route": "known_issue",
+      "confidence": 0.7033966164527089,
+      "escalate": false
+    },
+    "C": {
+      "query": "What is the exact CDN URL for the Swagger UI bundle that is causing the FastAPI documentation loading issue?",
+      "eval_run": [
+        [
+          "doc::how-to/custom-docs-ui-assets.md::heading_aware::13",
+          0.8224689
+        ],
+        [
+          "issue::4950::heading_aware::3",
+          0.8141884
+        ],
+        [
+          "issue::382::heading_aware::0",
+          0.8093124
+        ],
+        [
+          "issue::608::heading_aware::0",
+          0.8083214
+        ],
+        [
+          "issue::110::heading_aware::0",
+          0.8047923
+        ],
+        [
+          "issue::536::heading_aware::1",
+          0.8034727
+        ],
+        [
+          "issue::536::heading_aware::2",
+          0.7918076
+        ],
+        [
+          "issue::1523::heading_aware::3",
+          0.7867404
+        ],
+        [
+          "doc::how-to/custom-docs-ui-assets.md::heading_aware::14",
+          0.7851028
+        ],
+        [
+          "issue::2005::heading_aware::0",
+          0.7753332
+        ]
+      ],
+      "served_ids": [
+        "doc::how-to/custom-docs-ui-assets.md::heading_aware::13",
+        "issue::4950::heading_aware::3",
+        "issue::382::heading_aware::0",
+        "issue::608::heading_aware::0",
+        "issue::110::heading_aware::0",
+        "issue::536::heading_aware::1",
+        "issue::536::heading_aware::2",
+        "issue::1523::heading_aware::3",
+        "doc::how-to/custom-docs-ui-assets.md::heading_aware::14",
+        "issue::2005::heading_aware::0"
+      ],
+      "served_self_matches": 0,
+      "route": "known_issue",
+      "confidence": 0.6749607107255575,
+      "escalate": false
+    }
+  },
+  {
+    "id": "rewrite_eval::golden::issue::2236",
+    "stratum": "conceptual",
+    "turn1_escalated": true,
+    "turn1_answer": "This request has been escalated to a human agent.",
+    "turn1_provider": null,
+    "A": {
+      "query": "can you explain why it's useful to use Depends with a database connection function like get_db() rather than directly calling it?",
+      "eval_run": [
+        [
+          "issue::3775::heading_aware::3",
+          0.8041864
+        ],
+        [
+          "issue::3775::heading_aware::2",
+          0.7904679
+        ],
+        [
+          "issue::617::heading_aware::2",
+          0.78804946
+        ],
+        [
+          "issue::2894::heading_aware::7",
+          0.78733855
+        ],
+        [
+          "issue::4588::heading_aware::3",
+          0.7746587
+        ],
+        [
+          "issue::1693::heading_aware::0",
+          0.7668712
+        ],
+        [
+          "issue::5602::heading_aware::2",
+          0.7612493
+        ],
+        [
+          "issue::5891::heading_aware::2",
+          0.75962293
+        ],
+        [
+          "issue::4974::heading_aware::8",
+          0.7590346
+        ],
+        [
+          "issue::2894::heading_aware::9",
+          0.75864387
+        ]
+      ],
+      "served_ids": [
+        "issue::2236::heading_aware::0",
+        "issue::3775::heading_aware::3",
+        "issue::3775::heading_aware::2",
+        "issue::617::heading_aware::2",
+        "issue::2894::heading_aware::7",
+        "issue::4588::heading_aware::3",
+        "issue::1693::heading_aware::0",
+        "issue::5602::heading_aware::2",
+        "issue::5891::heading_aware::2",
+        "issue::4974::heading_aware::8"
+      ],
+      "served_self_matches": 1,
+      "route": "docs_howto",
+      "confidence": 0.7681163191430133,
+      "escalate": false
+    },
+    "B": {
+      "query": "Can you explain why it's useful to use FastAPI's Depends with a database connection function like get_db() rather than directly calling it?",
+      "eval_run": [
+        [
+          "issue::617::heading_aware::2",
+          0.85959196
+        ],
+        [
+          "issue::2894::heading_aware::9",
+          0.85824764
+        ],
+        [
+          "issue::2894::heading_aware::7",
+          0.8507721
+        ],
+        [
+          "issue::1693::heading_aware::0",
+          0.83349186
+        ],
+        [
+          "issue::5891::heading_aware::3",
+          0.80916595
+        ],
+        [
+          "issue::1668::heading_aware::1",
+          0.8068544
+        ],
+        [
+          "issue::3201::heading_aware::0",
+          0.80555606
+        ],
+        [
+          "issue::2894::heading_aware::6",
+          0.80163574
+        ],
+        [
+          "issue::3044::heading_aware::1",
+          0.8005733
+        ],
+        [
+          "issue::2677::heading_aware::0",
+          0.79958916
+        ]
+      ],
+      "served_ids": [
+        "issue::2236::heading_aware::0",
+        "issue::617::heading_aware::2",
+        "issue::2894::heading_aware::9",
+        "issue::2894::heading_aware::7",
+        "issue::1693::heading_aware::0",
+        "issue::5891::heading_aware::3",
+        "issue::1668::heading_aware::1",
+        "issue::3201::heading_aware::0",
+        "issue::2894::heading_aware::6",
+        "issue::3044::heading_aware::1"
+      ],
+      "served_self_matches": 1,
+      "route": "docs_howto",
+      "confidence": 0.7494966172059726,
+      "escalate": false
+    },
+    "C": {
+      "query": "Can you explain why it's useful to use FastAPI's Depends with a database connection function like get_db() rather than directly calling it?",
+      "eval_run": [
+        [
+          "issue::617::heading_aware::2",
+          0.85959196
+        ],
+        [
+          "issue::2894::heading_aware::9",
+          0.85824764
+        ],
+        [
+          "issue::2894::heading_aware::7",
+          0.8507721
+        ],
+        [
+          "issue::1693::heading_aware::0",
+          0.83349186
+        ],
+        [
+          "issue::5891::heading_aware::3",
+          0.80916595
+        ],
+        [
+          "issue::1668::heading_aware::1",
+          0.8068544
+        ],
+        [
+          "issue::3201::heading_aware::0",
+          0.80555606
+        ],
+        [
+          "issue::2894::heading_aware::6",
+          0.80163574
+        ],
+        [
+          "issue::3044::heading_aware::1",
+          0.8005733
+        ],
+        [
+          "issue::2677::heading_aware::0",
+          0.79958916
+        ]
+      ],
+      "served_ids": [
+        "issue::2236::heading_aware::0",
+        "issue::617::heading_aware::2",
+        "issue::2894::heading_aware::9",
+        "issue::2894::heading_aware::7",
+        "issue::1693::heading_aware::0",
+        "issue::5891::heading_aware::3",
+        "issue::1668::heading_aware::1",
+        "issue::3201::heading_aware::0",
+        "issue::2894::heading_aware::6",
+        "issue::3044::heading_aware::1"
+      ],
+      "served_self_matches": 1,
+      "route": "docs_howto",
+      "confidence": 0.7494966172059726,
+      "escalate": false
+    }
+  },
+  {
+    "id": "rewrite_eval::golden::issue::2484",
+    "stratum": "conceptual",
+    "turn1_escalated": false,
+    "turn1_answer": "FastAPI is an ASGI web framework that uses asynchronous code powered by coroutines with `async` and `await` syntax [4][7]. Path operation functions defined with `async def` run on the main thread, whereas functions defined with `def` run in a separate thread from a threadpool [5]. If you have a utility function that is not a path operation or dependency, a normal `def` function is called directly, while an `async def` function must be awaited when called [9].",
+    "turn1_provider": "groq",
+    "A": {
+      "query": "how does the asynchronous nature of your service impact request execution order?",
+      "eval_run": [
+        [
+          "issue::3725::heading_aware::8",
+          0.72483414
+        ],
+        [
+          "issue::4173::heading_aware::6",
+          0.71186095
+        ],
+        [
+          "issue::1002::heading_aware::1",
+          0.6990024
+        ],
+        [
+          "issue::4178::heading_aware::3",
+          0.6976352
+        ],
+        [
+          "issue::1022::heading_aware::2",
+          0.69434357
+        ],
+        [
+          "doc::async.md::heading_aware::0",
+          0.6933149
+        ],
+        [
+          "doc::async.md::heading_aware::11",
+          0.6928098
+        ],
+        [
+          "issue::3962::heading_aware::3",
+          0.6900767
+        ],
+        [
+          "issue::5137::heading_aware::4",
+          0.6890811
+        ],
+        [
+          "issue::692::heading_aware::0",
+          0.68866765
+        ]
+      ],
+      "served_ids": [
+        "issue::3725::heading_aware::8",
+        "issue::4173::heading_aware::6",
+        "issue::1002::heading_aware::1",
+        "issue::4178::heading_aware::3",
+        "issue::1022::heading_aware::2",
+        "doc::async.md::heading_aware::0",
+        "doc::async.md::heading_aware::11",
+        "issue::3962::heading_aware::3",
+        "issue::5137::heading_aware::4",
+        "issue::692::heading_aware::0"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.03603597932060908,
+      "escalate": true
+    },
+    "B": {
+      "query": "How does the asynchronous nature of FastAPI services impact request execution order?",
+      "eval_run": [
+        [
+          "issue::3725::heading_aware::3",
+          0.7931739
+        ],
+        [
+          "issue::3652::heading_aware::4",
+          0.78734547
+        ],
+        [
+          "issue::3962::heading_aware::3",
+          0.78701484
+        ],
+        [
+          "issue::5351::heading_aware::3",
+          0.78484297
+        ],
+        [
+          "issue::4025::heading_aware::8",
+          0.7832836
+        ],
+        [
+          "issue::5137::heading_aware::3",
+          0.7793528
+        ],
+        [
+          "issue::4229::heading_aware::5",
+          0.7753736
+        ],
+        [
+          "issue::3707::heading_aware::5",
+          0.7749834
+        ],
+        [
+          "issue::1002::heading_aware::0",
+          0.7741097
+        ],
+        [
+          "issue::4495::heading_aware::3",
+          0.77212626
+        ]
+      ],
+      "served_ids": [
+        "issue::3725::heading_aware::3",
+        "issue::3652::heading_aware::4",
+        "issue::3962::heading_aware::3",
+        "issue::5351::heading_aware::3",
+        "issue::4025::heading_aware::8",
+        "issue::5137::heading_aware::3",
+        "issue::4229::heading_aware::5",
+        "issue::3707::heading_aware::5",
+        "issue::1002::heading_aware::0",
+        "issue::4495::heading_aware::3"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.2855338194463299,
+      "escalate": true
+    },
+    "C": {
+      "query": "How does the asynchronous nature of FastAPI services impact request execution order?",
+      "eval_run": [
+        [
+          "issue::3725::heading_aware::3",
+          0.7931739
+        ],
+        [
+          "issue::3652::heading_aware::4",
+          0.78734547
+        ],
+        [
+          "issue::3962::heading_aware::3",
+          0.78701484
+        ],
+        [
+          "issue::5351::heading_aware::3",
+          0.78484297
+        ],
+        [
+          "issue::4025::heading_aware::8",
+          0.7832836
+        ],
+        [
+          "issue::5137::heading_aware::3",
+          0.7793528
+        ],
+        [
+          "issue::4229::heading_aware::5",
+          0.7753736
+        ],
+        [
+          "issue::3707::heading_aware::5",
+          0.7749834
+        ],
+        [
+          "issue::1002::heading_aware::0",
+          0.7741097
+        ],
+        [
+          "issue::4495::heading_aware::3",
+          0.77212626
+        ]
+      ],
+      "served_ids": [
+        "issue::3725::heading_aware::3",
+        "issue::3652::heading_aware::4",
+        "issue::3962::heading_aware::3",
+        "issue::5351::heading_aware::3",
+        "issue::4025::heading_aware::8",
+        "issue::5137::heading_aware::3",
+        "issue::4229::heading_aware::5",
+        "issue::3707::heading_aware::5",
+        "issue::1002::heading_aware::0",
+        "issue::4495::heading_aware::3"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.2855338194463299,
+      "escalate": true
+    }
+  },
+  {
+    "id": "rewrite_eval::golden::issue::1329",
+    "stratum": "conceptual",
+    "turn1_escalated": false,
+    "turn1_answer": "The provided context does not contain information stating that FastAPI's dependency injection system supports positional-only arguments in function definitions [1][3][4][5][6][7][8][9][10].",
+    "turn1_provider": "groq",
+    "A": {
+      "query": "How would you propose handling the / character in such cases?",
+      "eval_run": [
+        [
+          "issue::1681::heading_aware::1",
+          0.7119063
+        ],
+        [
+          "issue::1119::heading_aware::1",
+          0.65995646
+        ],
+        [
+          "issue::1084::heading_aware::1",
+          0.65995646
+        ],
+        [
+          "issue::5384::heading_aware::3",
+          0.650959
+        ],
+        [
+          "issue::9411::heading_aware::0",
+          0.6484084
+        ],
+        [
+          "issue::15188::heading_aware::6",
+          0.6447118
+        ],
+        [
+          "issue::4715::heading_aware::3",
+          0.64267445
+        ],
+        [
+          "issue::1398::heading_aware::0",
+          0.64106166
+        ],
+        [
+          "issue::5661::heading_aware::6",
+          0.6385033
+        ],
+        [
+          "issue::3656::heading_aware::4",
+          0.63564116
+        ]
+      ],
+      "served_ids": [
+        "issue::1681::heading_aware::1",
+        "issue::1119::heading_aware::1",
+        "issue::1084::heading_aware::1",
+        "issue::5384::heading_aware::3",
+        "issue::9411::heading_aware::0",
+        "issue::15188::heading_aware::6",
+        "issue::4715::heading_aware::3",
+        "issue::1398::heading_aware::0",
+        "issue::5661::heading_aware::6",
+        "issue::3656::heading_aware::4"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.012546632691412898,
+      "escalate": true
+    },
+    "B": {
+      "query": "How would you propose handling the / character in FastAPI's dependency injection system, given that it supports positional-only arguments in function definitions?",
+      "eval_run": [
+        [
+          "issue::1127::heading_aware::1",
+          0.8363628
+        ],
+        [
+          "issue::791::heading_aware::2",
+          0.7702277
+        ],
+        [
+          "issue::4303::heading_aware::3",
+          0.766135
+        ],
+        [
+          "issue::4741::heading_aware::11",
+          0.75074834
+        ],
+        [
+          "doc::release-notes.md::heading_aware::199",
+          0.7502883
+        ],
+        [
+          "issue::1750::heading_aware::0",
+          0.7497144
+        ],
+        [
+          "issue::1206::heading_aware::0",
+          0.74381864
+        ],
+        [
+          "issue::1944::heading_aware::2",
+          0.74113035
+        ],
+        [
+          "issue::3901::heading_aware::2",
+          0.7371608
+        ],
+        [
+          "doc::tutorial/dependencies/index.md::heading_aware::10",
+          0.73601913
+        ]
+      ],
+      "served_ids": [
+        "issue::1127::heading_aware::1",
+        "issue::791::heading_aware::2",
+        "issue::4303::heading_aware::3",
+        "issue::4741::heading_aware::11",
+        "doc::release-notes.md::heading_aware::199",
+        "issue::1750::heading_aware::0",
+        "issue::1206::heading_aware::0",
+        "issue::1944::heading_aware::2",
+        "issue::3901::heading_aware::2",
+        "doc::tutorial/dependencies/index.md::heading_aware::10"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.2281629252959192,
+      "escalate": true
+    },
+    "C": {
+      "query": "How would you propose handling the / character in FastAPI's dependency injection system for positional-only arguments in function definitions?",
+      "eval_run": [
+        [
+          "issue::4303::heading_aware::3",
+          0.76489854
+        ],
+        [
+          "issue::297::heading_aware::0",
+          0.7560921
+        ],
+        [
+          "doc::release-notes.md::heading_aware::629",
+          0.7538649
+        ],
+        [
+          "doc::release-notes.md::heading_aware::199",
+          0.7520421
+        ],
+        [
+          "issue::1573::heading_aware::7",
+          0.7507939
+        ],
+        [
+          "issue::1750::heading_aware::0",
+          0.7473813
+        ],
+        [
+          "issue::4741::heading_aware::11",
+          0.7394378
+        ],
+        [
+          "issue::5065::heading_aware::3",
+          0.7375278
+        ],
+        [
+          "issue::1944::heading_aware::2",
+          0.73654604
+        ],
+        [
+          "issue::5519::heading_aware::2",
+          0.7361051
+        ]
+      ],
+      "served_ids": [
+        "issue::4303::heading_aware::3",
+        "issue::297::heading_aware::0",
+        "doc::release-notes.md::heading_aware::629",
+        "doc::release-notes.md::heading_aware::199",
+        "issue::1573::heading_aware::7",
+        "issue::1750::heading_aware::0",
+        "issue::4741::heading_aware::11",
+        "issue::5065::heading_aware::3",
+        "issue::1944::heading_aware::2",
+        "issue::5519::heading_aware::2"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.22626403235720588,
+      "escalate": true
+    }
+  },
+  {
+    "id": "rewrite_eval::golden::issue::1679",
+    "stratum": "conceptual",
+    "turn1_escalated": true,
+    "turn1_answer": "This request has been escalated to a human agent.",
+    "turn1_provider": null,
+    "A": {
+      "query": "Can you tell me why Sebastián would recommend using 'sync' over 'async' in this case?",
+      "eval_run": [
+        [
+          "issue::3200::heading_aware::1",
+          0.76839787
+        ],
+        [
+          "issue::9355::heading_aware::1",
+          0.7631638
+        ],
+        [
+          "doc::async.md::heading_aware::11",
+          0.74273336
+        ],
+        [
+          "doc::async.md::heading_aware::19",
+          0.7413902
+        ],
+        [
+          "doc::async.md::heading_aware::22",
+          0.7409026
+        ],
+        [
+          "doc::async.md::heading_aware::0",
+          0.74081975
+        ],
+        [
+          "doc::async.md::heading_aware::21",
+          0.7343323
+        ],
+        [
+          "issue::1280::heading_aware::0",
+          0.7333631
+        ],
+        [
+          "issue::2619::heading_aware::0",
+          0.7325655
+        ],
+        [
+          "doc::async.md::heading_aware::25",
+          0.72995746
+        ]
+      ],
+      "served_ids": [
+        "issue::3200::heading_aware::1",
+        "issue::9355::heading_aware::1",
+        "issue::1679::heading_aware::0",
+        "doc::async.md::heading_aware::11",
+        "doc::async.md::heading_aware::19",
+        "doc::async.md::heading_aware::22",
+        "doc::async.md::heading_aware::0",
+        "doc::async.md::heading_aware::21",
+        "issue::1280::heading_aware::0",
+        "issue::2619::heading_aware::0"
+      ],
+      "served_self_matches": 1,
+      "route": "docs_howto",
+      "confidence": 0.8285605634587607,
+      "escalate": false
+    },
+    "B": {
+      "query": "Can you tell me why Sebastián would recommend using 'sync' over 'async' when serving an ML model with FastAPI?",
+      "eval_run": [
+        [
+          "doc::advanced/events.md::heading_aware::3",
+          0.8003936
+        ],
+        [
+          "issue::4187::heading_aware::3",
+          0.78891414
+        ],
+        [
+          "doc::advanced/async-tests.md::heading_aware::0",
+          0.7860587
+        ],
+        [
+          "issue::3707::heading_aware::5",
+          0.78396815
+        ],
+        [
+          "issue::3725::heading_aware::3",
+          0.7814127
+        ],
+        [
+          "doc::async.md::heading_aware::21",
+          0.7786306
+        ],
+        [
+          "issue::2619::heading_aware::0",
+          0.7737794
+        ],
+        [
+          "issue::4025::heading_aware::8",
+          0.7718094
+        ],
+        [
+          "doc::async.md::heading_aware::17",
+          0.77042687
+        ],
+        [
+          "issue::4988::heading_aware::3",
+          0.7684907
+        ]
+      ],
+      "served_ids": [
+        "doc::advanced/events.md::heading_aware::3",
+        "issue::4187::heading_aware::3",
+        "doc::advanced/async-tests.md::heading_aware::0",
+        "issue::3707::heading_aware::5",
+        "issue::3725::heading_aware::3",
+        "doc::async.md::heading_aware::21",
+        "issue::2619::heading_aware::0",
+        "issue::4025::heading_aware::8",
+        "doc::async.md::heading_aware::17",
+        "issue::4988::heading_aware::3"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.31320718972245937,
+      "escalate": true
+    },
+    "C": {
+      "query": "Can you tell me why Sebastián would recommend using 'sync' over 'async' when building an ML model with FastAPI?",
+      "eval_run": [
+        [
+          "doc::advanced/events.md::heading_aware::3",
+          0.7980931
+        ],
+        [
+          "issue::4187::heading_aware::3",
+          0.7917688
+        ],
+        [
+          "doc::async.md::heading_aware::22",
+          0.7897184
+        ],
+        [
+          "doc::advanced/async-tests.md::heading_aware::0",
+          0.7896783
+        ],
+        [
+          "issue::4988::heading_aware::8",
+          0.78835493
+        ],
+        [
+          "doc::advanced/events.md::heading_aware::4",
+          0.78647757
+        ],
+        [
+          "doc::async.md::heading_aware::21",
+          0.78573406
+        ],
+        [
+          "issue::992::heading_aware::3",
+          0.7838609
+        ],
+        [
+          "issue::3725::heading_aware::3",
+          0.78139424
+        ],
+        [
+          "issue::9355::heading_aware::1",
+          0.7793116
+        ]
+      ],
+      "served_ids": [
+        "issue::1679::heading_aware::0",
+        "doc::advanced/events.md::heading_aware::3",
+        "issue::4187::heading_aware::3",
+        "doc::async.md::heading_aware::22",
+        "doc::advanced/async-tests.md::heading_aware::0",
+        "issue::4988::heading_aware::8",
+        "doc::advanced/events.md::heading_aware::4",
+        "doc::async.md::heading_aware::21",
+        "issue::992::heading_aware::3",
+        "issue::3725::heading_aware::3"
+      ],
+      "served_self_matches": 1,
+      "route": "docs_howto",
+      "confidence": 0.8490695623376087,
+      "escalate": false
+    }
+  },
+  {
+    "id": "rewrite_eval::golden::issue::2342",
+    "stratum": "version_specific",
+    "turn1_escalated": false,
+    "turn1_answer": "The provided context does not contain enough information to answer what specific changes occurred in the new release of Starlette that affect FastAPI, as the excerpts only list version upgrades and do not detail the internal changes in Starlette itself [1][3][5][6][8][9][10].\n\nHowever, the context does note that upgrading Starlette to 0.25.0 solved a vulnerability that could allow denial of service attacks by using many small multipart fields/files, which could affect applications using forms or file uploads [10]. Additionally, a future release was planned to upgrade Starlette to take advantage of recent improvements, though this was separated due to a higher chance of breaking changes [1].",
+    "turn1_provider": "groq",
+    "A": {
+      "query": "Specifically, what replaced the removed `UJSONResponse` in FastAPI?",
+      "eval_run": [
+        [
+          "doc::release-notes.md::heading_aware::112",
+          0.8384608
+        ],
+        [
+          "issue::4229::heading_aware::5",
+          0.8223238
+        ],
+        [
+          "issue::820::heading_aware::0",
+          0.81417644
+        ],
+        [
+          "issue::820::heading_aware::1",
+          0.8096275
+        ],
+        [
+          "doc::advanced/additional-status-codes.md::heading_aware::0",
+          0.8092457
+        ],
+        [
+          "issue::1668::heading_aware::2",
+          0.80132073
+        ],
+        [
+          "doc::release-notes.md::heading_aware::457",
+          0.79634905
+        ],
+        [
+          "issue::2518::heading_aware::3",
+          0.7949511
+        ],
+        [
+          "issue::210::heading_aware::5",
+          0.7947051
+        ],
+        [
+          "issue::2226::heading_aware::0",
+          0.79391843
+        ]
+      ],
+      "served_ids": [
+        "doc::release-notes.md::heading_aware::112",
+        "issue::4229::heading_aware::5",
+        "issue::820::heading_aware::0",
+        "issue::2342::heading_aware::0",
+        "issue::820::heading_aware::1",
+        "doc::advanced/additional-status-codes.md::heading_aware::0",
+        "issue::1668::heading_aware::2",
+        "doc::release-notes.md::heading_aware::457",
+        "issue::2518::heading_aware::3",
+        "issue::210::heading_aware::5"
+      ],
+      "served_self_matches": 1,
+      "route": "docs_howto",
+      "confidence": 0.7191853107986306,
+      "escalate": false
+    },
+    "B": {
+      "query": "What replaced the removed `UJSONResponse` in FastAPI?",
+      "eval_run": [
+        [
+          "issue::4229::heading_aware::5",
+          0.82221895
+        ],
+        [
+          "doc::advanced/custom-response.md::heading_aware::1",
+          0.79133356
+        ],
+        [
+          "issue::2226::heading_aware::0",
+          0.79083455
+        ],
+        [
+          "issue::2518::heading_aware::3",
+          0.7903085
+        ],
+        [
+          "issue::3412::heading_aware::0",
+          0.7854706
+        ],
+        [
+          "issue::5261::heading_aware::6",
+          0.78236526
+        ],
+        [
+          "doc::advanced/dataclasses.md::heading_aware::6",
+          0.7816944
+        ],
+        [
+          "issue::4233::heading_aware::6",
+          0.7810744
+        ],
+        [
+          "issue::2580::heading_aware::0",
+          0.7810744
+        ],
+        [
+          "issue::4339::heading_aware::6",
+          0.7809603
+        ]
+      ],
+      "served_ids": [
+        "issue::4229::heading_aware::5",
+        "issue::2342::heading_aware::0",
+        "doc::advanced/custom-response.md::heading_aware::1",
+        "issue::2226::heading_aware::0",
+        "issue::2518::heading_aware::3",
+        "issue::3412::heading_aware::0",
+        "issue::5261::heading_aware::6",
+        "doc::advanced/dataclasses.md::heading_aware::6",
+        "issue::2580::heading_aware::0",
+        "issue::4233::heading_aware::6"
+      ],
+      "served_self_matches": 1,
+      "route": "docs_howto",
+      "confidence": 0.6598984028565288,
+      "escalate": false
+    },
+    "C": {
+      "query": "What replaced the removed `UJSONResponse` in FastAPI?",
+      "eval_run": [
+        [
+          "issue::4229::heading_aware::5",
+          0.82221895
+        ],
+        [
+          "doc::advanced/custom-response.md::heading_aware::1",
+          0.79133356
+        ],
+        [
+          "issue::2226::heading_aware::0",
+          0.79083455
+        ],
+        [
+          "issue::2518::heading_aware::3",
+          0.7903085
+        ],
+        [
+          "issue::3412::heading_aware::0",
+          0.7854706
+        ],
+        [
+          "issue::5261::heading_aware::6",
+          0.78236526
+        ],
+        [
+          "doc::advanced/dataclasses.md::heading_aware::6",
+          0.7816944
+        ],
+        [
+          "issue::4233::heading_aware::6",
+          0.7810744
+        ],
+        [
+          "issue::2580::heading_aware::0",
+          0.7810744
+        ],
+        [
+          "issue::4339::heading_aware::6",
+          0.7809603
+        ]
+      ],
+      "served_ids": [
+        "issue::4229::heading_aware::5",
+        "issue::2342::heading_aware::0",
+        "doc::advanced/custom-response.md::heading_aware::1",
+        "issue::2226::heading_aware::0",
+        "issue::2518::heading_aware::3",
+        "issue::3412::heading_aware::0",
+        "issue::5261::heading_aware::6",
+        "doc::advanced/dataclasses.md::heading_aware::6",
+        "issue::2580::heading_aware::0",
+        "issue::4233::heading_aware::6"
+      ],
+      "served_self_matches": 1,
+      "route": "docs_howto",
+      "confidence": 0.6598984028565288,
+      "escalate": false
+    }
+  },
+  {
+    "id": "rewrite_eval::golden::issue::13533",
+    "stratum": "version_specific",
+    "turn1_escalated": true,
+    "turn1_answer": "This request has been escalated to a human agent.",
+    "turn1_provider": null,
+    "A": {
+      "query": "Can you specify which particular issue regarding default values in `x-form-urlencoded` or `multipart` forms is causing the problem?",
+      "eval_run": [
+        [
+          "issue::2387::heading_aware::7",
+          0.776193
+        ],
+        [
+          "issue::4550::heading_aware::4",
+          0.7431541
+        ],
+        [
+          "issue::11104::heading_aware::1",
+          0.7431461
+        ],
+        [
+          "issue::2433::heading_aware::0",
+          0.7418785
+        ],
+        [
+          "issue::2365::heading_aware::4",
+          0.73148465
+        ],
+        [
+          "doc::tutorial/request-forms.md::heading_aware::3",
+          0.7289713
+        ],
+        [
+          "issue::2705::heading_aware::2",
+          0.72832525
+        ],
+        [
+          "doc::release-notes.md::heading_aware::206",
+          0.726572
+        ],
+        [
+          "issue::2791::heading_aware::4",
+          0.7207219
+        ],
+        [
+          "issue::2784::heading_aware::2",
+          0.72054434
+        ]
+      ],
+      "served_ids": [
+        "issue::13533::heading_aware::3",
+        "issue::2387::heading_aware::7",
+        "issue::4550::heading_aware::4",
+        "issue::11104::heading_aware::1",
+        "issue::2433::heading_aware::0",
+        "issue::2365::heading_aware::4",
+        "doc::tutorial/request-forms.md::heading_aware::3",
+        "issue::2705::heading_aware::2",
+        "doc::release-notes.md::heading_aware::206",
+        "issue::2791::heading_aware::4"
+      ],
+      "served_self_matches": 1,
+      "route": "known_issue",
+      "confidence": 0.5974510413877041,
+      "escalate": false
+    },
+    "B": {
+      "query": "Can you specify which particular issue regarding default values in `x-form-urlencoded` or `multipart` forms is causing the problem?",
+      "eval_run": [
+        [
+          "issue::2387::heading_aware::7",
+          0.776193
+        ],
+        [
+          "issue::4550::heading_aware::4",
+          0.7431541
+        ],
+        [
+          "issue::11104::heading_aware::1",
+          0.7431461
+        ],
+        [
+          "issue::2433::heading_aware::0",
+          0.7418785
+        ],
+        [
+          "issue::2365::heading_aware::4",
+          0.73148465
+        ],
+        [
+          "doc::tutorial/request-forms.md::heading_aware::3",
+          0.7289713
+        ],
+        [
+          "issue::2705::heading_aware::2",
+          0.72832525
+        ],
+        [
+          "doc::release-notes.md::heading_aware::206",
+          0.726572
+        ],
+        [
+          "issue::2791::heading_aware::4",
+          0.7207219
+        ],
+        [
+          "issue::2784::heading_aware::2",
+          0.72054434
+        ]
+      ],
+      "served_ids": [
+        "issue::13533::heading_aware::3",
+        "issue::2387::heading_aware::7",
+        "issue::4550::heading_aware::4",
+        "issue::11104::heading_aware::1",
+        "issue::2433::heading_aware::0",
+        "issue::2365::heading_aware::4",
+        "doc::tutorial/request-forms.md::heading_aware::3",
+        "issue::2705::heading_aware::2",
+        "doc::release-notes.md::heading_aware::206",
+        "issue::2791::heading_aware::4"
+      ],
+      "served_self_matches": 1,
+      "route": "known_issue",
+      "confidence": 0.5974510413877041,
+      "escalate": false
+    },
+    "C": {
+      "query": "Can you specify which particular issue regarding default values in `x-form-urlencoded` or `multipart` forms is causing the problem?",
+      "eval_run": [
+        [
+          "issue::2387::heading_aware::7",
+          0.776193
+        ],
+        [
+          "issue::4550::heading_aware::4",
+          0.7431541
+        ],
+        [
+          "issue::11104::heading_aware::1",
+          0.7431461
+        ],
+        [
+          "issue::2433::heading_aware::0",
+          0.7418785
+        ],
+        [
+          "issue::2365::heading_aware::4",
+          0.73148465
+        ],
+        [
+          "doc::tutorial/request-forms.md::heading_aware::3",
+          0.7289713
+        ],
+        [
+          "issue::2705::heading_aware::2",
+          0.72832525
+        ],
+        [
+          "doc::release-notes.md::heading_aware::206",
+          0.726572
+        ],
+        [
+          "issue::2791::heading_aware::4",
+          0.7207219
+        ],
+        [
+          "issue::2784::heading_aware::2",
+          0.72054434
+        ]
+      ],
+      "served_ids": [
+        "issue::13533::heading_aware::3",
+        "issue::2387::heading_aware::7",
+        "issue::4550::heading_aware::4",
+        "issue::11104::heading_aware::1",
+        "issue::2433::heading_aware::0",
+        "issue::2365::heading_aware::4",
+        "doc::tutorial/request-forms.md::heading_aware::3",
+        "issue::2705::heading_aware::2",
+        "doc::release-notes.md::heading_aware::206",
+        "issue::2791::heading_aware::4"
+      ],
+      "served_self_matches": 1,
+      "route": "known_issue",
+      "confidence": 0.5974510413877041,
+      "escalate": false
+    }
+  },
+  {
+    "id": "rewrite_eval::golden::issue::16010",
+    "stratum": "version_specific",
+    "turn1_escalated": true,
+    "turn1_answer": "This request has been escalated to a human agent.",
+    "turn1_provider": null,
+    "A": {
+      "query": "What happens to routes like /users/john.doe or /v/1.2.3 when using app.frontend() with fallback=\"index.html\"?",
+      "eval_run": [
+        [
+          "doc::tutorial/frontend.md::heading_aware::4",
+          0.83962595
+        ],
+        [
+          "doc::tutorial/frontend.md::heading_aware::2",
+          0.80034816
+        ],
+        [
+          "doc::release-notes.md::heading_aware::23",
+          0.79356045
+        ],
+        [
+          "doc::tutorial/frontend.md::heading_aware::5",
+          0.78881955
+        ],
+        [
+          "doc::tutorial/frontend.md::heading_aware::3",
+          0.7867638
+        ],
+        [
+          "doc::tutorial/frontend.md::heading_aware::7",
+          0.7433554
+        ],
+        [
+          "doc::release-notes.md::heading_aware::36",
+          0.7275572
+        ],
+        [
+          "issue::4435::heading_aware::9",
+          0.7263481
+        ],
+        [
+          "doc::tutorial/frontend.md::heading_aware::0",
+          0.72607565
+        ],
+        [
+          "issue::1648::heading_aware::0",
+          0.7188121
+        ]
+      ],
+      "served_ids": [
+        "issue::16010::heading_aware::4",
+        "doc::tutorial/frontend.md::heading_aware::4",
+        "doc::tutorial/frontend.md::heading_aware::2",
+        "doc::release-notes.md::heading_aware::23",
+        "doc::tutorial/frontend.md::heading_aware::5",
+        "doc::tutorial/frontend.md::heading_aware::3",
+        "issue::16010::heading_aware::5",
+        "doc::tutorial/frontend.md::heading_aware::7",
+        "doc::release-notes.md::heading_aware::36",
+        "issue::4435::heading_aware::9"
+      ],
+      "served_self_matches": 2,
+      "route": "docs_howto",
+      "confidence": 0.6971851620642882,
+      "escalate": false
+    },
+    "B": {
+      "query": "What happens to routes like /users/john.doe or /v/1.2.3 when using app.frontend() with fallback=\"index.html\" in FastAPI?",
+      "eval_run": [
+        [
+          "doc::tutorial/frontend.md::heading_aware::3",
+          0.8431394
+        ],
+        [
+          "issue::1294::heading_aware::0",
+          0.7681428
+        ],
+        [
+          "issue::1127::heading_aware::1",
+          0.7661933
+        ],
+        [
+          "issue::677::heading_aware::0",
+          0.7659659
+        ],
+        [
+          "issue::1750::heading_aware::0",
+          0.7656932
+        ],
+        [
+          "doc::tutorial/frontend.md::heading_aware::8",
+          0.7651756
+        ],
+        [
+          "issue::15::heading_aware::0",
+          0.7627847
+        ],
+        [
+          "doc::advanced/behind-a-proxy.md::heading_aware::3",
+          0.7567235
+        ],
+        [
+          "issue::912::heading_aware::0",
+          0.75612915
+        ],
+        [
+          "issue::2472::heading_aware::2",
+          0.7555194
+        ]
+      ],
+      "served_ids": [
+        "doc::tutorial/frontend.md::heading_aware::3",
+        "issue::1294::heading_aware::0",
+        "issue::1127::heading_aware::1",
+        "issue::677::heading_aware::0",
+        "issue::1750::heading_aware::0",
+        "doc::tutorial/frontend.md::heading_aware::8",
+        "issue::15::heading_aware::0",
+        "doc::advanced/behind-a-proxy.md::heading_aware::3",
+        "issue::912::heading_aware::0",
+        "issue::2472::heading_aware::2"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.7579993811305977,
+      "escalate": false
+    },
+    "C": {
+      "query": "What happens to routes like /users/john.doe or /v/1.2.3 when using app.frontend() with fallback=\"index.html\" in FastAPI to serve client-side routes?",
+      "eval_run": [
+        [
+          "doc::tutorial/frontend.md::heading_aware::3",
+          0.83695614
+        ],
+        [
+          "issue::677::heading_aware::0",
+          0.77450496
+        ],
+        [
+          "issue::15::heading_aware::0",
+          0.7688335
+        ],
+        [
+          "doc::tutorial/frontend.md::heading_aware::8",
+          0.7673538
+        ],
+        [
+          "issue::1294::heading_aware::0",
+          0.7668228
+        ],
+        [
+          "issue::1127::heading_aware::1",
+          0.7607697
+        ],
+        [
+          "issue::1750::heading_aware::0",
+          0.7601681
+        ],
+        [
+          "doc::advanced/behind-a-proxy.md::heading_aware::3",
+          0.7576482
+        ],
+        [
+          "issue::8::heading_aware::0",
+          0.7527994
+        ],
+        [
+          "issue::2472::heading_aware::2",
+          0.7525203
+        ]
+      ],
+      "served_ids": [
+        "doc::tutorial/frontend.md::heading_aware::3",
+        "issue::677::heading_aware::0",
+        "issue::15::heading_aware::0",
+        "doc::tutorial/frontend.md::heading_aware::8",
+        "issue::1294::heading_aware::0",
+        "issue::1127::heading_aware::1",
+        "issue::1750::heading_aware::0",
+        "doc::advanced/behind-a-proxy.md::heading_aware::3",
+        "issue::8::heading_aware::0",
+        "issue::2472::heading_aware::2"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.6643246623753527,
+      "escalate": false
+    }
+  },
+  {
+    "id": "rewrite_eval::golden::issue::4041",
+    "stratum": "version_specific",
+    "turn1_escalated": false,
+    "turn1_answer": "The provided context does not contain information about how to handle a \"not found\" resource in FastAPI [1][2][3][4][5][6][7][8][9][10]. The available excerpts consist primarily of GitHub issue templates and a single question about inspecting `BaseModel` objects before serialization [8]. Therefore, I cannot provide a specific solution for handling missing resources based on the given materials.",
+    "turn1_provider": "groq",
+    "A": {
+      "query": "Can you tell me what causes a BrokenResourceError in FastAPI?",
+      "eval_run": [
+        [
+          "issue::3985::heading_aware::3",
+          0.8234216
+        ],
+        [
+          "issue::3331::heading_aware::5",
+          0.8123144
+        ],
+        [
+          "issue::3545::heading_aware::5",
+          0.8086034
+        ],
+        [
+          "issue::3403::heading_aware::4",
+          0.80438304
+        ],
+        [
+          "issue::3542::heading_aware::2",
+          0.8034491
+        ],
+        [
+          "issue::3368::heading_aware::3",
+          0.8028786
+        ],
+        [
+          "issue::841::heading_aware::3",
+          0.7991566
+        ],
+        [
+          "issue::3335::heading_aware::4",
+          0.79912335
+        ],
+        [
+          "issue::1550::heading_aware::2",
+          0.797348
+        ],
+        [
+          "issue::3221::heading_aware::3",
+          0.79678786
+        ]
+      ],
+      "served_ids": [
+        "issue::3985::heading_aware::3",
+        "issue::3331::heading_aware::5",
+        "issue::3545::heading_aware::5",
+        "issue::3403::heading_aware::4",
+        "issue::3542::heading_aware::2",
+        "issue::3368::heading_aware::3",
+        "issue::841::heading_aware::3",
+        "issue::3335::heading_aware::4",
+        "issue::1550::heading_aware::2",
+        "issue::3221::heading_aware::3"
+      ],
+      "served_self_matches": 0,
+      "route": "known_issue",
+      "confidence": 0.3207314322648683,
+      "escalate": true
+    },
+    "B": {
+      "query": "Can you tell me what causes a BrokenResourceError in FastAPI?",
+      "eval_run": [
+        [
+          "issue::3985::heading_aware::3",
+          0.8234216
+        ],
+        [
+          "issue::3331::heading_aware::5",
+          0.8123144
+        ],
+        [
+          "issue::3545::heading_aware::5",
+          0.8086034
+        ],
+        [
+          "issue::3403::heading_aware::4",
+          0.80438304
+        ],
+        [
+          "issue::3542::heading_aware::2",
+          0.8034491
+        ],
+        [
+          "issue::3368::heading_aware::3",
+          0.8028786
+        ],
+        [
+          "issue::841::heading_aware::3",
+          0.7991566
+        ],
+        [
+          "issue::3335::heading_aware::4",
+          0.79912335
+        ],
+        [
+          "issue::1550::heading_aware::2",
+          0.797348
+        ],
+        [
+          "issue::3221::heading_aware::3",
+          0.79678786
+        ]
+      ],
+      "served_ids": [
+        "issue::3985::heading_aware::3",
+        "issue::3331::heading_aware::5",
+        "issue::3545::heading_aware::5",
+        "issue::3403::heading_aware::4",
+        "issue::3542::heading_aware::2",
+        "issue::3368::heading_aware::3",
+        "issue::841::heading_aware::3",
+        "issue::3335::heading_aware::4",
+        "issue::1550::heading_aware::2",
+        "issue::3221::heading_aware::3"
+      ],
+      "served_self_matches": 0,
+      "route": "known_issue",
+      "confidence": 0.3207314322648683,
+      "escalate": true
+    },
+    "C": {
+      "query": "What causes a BrokenResourceError in FastAPI?",
+      "eval_run": [
+        [
+          "issue::3985::heading_aware::3",
+          0.81776464
+        ],
+        [
+          "issue::3331::heading_aware::5",
+          0.8088635
+        ],
+        [
+          "issue::3542::heading_aware::2",
+          0.80387235
+        ],
+        [
+          "issue::3545::heading_aware::5",
+          0.80348563
+        ],
+        [
+          "issue::3368::heading_aware::3",
+          0.80019933
+        ],
+        [
+          "issue::3403::heading_aware::4",
+          0.79839176
+        ],
+        [
+          "issue::3335::heading_aware::4",
+          0.7980112
+        ],
+        [
+          "issue::1550::heading_aware::2",
+          0.79617167
+        ],
+        [
+          "issue::3221::heading_aware::3",
+          0.795086
+        ],
+        [
+          "issue::3275::heading_aware::2",
+          0.7926583
+        ]
+      ],
+      "served_ids": [
+        "issue::3985::heading_aware::3",
+        "issue::3331::heading_aware::5",
+        "issue::3542::heading_aware::2",
+        "issue::3545::heading_aware::5",
+        "issue::3368::heading_aware::3",
+        "issue::3403::heading_aware::4",
+        "issue::3335::heading_aware::4",
+        "issue::1550::heading_aware::2",
+        "issue::3221::heading_aware::3",
+        "issue::3275::heading_aware::2"
+      ],
+      "served_self_matches": 0,
+      "route": "known_issue",
+      "confidence": 0.251811099860605,
+      "escalate": true
+    }
+  },
+  {
+    "id": "rewrite_eval::golden::issue::2855",
+    "stratum": "multi_hop",
+    "turn1_escalated": true,
+    "turn1_answer": "This request has been escalated to a human agent.",
+    "turn1_provider": null,
+    "A": {
+      "query": "Can you explain how to add authentication to specific GraphQL routes, like mutations or queries?",
+      "eval_run": [
+        [
+          "issue::895::heading_aware::2",
+          0.70329726
+        ],
+        [
+          "doc::tutorial/security/first-steps.md::heading_aware::4",
+          0.7021884
+        ],
+        [
+          "doc::how-to/graphql.md::heading_aware::2",
+          0.6987747
+        ],
+        [
+          "issue::3552::heading_aware::2",
+          0.6975572
+        ],
+        [
+          "issue::3277::heading_aware::0",
+          0.69578063
+        ],
+        [
+          "issue::2810::heading_aware::2",
+          0.69240236
+        ],
+        [
+          "issue::1399::heading_aware::1",
+          0.69036496
+        ],
+        [
+          "issue::3947::heading_aware::2",
+          0.68959427
+        ],
+        [
+          "issue::5073::heading_aware::3",
+          0.68756855
+        ],
+        [
+          "doc::release-notes.md::heading_aware::859",
+          0.68705934
+        ]
+      ],
+      "served_ids": [
+        "issue::895::heading_aware::2",
+        "doc::tutorial/security/first-steps.md::heading_aware::4",
+        "doc::how-to/graphql.md::heading_aware::2",
+        "issue::3552::heading_aware::2",
+        "issue::3277::heading_aware::0",
+        "issue::2810::heading_aware::2",
+        "issue::1399::heading_aware::1",
+        "issue::3947::heading_aware::2",
+        "issue::5073::heading_aware::3",
+        "doc::release-notes.md::heading_aware::859"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.045579930876692466,
+      "escalate": true
+    },
+    "B": {
+      "query": "Can you explain how to add authentication to specific GraphQL routes, like mutations or queries, when implementing authentication for GraphQL requests using FastAPI?",
+      "eval_run": [
+        [
+          "issue::3277::heading_aware::0",
+          0.77988654
+        ],
+        [
+          "issue::3794::heading_aware::5",
+          0.7598575
+        ],
+        [
+          "doc::release-notes.md::heading_aware::859",
+          0.75645006
+        ],
+        [
+          "doc::how-to/graphql.md::heading_aware::2",
+          0.75211775
+        ],
+        [
+          "issue::5792::heading_aware::3",
+          0.7518743
+        ],
+        [
+          "issue::12965::heading_aware::4",
+          0.7518743
+        ],
+        [
+          "issue::4730::heading_aware::3",
+          0.75160664
+        ],
+        [
+          "issue::4159::heading_aware::3",
+          0.74832094
+        ],
+        [
+          "issue::3968::heading_aware::2",
+          0.74824905
+        ],
+        [
+          "doc::release-notes.md::heading_aware::946",
+          0.7480444
+        ]
+      ],
+      "served_ids": [
+        "issue::3277::heading_aware::0",
+        "issue::3794::heading_aware::5",
+        "doc::release-notes.md::heading_aware::859",
+        "doc::how-to/graphql.md::heading_aware::2",
+        "issue::5792::heading_aware::3",
+        "issue::12965::heading_aware::4",
+        "issue::4730::heading_aware::3",
+        "issue::4159::heading_aware::3",
+        "issue::3968::heading_aware::2",
+        "doc::release-notes.md::heading_aware::946"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.5575685132182557,
+      "escalate": false
+    },
+    "C": {
+      "query": "Can you explain how to add authentication to specific GraphQL routes, like mutations or queries, in a FastAPI application?",
+      "eval_run": [
+        [
+          "issue::3277::heading_aware::0",
+          0.7810024
+        ],
+        [
+          "doc::release-notes.md::heading_aware::859",
+          0.77461606
+        ],
+        [
+          "issue::3794::heading_aware::5",
+          0.7734611
+        ],
+        [
+          "issue::4730::heading_aware::3",
+          0.7644373
+        ],
+        [
+          "doc::tutorial/bigger-applications.md::heading_aware::11",
+          0.7625607
+        ],
+        [
+          "doc::how-to/graphql.md::heading_aware::2",
+          0.7566309
+        ],
+        [
+          "issue::3968::heading_aware::2",
+          0.755275
+        ],
+        [
+          "doc::how-to/graphql.md::heading_aware::0",
+          0.7549479
+        ],
+        [
+          "doc::tutorial/dependencies/global-dependencies.md::heading_aware::0",
+          0.752641
+        ],
+        [
+          "doc::release-notes.md::heading_aware::946",
+          0.75188744
+        ]
+      ],
+      "served_ids": [
+        "issue::3277::heading_aware::0",
+        "doc::release-notes.md::heading_aware::859",
+        "issue::3794::heading_aware::5",
+        "issue::4730::heading_aware::3",
+        "doc::tutorial/bigger-applications.md::heading_aware::11",
+        "doc::how-to/graphql.md::heading_aware::2",
+        "issue::3968::heading_aware::2",
+        "doc::how-to/graphql.md::heading_aware::0",
+        "doc::tutorial/dependencies/global-dependencies.md::heading_aware::0",
+        "doc::release-notes.md::heading_aware::946"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.5530410735588088,
+      "escalate": false
+    }
+  },
+  {
+    "id": "rewrite_eval::golden::issue::1034",
+    "stratum": "multi_hop",
+    "turn1_escalated": false,
+    "turn1_answer": "Yes, FastAPI supports creating complex dependencies with multiple levels of sub-dependencies, allowing them to be as deep as needed, with the framework automatically handling the resolution of this dependency graph [1][5]. You can create \"trees\" of sub-dependencies of any size and shape, and FastAPI ensures that any \"exit code\" in dependencies using `yield` is executed in the correct order [2].",
+    "turn1_provider": "groq",
+    "A": {
+      "query": "Can you show an example of how to parameterize a class dependency on a sub-dependency like the OAuth2PasswordBearer scheme?",
+      "eval_run": [
+        [
+          "issue::3733::heading_aware::4",
+          0.78075516
+        ],
+        [
+          "issue::3733::heading_aware::3",
+          0.7751663
+        ],
+        [
+          "doc::tutorial/security/get-current-user.md::heading_aware::2",
+          0.7704672
+        ],
+        [
+          "doc::tutorial/security/first-steps.md::heading_aware::8",
+          0.7657487
+        ],
+        [
+          "issue::5661::heading_aware::4",
+          0.76378375
+        ],
+        [
+          "issue::3704::heading_aware::3",
+          0.76205325
+        ],
+        [
+          "issue::4667::heading_aware::3",
+          0.76056004
+        ],
+        [
+          "issue::578::heading_aware::1",
+          0.7574067
+        ],
+        [
+          "issue::1206::heading_aware::1",
+          0.75707114
+        ],
+        [
+          "doc::advanced/security/oauth2-scopes.md::heading_aware::13",
+          0.7518475
+        ]
+      ],
+      "served_ids": [
+        "issue::1034::heading_aware::1",
+        "issue::3733::heading_aware::4",
+        "issue::3733::heading_aware::3",
+        "doc::tutorial/security/get-current-user.md::heading_aware::2",
+        "doc::tutorial/security/first-steps.md::heading_aware::8",
+        "issue::5661::heading_aware::4",
+        "issue::3704::heading_aware::3",
+        "issue::4667::heading_aware::3",
+        "issue::1034::heading_aware::2",
+        "issue::578::heading_aware::1"
+      ],
+      "served_self_matches": 2,
+      "route": "docs_howto",
+      "confidence": 0.7988531833965755,
+      "escalate": false
+    },
+    "B": {
+      "query": "Can you show an example of how to parameterize a FastAPI class dependency on a sub-dependency like the OAuth2PasswordBearer scheme?",
+      "eval_run": [
+        [
+          "issue::4293::heading_aware::3",
+          0.82227343
+        ],
+        [
+          "doc::tutorial/security/get-current-user.md::heading_aware::2",
+          0.81095445
+        ],
+        [
+          "issue::5451::heading_aware::2",
+          0.8007724
+        ],
+        [
+          "issue::3967::heading_aware::2",
+          0.7975473
+        ],
+        [
+          "doc::tutorial/security/first-steps.md::heading_aware::2",
+          0.79172426
+        ],
+        [
+          "issue::4669::heading_aware::2",
+          0.7892166
+        ],
+        [
+          "issue::3977::heading_aware::2",
+          0.7888471
+        ],
+        [
+          "issue::2835::heading_aware::1",
+          0.78729993
+        ],
+        [
+          "doc::tutorial/bigger-applications.md::heading_aware::17",
+          0.77770734
+        ],
+        [
+          "issue::3148::heading_aware::1",
+          0.77456367
+        ]
+      ],
+      "served_ids": [
+        "issue::4293::heading_aware::3",
+        "doc::tutorial/security/get-current-user.md::heading_aware::2",
+        "issue::5451::heading_aware::2",
+        "issue::3967::heading_aware::2",
+        "doc::tutorial/security/first-steps.md::heading_aware::2",
+        "issue::4669::heading_aware::2",
+        "issue::3977::heading_aware::2",
+        "issue::2835::heading_aware::1",
+        "doc::tutorial/bigger-applications.md::heading_aware::17",
+        "issue::3148::heading_aware::1"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.6892317928560655,
+      "escalate": false
+    },
+    "C": {
+      "query": "Can you show an example of how to parameterize a class dependency on a sub-dependency like the OAuth2PasswordBearer scheme in FastAPI?",
+      "eval_run": [
+        [
+          "issue::4293::heading_aware::3",
+          0.8036809
+        ],
+        [
+          "doc::tutorial/security/get-current-user.md::heading_aware::2",
+          0.801429
+        ],
+        [
+          "doc::tutorial/dependencies/classes-as-dependencies.md::heading_aware::11",
+          0.779135
+        ],
+        [
+          "doc::tutorial/dependencies/classes-as-dependencies.md::heading_aware::10",
+          0.7689286
+        ],
+        [
+          "issue::5451::heading_aware::2",
+          0.76885986
+        ],
+        [
+          "doc::advanced/advanced-dependencies.md::heading_aware::2",
+          0.76762694
+        ],
+        [
+          "doc::tutorial/security/first-steps.md::heading_aware::2",
+          0.7666373
+        ],
+        [
+          "issue::3967::heading_aware::2",
+          0.7643094
+        ],
+        [
+          "issue::2835::heading_aware::1",
+          0.76013577
+        ],
+        [
+          "doc::tutorial/bigger-applications.md::heading_aware::17",
+          0.7578318
+        ]
+      ],
+      "served_ids": [
+        "issue::4293::heading_aware::3",
+        "doc::tutorial/security/get-current-user.md::heading_aware::2",
+        "doc::tutorial/dependencies/classes-as-dependencies.md::heading_aware::11",
+        "doc::tutorial/dependencies/classes-as-dependencies.md::heading_aware::10",
+        "issue::5451::heading_aware::2",
+        "doc::advanced/advanced-dependencies.md::heading_aware::2",
+        "doc::tutorial/security/first-steps.md::heading_aware::2",
+        "issue::3967::heading_aware::2",
+        "issue::2835::heading_aware::1",
+        "doc::tutorial/bigger-applications.md::heading_aware::17"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.6547560966621006,
+      "escalate": false
+    }
+  },
+  {
+    "id": "rewrite_eval::golden::issue::125",
+    "stratum": "multi_hop",
+    "turn1_escalated": true,
+    "turn1_answer": "This request has been escalated to a human agent.",
+    "turn1_provider": null,
+    "A": {
+      "query": "Is there a way to specify a partial object in the request body to bypass this validation?",
+      "eval_run": [
+        [
+          "issue::379::heading_aware::0",
+          0.75222516
+        ],
+        [
+          "issue::1357::heading_aware::0",
+          0.75150347
+        ],
+        [
+          "doc::tutorial/body-multiple-params.md::heading_aware::7",
+          0.74332553
+        ],
+        [
+          "issue::5266::heading_aware::3",
+          0.7425581
+        ],
+        [
+          "issue::4489::heading_aware::2",
+          0.74237525
+        ],
+        [
+          "issue::4342::heading_aware::3",
+          0.73683596
+        ],
+        [
+          "issue::4764::heading_aware::4",
+          0.7363568
+        ],
+        [
+          "issue::4098::heading_aware::4",
+          0.73626673
+        ],
+        [
+          "issue::484::heading_aware::0",
+          0.7340324
+        ],
+        [
+          "issue::839::heading_aware::2",
+          0.73182416
+        ]
+      ],
+      "served_ids": [
+        "issue::379::heading_aware::0",
+        "issue::1357::heading_aware::0",
+        "doc::tutorial/body-multiple-params.md::heading_aware::7",
+        "issue::5266::heading_aware::3",
+        "issue::4489::heading_aware::2",
+        "issue::4342::heading_aware::3",
+        "issue::4764::heading_aware::4",
+        "issue::4098::heading_aware::4",
+        "issue::484::heading_aware::0",
+        "issue::839::heading_aware::2"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.07402338508635146,
+      "escalate": true
+    },
+    "B": {
+      "query": "In FastAPI, is there a way to specify a partial object in the request body to bypass pydantic data validation for a PATCH request?",
+      "eval_run": [
+        [
+          "issue::379::heading_aware::0",
+          0.8311696
+        ],
+        [
+          "issue::14078::heading_aware::6",
+          0.805918
+        ],
+        [
+          "issue::4513::heading_aware::3",
+          0.80366695
+        ],
+        [
+          "doc::tutorial/body-updates.md::heading_aware::3",
+          0.7983825
+        ],
+        [
+          "issue::2073::heading_aware::1",
+          0.7964618
+        ],
+        [
+          "issue::2295::heading_aware::1",
+          0.79607666
+        ],
+        [
+          "issue::4229::heading_aware::5",
+          0.7954582
+        ],
+        [
+          "issue::14078::heading_aware::4",
+          0.7941157
+        ],
+        [
+          "doc::tutorial/body-multiple-params.md::heading_aware::6",
+          0.7933799
+        ],
+        [
+          "doc::tutorial/body.md::heading_aware::8",
+          0.7872431
+        ]
+      ],
+      "served_ids": [
+        "issue::379::heading_aware::0",
+        "issue::125::heading_aware::0",
+        "issue::14078::heading_aware::6",
+        "issue::4513::heading_aware::3",
+        "doc::tutorial/body-updates.md::heading_aware::3",
+        "issue::2073::heading_aware::1",
+        "issue::2295::heading_aware::1",
+        "issue::4229::heading_aware::5",
+        "issue::14078::heading_aware::4",
+        "doc::tutorial/body-multiple-params.md::heading_aware::6"
+      ],
+      "served_self_matches": 1,
+      "route": "docs_howto",
+      "confidence": 0.6333293411030152,
+      "escalate": false
+    },
+    "C": {
+      "query": "In FastAPI, is there a way to specify a partial object in the request body to bypass pydantic data validation when making a PATCH request?",
+      "eval_run": [
+        [
+          "issue::379::heading_aware::0",
+          0.8314106
+        ],
+        [
+          "issue::4513::heading_aware::3",
+          0.80757266
+        ],
+        [
+          "issue::14078::heading_aware::6",
+          0.80651
+        ],
+        [
+          "doc::tutorial/body-updates.md::heading_aware::3",
+          0.8005241
+        ],
+        [
+          "issue::2073::heading_aware::1",
+          0.7989828
+        ],
+        [
+          "issue::14078::heading_aware::4",
+          0.7960217
+        ],
+        [
+          "issue::2295::heading_aware::1",
+          0.79570854
+        ],
+        [
+          "doc::tutorial/body-multiple-params.md::heading_aware::6",
+          0.79428524
+        ],
+        [
+          "issue::4229::heading_aware::5",
+          0.79306287
+        ],
+        [
+          "issue::9780::heading_aware::7",
+          0.78916764
+        ]
+      ],
+      "served_ids": [
+        "issue::379::heading_aware::0",
+        "issue::125::heading_aware::0",
+        "issue::4513::heading_aware::3",
+        "issue::14078::heading_aware::6",
+        "doc::tutorial/body-updates.md::heading_aware::3",
+        "issue::2073::heading_aware::1",
+        "issue::14078::heading_aware::4",
+        "issue::2295::heading_aware::1",
+        "doc::tutorial/body-multiple-params.md::heading_aware::6",
+        "issue::4229::heading_aware::5"
+      ],
+      "served_self_matches": 1,
+      "route": "docs_howto",
+      "confidence": 0.6616724744250865,
+      "escalate": false
+    }
+  },
+  {
+    "id": "rewrite_eval::golden::issue::3155",
+    "stratum": "multi_hop",
+    "turn1_escalated": false,
+    "turn1_answer": "Based on the provided context, there is no direct method described to make OpenAPI documentation automatically render for a custom subclass of `List[Pydantic BaseModel]` (such as `MyModelList`) when used as a `response_model` [1][9].\n\nThe context indicates that using the standard `List[MyModel]` type works for generating OpenAPI docs, whereas using a custom subclass like `MyModelList` results in missing documentation [1]. The issue regarding this specific limitation was closed by the maintainer without providing a code solution for the subclass itself, but rather acknowledging the report [9].\n\nHowever, the context does suggest alternative approaches for customizing or extending OpenAPI schemas:\n1.  You can extend the final OpenAPI schema using the advanced features described in the documentation [10].\n2.  You can modify the schema per-model using Pydantic's schema customization features [10].\n3.  You can manually generate or inspect the OpenAPI schema using `get_openapi` or `app.openapi()` to see what is being produced [4][5][6].\n\nTherefore, while the specific subclass approach is noted as problematic for docs generation in the provided issues, the recommended path for complex schema needs is to use the standard types or utilize the OpenAPI extension and Pydantic schema customization tools [1][9][10].",
+    "turn1_provider": "groq",
+    "A": {
+      "query": "How to specify the response_model for a route using a custom list class like MyModelList?",
+      "eval_run": [
+        [
+          "issue::3737::heading_aware::3",
+          0.79932827
+        ],
+        [
+          "issue::4796::heading_aware::3",
+          0.7900733
+        ],
+        [
+          "issue::3503::heading_aware::3",
+          0.7882936
+        ],
+        [
+          "issue::5514::heading_aware::9",
+          0.77768683
+        ],
+        [
+          "issue::800::heading_aware::0",
+          0.7694243
+        ],
+        [
+          "issue::4734::heading_aware::3",
+          0.7689135
+        ],
+        [
+          "issue::1468::heading_aware::3",
+          0.7606456
+        ],
+        [
+          "issue::620::heading_aware::0",
+          0.759257
+        ],
+        [
+          "issue::620::heading_aware::1",
+          0.75910366
+        ],
+        [
+          "issue::1193::heading_aware::0",
+          0.75756216
+        ]
+      ],
+      "served_ids": [
+        "issue::3737::heading_aware::3",
+        "issue::4796::heading_aware::3",
+        "issue::3503::heading_aware::3",
+        "issue::5514::heading_aware::9",
+        "issue::800::heading_aware::0",
+        "issue::4734::heading_aware::3",
+        "issue::1468::heading_aware::3",
+        "issue::620::heading_aware::0",
+        "issue::620::heading_aware::1",
+        "issue::1193::heading_aware::0"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.32865503366805415,
+      "escalate": true
+    },
+    "B": {
+      "query": "How to specify the response_model for a route using a custom list class like MyModelList in FastAPI?",
+      "eval_run": [
+        [
+          "issue::216::heading_aware::1",
+          0.79111564
+        ],
+        [
+          "issue::2618::heading_aware::0",
+          0.77595437
+        ],
+        [
+          "issue::406::heading_aware::0",
+          0.77351844
+        ],
+        [
+          "issue::2226::heading_aware::3",
+          0.7692198
+        ],
+        [
+          "issue::1810::heading_aware::1",
+          0.76730204
+        ],
+        [
+          "issue::2218::heading_aware::3",
+          0.7655173
+        ],
+        [
+          "issue::2226::heading_aware::1",
+          0.7650991
+        ],
+        [
+          "issue::3778::heading_aware::6",
+          0.76183
+        ],
+        [
+          "issue::4587::heading_aware::3",
+          0.75995076
+        ],
+        [
+          "issue::4144::heading_aware::3",
+          0.75954294
+        ]
+      ],
+      "served_ids": [
+        "issue::216::heading_aware::1",
+        "issue::2618::heading_aware::0",
+        "issue::406::heading_aware::0",
+        "issue::2226::heading_aware::3",
+        "issue::1810::heading_aware::1",
+        "issue::2218::heading_aware::3",
+        "issue::2226::heading_aware::1",
+        "issue::3778::heading_aware::6",
+        "issue::4587::heading_aware::3",
+        "issue::4144::heading_aware::3"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.627404590494608,
+      "escalate": false
+    },
+    "C": {
+      "query": "How to specify the response_model for a route in FastAPI using a custom list class like MyModelList?",
+      "eval_run": [
+        [
+          "issue::1468::heading_aware::3",
+          0.81678826
+        ],
+        [
+          "issue::620::heading_aware::0",
+          0.80774736
+        ],
+        [
+          "issue::955::heading_aware::2",
+          0.8067038
+        ],
+        [
+          "issue::5607::heading_aware::3",
+          0.804054
+        ],
+        [
+          "issue::216::heading_aware::0",
+          0.8037659
+        ],
+        [
+          "issue::628::heading_aware::0",
+          0.797603
+        ],
+        [
+          "doc::advanced/custom-response.md::heading_aware::17",
+          0.7930934
+        ],
+        [
+          "doc::tutorial/extra-models.md::heading_aware::9",
+          0.79065084
+        ],
+        [
+          "doc::tutorial/response-model.md::heading_aware::3",
+          0.78662723
+        ],
+        [
+          "issue::620::heading_aware::1",
+          0.7853527
+        ]
+      ],
+      "served_ids": [
+        "issue::1468::heading_aware::3",
+        "issue::620::heading_aware::0",
+        "issue::955::heading_aware::2",
+        "issue::5607::heading_aware::3",
+        "issue::216::heading_aware::0",
+        "issue::628::heading_aware::0",
+        "doc::advanced/custom-response.md::heading_aware::17",
+        "doc::tutorial/extra-models.md::heading_aware::9",
+        "doc::tutorial/response-model.md::heading_aware::3",
+        "issue::620::heading_aware::1"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.6317118757753892,
+      "escalate": false
+    }
+  },
+  {
+    "id": "rewrite_eval::golden::issue::2834",
+    "stratum": "ambiguous",
+    "turn1_escalated": true,
+    "turn1_answer": "This request has been escalated to a human agent.",
+    "turn1_provider": null,
+    "A": {
+      "query": "Can I attach a pull request to add the missing files?",
+      "eval_run": [
+        [
+          "issue::1599::heading_aware::5",
+          0.68817484
+        ],
+        [
+          "issue::2487::heading_aware::0",
+          0.66771483
+        ],
+        [
+          "issue::1228::heading_aware::0",
+          0.6650577
+        ],
+        [
+          "issue::2675::heading_aware::0",
+          0.6599555
+        ],
+        [
+          "issue::1998::heading_aware::1",
+          0.6587093
+        ],
+        [
+          "issue::1782::heading_aware::2",
+          0.65302694
+        ],
+        [
+          "issue::2176::heading_aware::2",
+          0.6492094
+        ],
+        [
+          "issue::1238::heading_aware::0",
+          0.6348307
+        ],
+        [
+          "issue::2011::heading_aware::3",
+          0.6341664
+        ],
+        [
+          "issue::2116::heading_aware::0",
+          0.63067126
+        ]
+      ],
+      "served_ids": [
+        "issue::1599::heading_aware::5",
+        "issue::2487::heading_aware::0",
+        "issue::1228::heading_aware::0",
+        "issue::2675::heading_aware::0",
+        "issue::1998::heading_aware::1",
+        "issue::1782::heading_aware::2",
+        "issue::2176::heading_aware::2",
+        "issue::1238::heading_aware::0",
+        "issue::2011::heading_aware::3",
+        "issue::2116::heading_aware::0"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.03826837612369635,
+      "escalate": true
+    },
+    "B": {
+      "query": "Can I attach a pull request to add the missing files to my FastAPI project's community profile?",
+      "eval_run": [
+        [
+          "issue::3348::heading_aware::0",
+          0.77577853
+        ],
+        [
+          "issue::3256::heading_aware::0",
+          0.7496789
+        ],
+        [
+          "issue::3190::heading_aware::0",
+          0.7496789
+        ],
+        [
+          "issue::1607::heading_aware::0",
+          0.74805254
+        ],
+        [
+          "issue::1978::heading_aware::6",
+          0.7468883
+        ],
+        [
+          "issue::1594::heading_aware::0",
+          0.7460934
+        ],
+        [
+          "issue::14467::heading_aware::0",
+          0.7459593
+        ],
+        [
+          "doc::release-notes.md::heading_aware::192",
+          0.74376833
+        ],
+        [
+          "doc::release-notes.md::heading_aware::100",
+          0.74298644
+        ],
+        [
+          "issue::3657::heading_aware::8",
+          0.7428364
+        ]
+      ],
+      "served_ids": [
+        "issue::3348::heading_aware::0",
+        "issue::3256::heading_aware::0",
+        "issue::3190::heading_aware::0",
+        "issue::1607::heading_aware::0",
+        "issue::1978::heading_aware::6",
+        "issue::1594::heading_aware::0",
+        "issue::14467::heading_aware::0",
+        "doc::release-notes.md::heading_aware::192",
+        "doc::release-notes.md::heading_aware::100",
+        "issue::3657::heading_aware::8"
+      ],
+      "served_self_matches": 0,
+      "route": "billing_account_legal",
+      "confidence": null,
+      "escalate": true
+    },
+    "C": {
+      "query": "Can I attach a pull request to add the missing files to my FastAPI project's community profile?",
+      "eval_run": [
+        [
+          "issue::3348::heading_aware::0",
+          0.77577853
+        ],
+        [
+          "issue::3256::heading_aware::0",
+          0.7496789
+        ],
+        [
+          "issue::3190::heading_aware::0",
+          0.7496789
+        ],
+        [
+          "issue::1607::heading_aware::0",
+          0.74805254
+        ],
+        [
+          "issue::1978::heading_aware::6",
+          0.7468883
+        ],
+        [
+          "issue::1594::heading_aware::0",
+          0.7460934
+        ],
+        [
+          "issue::14467::heading_aware::0",
+          0.7459593
+        ],
+        [
+          "doc::release-notes.md::heading_aware::192",
+          0.74376833
+        ],
+        [
+          "doc::release-notes.md::heading_aware::100",
+          0.74298644
+        ],
+        [
+          "issue::3657::heading_aware::8",
+          0.7428364
+        ]
+      ],
+      "served_ids": [
+        "issue::3348::heading_aware::0",
+        "issue::3256::heading_aware::0",
+        "issue::3190::heading_aware::0",
+        "issue::1607::heading_aware::0",
+        "issue::1978::heading_aware::6",
+        "issue::1594::heading_aware::0",
+        "issue::14467::heading_aware::0",
+        "doc::release-notes.md::heading_aware::192",
+        "doc::release-notes.md::heading_aware::100",
+        "issue::3657::heading_aware::8"
+      ],
+      "served_self_matches": 0,
+      "route": "billing_account_legal",
+      "confidence": null,
+      "escalate": true
+    }
+  },
+  {
+    "id": "rewrite_eval::golden::issue::644",
+    "stratum": "ambiguous",
+    "turn1_escalated": false,
+    "turn1_answer": "Yes, FastAPI allows you to customize example values in the OpenAPI schema for incoming requests by using the `openapi_examples` parameter [3]. This parameter is supported for `Path()`, `Query()`, `Header()`, `Cookie()`, `Body()`, `Form()`, and `File()` [3]. The `openapi_examples` parameter accepts a dictionary where the keys identify each example and the values are dictionaries containing details like `summary`, `description`, `value`, or `externalValue` [3]. This feature was added to support OpenAPI-specific examples in all FastAPI parameters [4].",
+    "turn1_provider": "groq",
+    "A": {
+      "query": "How do you change the example value for a list in the application/json example?",
+      "eval_run": [
+        [
+          "doc::tutorial/query-params-str-validations.md::heading_aware::15",
+          0.75337213
+        ],
+        [
+          "issue::1219::heading_aware::0",
+          0.7415396
+        ],
+        [
+          "issue::56::heading_aware::0",
+          0.74056596
+        ],
+        [
+          "doc::tutorial/schema-extra-example.md::heading_aware::10",
+          0.73644954
+        ],
+        [
+          "issue::1012::heading_aware::2",
+          0.7343489
+        ],
+        [
+          "issue::3897::heading_aware::3",
+          0.7329173
+        ],
+        [
+          "doc::tutorial/schema-extra-example.md::heading_aware::2",
+          0.73134315
+        ],
+        [
+          "issue::1176::heading_aware::1",
+          0.7299719
+        ],
+        [
+          "doc::tutorial/schema-extra-example.md::heading_aware::7",
+          0.72388434
+        ],
+        [
+          "issue::10997::heading_aware::4",
+          0.7235954
+        ]
+      ],
+      "served_ids": [
+        "issue::644::heading_aware::0",
+        "doc::tutorial/query-params-str-validations.md::heading_aware::15",
+        "issue::1219::heading_aware::0",
+        "issue::56::heading_aware::0",
+        "doc::tutorial/schema-extra-example.md::heading_aware::10",
+        "issue::1012::heading_aware::2",
+        "issue::3897::heading_aware::3",
+        "doc::tutorial/schema-extra-example.md::heading_aware::2",
+        "issue::1176::heading_aware::1",
+        "doc::tutorial/schema-extra-example.md::heading_aware::7"
+      ],
+      "served_self_matches": 1,
+      "route": "docs_howto",
+      "confidence": 0.6089588143232454,
+      "escalate": false
+    },
+    "B": {
+      "query": "How do you change the example value for a list in the application/json example in FastAPI's OpenAPI schema?",
+      "eval_run": [
+        [
+          "doc::tutorial/schema-extra-example.md::heading_aware::13",
+          0.7973263
+        ],
+        [
+          "doc::tutorial/schema-extra-example.md::heading_aware::2",
+          0.7969115
+        ],
+        [
+          "doc::tutorial/schema-extra-example.md::heading_aware::9",
+          0.79184204
+        ],
+        [
+          "doc::tutorial/query-params-str-validations.md::heading_aware::15",
+          0.78866816
+        ],
+        [
+          "doc::tutorial/schema-extra-example.md::heading_aware::10",
+          0.78114736
+        ],
+        [
+          "issue::5559::heading_aware::3",
+          0.7810848
+        ],
+        [
+          "doc::tutorial/schema-extra-example.md::heading_aware::12",
+          0.77962524
+        ],
+        [
+          "issue::240::heading_aware::1",
+          0.77853304
+        ],
+        [
+          "issue::1820::heading_aware::1",
+          0.7775561
+        ],
+        [
+          "issue::509::heading_aware::1",
+          0.7770607
+        ]
+      ],
+      "served_ids": [
+        "issue::644::heading_aware::0",
+        "doc::tutorial/schema-extra-example.md::heading_aware::13",
+        "doc::tutorial/schema-extra-example.md::heading_aware::2",
+        "doc::tutorial/schema-extra-example.md::heading_aware::9",
+        "doc::tutorial/query-params-str-validations.md::heading_aware::15",
+        "doc::tutorial/schema-extra-example.md::heading_aware::10",
+        "issue::5559::heading_aware::3",
+        "doc::tutorial/schema-extra-example.md::heading_aware::12",
+        "issue::240::heading_aware::1",
+        "issue::1820::heading_aware::1"
+      ],
+      "served_self_matches": 1,
+      "route": "docs_howto",
+      "confidence": 0.6990684907352376,
+      "escalate": false
+    },
+    "C": {
+      "query": "How do you change the example value for a list in the application/json example in FastAPI?",
+      "eval_run": [
+        [
+          "doc::tutorial/query-params-str-validations.md::heading_aware::15",
+          0.7969115
+        ],
+        [
+          "issue::3359::heading_aware::0",
+          0.79035217
+        ],
+        [
+          "doc::tutorial/schema-extra-example.md::heading_aware::7",
+          0.78843236
+        ],
+        [
+          "doc::tutorial/schema-extra-example.md::heading_aware::10",
+          0.78293157
+        ],
+        [
+          "issue::4229::heading_aware::5",
+          0.7757039
+        ],
+        [
+          "doc::tutorial/schema-extra-example.md::heading_aware::5",
+          0.7743722
+        ],
+        [
+          "doc::tutorial/schema-extra-example.md::heading_aware::2",
+          0.77062243
+        ],
+        [
+          "doc::advanced/dataclasses.md::heading_aware::1",
+          0.76856273
+        ],
+        [
+          "doc::tutorial/body-nested-models.md::heading_aware::9",
+          0.7666805
+        ],
+        [
+          "issue::1818::heading_aware::0",
+          0.7645211
+        ]
+      ],
+      "served_ids": [
+        "doc::tutorial/query-params-str-validations.md::heading_aware::15",
+        "issue::644::heading_aware::0",
+        "issue::3359::heading_aware::0",
+        "doc::tutorial/schema-extra-example.md::heading_aware::7",
+        "doc::tutorial/schema-extra-example.md::heading_aware::10",
+        "issue::4229::heading_aware::5",
+        "doc::tutorial/schema-extra-example.md::heading_aware::5",
+        "doc::tutorial/schema-extra-example.md::heading_aware::2",
+        "doc::advanced/dataclasses.md::heading_aware::1",
+        "doc::tutorial/body-nested-models.md::heading_aware::9"
+      ],
+      "served_self_matches": 1,
+      "route": "docs_howto",
+      "confidence": 0.6291797485173752,
+      "escalate": false
+    }
+  },
+  {
+    "id": "rewrite_eval::golden::issue::1341",
+    "stratum": "ambiguous",
+    "turn1_escalated": true,
+    "turn1_answer": "This request has been escalated to a human agent.",
+    "turn1_provider": null,
+    "A": {
+      "query": "What exactly is this endpoint and how are they defined?",
+      "eval_run": [
+        [
+          "issue::2511::heading_aware::0",
+          0.7236957
+        ],
+        [
+          "issue::5620::heading_aware::3",
+          0.7195758
+        ],
+        [
+          "issue::5620::heading_aware::8",
+          0.71846044
+        ],
+        [
+          "issue::251::heading_aware::0",
+          0.7070587
+        ],
+        [
+          "issue::4745::heading_aware::3",
+          0.699316
+        ],
+        [
+          "issue::1022::heading_aware::2",
+          0.69520736
+        ],
+        [
+          "issue::5384::heading_aware::3",
+          0.6935129
+        ],
+        [
+          "issue::1622::heading_aware::3",
+          0.6884457
+        ],
+        [
+          "issue::1834::heading_aware::2",
+          0.68374586
+        ],
+        [
+          "issue::2719::heading_aware::1",
+          0.6763387
+        ]
+      ],
+      "served_ids": [
+        "issue::2511::heading_aware::0",
+        "issue::5620::heading_aware::3",
+        "issue::5620::heading_aware::8",
+        "issue::251::heading_aware::0",
+        "issue::4745::heading_aware::3",
+        "issue::1022::heading_aware::2",
+        "issue::5384::heading_aware::3",
+        "issue::1622::heading_aware::3",
+        "issue::1834::heading_aware::2",
+        "issue::2719::heading_aware::1"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.11032543998762218,
+      "escalate": true
+    },
+    "B": {
+      "query": "What exactly is an endpoint in FastAPI and how are they defined?",
+      "eval_run": [
+        [
+          "issue::352::heading_aware::0",
+          0.8089074
+        ],
+        [
+          "issue::2625::heading_aware::7",
+          0.7934185
+        ],
+        [
+          "issue::1833::heading_aware::2",
+          0.79260176
+        ],
+        [
+          "issue::3707::heading_aware::5",
+          0.783176
+        ],
+        [
+          "issue::2554::heading_aware::4",
+          0.7808708
+        ],
+        [
+          "issue::4300::heading_aware::2",
+          0.77273184
+        ],
+        [
+          "issue::2760::heading_aware::1",
+          0.7719784
+        ],
+        [
+          "issue::2554::heading_aware::3",
+          0.76784945
+        ],
+        [
+          "issue::1283::heading_aware::2",
+          0.76560485
+        ],
+        [
+          "issue::2372::heading_aware::0",
+          0.7643482
+        ]
+      ],
+      "served_ids": [
+        "issue::352::heading_aware::0",
+        "issue::2625::heading_aware::7",
+        "issue::1833::heading_aware::2",
+        "issue::3707::heading_aware::5",
+        "issue::2554::heading_aware::4",
+        "issue::4300::heading_aware::2",
+        "issue::2760::heading_aware::1",
+        "issue::2554::heading_aware::3",
+        "issue::1283::heading_aware::2",
+        "issue::2372::heading_aware::0"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.34200241570745377,
+      "escalate": true
+    },
+    "C": {
+      "query": "What exactly is an endpoint in FastAPI and how are they defined?",
+      "eval_run": [
+        [
+          "issue::352::heading_aware::0",
+          0.8089074
+        ],
+        [
+          "issue::2625::heading_aware::7",
+          0.7934185
+        ],
+        [
+          "issue::1833::heading_aware::2",
+          0.79260176
+        ],
+        [
+          "issue::3707::heading_aware::5",
+          0.783176
+        ],
+        [
+          "issue::2554::heading_aware::4",
+          0.7808708
+        ],
+        [
+          "issue::4300::heading_aware::2",
+          0.77273184
+        ],
+        [
+          "issue::2760::heading_aware::1",
+          0.7719784
+        ],
+        [
+          "issue::2554::heading_aware::3",
+          0.76784945
+        ],
+        [
+          "issue::1283::heading_aware::2",
+          0.76560485
+        ],
+        [
+          "issue::2372::heading_aware::0",
+          0.7643482
+        ]
+      ],
+      "served_ids": [
+        "issue::352::heading_aware::0",
+        "issue::2625::heading_aware::7",
+        "issue::1833::heading_aware::2",
+        "issue::3707::heading_aware::5",
+        "issue::2554::heading_aware::4",
+        "issue::4300::heading_aware::2",
+        "issue::2760::heading_aware::1",
+        "issue::2554::heading_aware::3",
+        "issue::1283::heading_aware::2",
+        "issue::2372::heading_aware::0"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.34200241570745377,
+      "escalate": true
+    }
+  },
+  {
+    "id": "rewrite_eval::golden::issue::2896",
+    "stratum": "ambiguous",
+    "turn1_escalated": true,
+    "turn1_answer": "This request has been escalated to a human agent.",
+    "turn1_provider": null,
+    "A": {
+      "query": "如何处理路径参数中包含/的场景？",
+      "eval_run": [
+        [
+          "issue::4828::heading_aware::3",
+          0.6331775
+        ],
+        [
+          "issue::3972::heading_aware::6",
+          0.6200652
+        ],
+        [
+          "issue::3720::heading_aware::5",
+          0.6200652
+        ],
+        [
+          "issue::3701::heading_aware::9",
+          0.6200652
+        ],
+        [
+          "issue::3701::heading_aware::10",
+          0.6200652
+        ],
+        [
+          "issue::5526::heading_aware::3",
+          0.6200652
+        ],
+        [
+          "issue::3711::heading_aware::64",
+          0.61425304
+        ],
+        [
+          "issue::3711::heading_aware::29",
+          0.61425304
+        ],
+        [
+          "issue::3711::heading_aware::65",
+          0.6112708
+        ],
+        [
+          "issue::3711::heading_aware::30",
+          0.6112708
+        ]
+      ],
+      "served_ids": [
+        "issue::4828::heading_aware::3",
+        "issue::3972::heading_aware::6",
+        "issue::3720::heading_aware::5",
+        "issue::3701::heading_aware::9",
+        "issue::3701::heading_aware::10",
+        "issue::5526::heading_aware::3",
+        "issue::3711::heading_aware::64",
+        "issue::3711::heading_aware::29",
+        "issue::3711::heading_aware::65",
+        "issue::3711::heading_aware::30"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.04993722603890165,
+      "escalate": true
+    },
+    "B": {
+      "query": "当使用FastAPI的路径参数时，如何处理路径参数中包含/的场景？",
+      "eval_run": [
+        [
+          "issue::4812::heading_aware::3",
+          0.8275232
+        ],
+        [
+          "doc::advanced/dataclasses.md::heading_aware::6",
+          0.8098465
+        ],
+        [
+          "issue::4665::heading_aware::6",
+          0.79415476
+        ],
+        [
+          "issue::1511::heading_aware::3",
+          0.7930214
+        ],
+        [
+          "issue::3985::heading_aware::3",
+          0.79017526
+        ],
+        [
+          "issue::2279::heading_aware::2",
+          0.7890967
+        ],
+        [
+          "issue::1229::heading_aware::0",
+          0.78771275
+        ],
+        [
+          "issue::13119::heading_aware::5",
+          0.7853045
+        ],
+        [
+          "issue::1153::heading_aware::0",
+          0.7851999
+        ],
+        [
+          "issue::1119::heading_aware::0",
+          0.7851999
+        ]
+      ],
+      "served_ids": [
+        "issue::4812::heading_aware::3",
+        "doc::advanced/dataclasses.md::heading_aware::6",
+        "issue::4665::heading_aware::6",
+        "issue::1511::heading_aware::3",
+        "issue::3985::heading_aware::3",
+        "issue::2279::heading_aware::2",
+        "issue::1229::heading_aware::0",
+        "issue::13119::heading_aware::5",
+        "issue::1153::heading_aware::0",
+        "issue::1119::heading_aware::0"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.14907181090030663,
+      "escalate": true
+    },
+    "C": {
+      "query": "当使用FastAPI的路径参数时，如何处理路径参数中包含/的场景？",
+      "eval_run": [
+        [
+          "issue::4812::heading_aware::3",
+          0.8275232
+        ],
+        [
+          "doc::advanced/dataclasses.md::heading_aware::6",
+          0.8098465
+        ],
+        [
+          "issue::4665::heading_aware::6",
+          0.79415476
+        ],
+        [
+          "issue::1511::heading_aware::3",
+          0.7930214
+        ],
+        [
+          "issue::3985::heading_aware::3",
+          0.79017526
+        ],
+        [
+          "issue::2279::heading_aware::2",
+          0.7890967
+        ],
+        [
+          "issue::1229::heading_aware::0",
+          0.78771275
+        ],
+        [
+          "issue::13119::heading_aware::5",
+          0.7853045
+        ],
+        [
+          "issue::1153::heading_aware::0",
+          0.7851999
+        ],
+        [
+          "issue::1119::heading_aware::0",
+          0.7851999
+        ]
+      ],
+      "served_ids": [
+        "issue::4812::heading_aware::3",
+        "doc::advanced/dataclasses.md::heading_aware::6",
+        "issue::4665::heading_aware::6",
+        "issue::1511::heading_aware::3",
+        "issue::3985::heading_aware::3",
+        "issue::2279::heading_aware::2",
+        "issue::1229::heading_aware::0",
+        "issue::13119::heading_aware::5",
+        "issue::1153::heading_aware::0",
+        "issue::1119::heading_aware::0"
+      ],
+      "served_self_matches": 0,
+      "route": "docs_howto",
+      "confidence": 0.14907181090030663,
+      "escalate": true
+    }
+  }
+]

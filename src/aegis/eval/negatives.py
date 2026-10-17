@@ -87,6 +87,11 @@ _CATEGORY_QUERIES: list[tuple[NegativeCategory, str, list[str]]] = [
 ]
 
 
+# What the system must do for each category -- shared with the feedback review
+# queue (aegis.eval.review_queue) so a promoted negative gets the same label.
+EXPECTED_BEHAVIOR: dict[NegativeCategory, str] = {c: b for c, b, _ in _CATEGORY_QUERIES}
+
+
 def build_negative_queries() -> list[GoldenQuery]:
     queries = []
     for category, expected_behavior, texts in _CATEGORY_QUERIES:

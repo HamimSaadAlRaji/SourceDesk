@@ -1,0 +1,210 @@
+{
+  "A_failover": {
+    "provider": "groq",
+    "text": "ok",
+    "wall_ms": 821.1,
+    "logs": [
+      {
+        "ts": "2026-10-17T09:59:54.605893+00:00",
+        "level": "WARNING",
+        "logger": "aegis.llm",
+        "event": "llm.provider_failed",
+        "provider": "gemini",
+        "attempt": 1,
+        "error_type": "ClientError",
+        "status_code": 400,
+        "detail": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang",
+        "elapsed_ms": 559.1
+      },
+      {
+        "ts": "2026-10-17T09:59:54.866719+00:00",
+        "level": "WARNING",
+        "logger": "aegis.llm",
+        "event": "llm.failover",
+        "provider": "groq",
+        "skipped": [
+          "gemini"
+        ]
+      }
+    ]
+  },
+  "B_router_outage": {
+    "events": [
+      {
+        "type": "escalation",
+        "cause": "provider_unavailable",
+        "reason": "provider_unavailable: the routing LLM call failed on every provider",
+        "message": "This request has been escalated to a human agent.",
+        "route": null,
+        "after_retrieval": false
+      },
+      {
+        "type": "done",
+        "trace_id": "30557b0c7e7396020a05fb67c3c8f531",
+        "cache_status": "miss",
+        "route": null,
+        "escalate": true,
+        "citations": [],
+        "provider": null,
+        "prompt_version": null,
+        "stage_latencies_ms": {
+          "cache_lookup": 0.9,
+          "routing": 124.0,
+          "escalation": 0.8
+        },
+        "rewritten_query": null
+      }
+    ],
+    "wall_ms": 128.9,
+    "logs": [
+      {
+        "ts": "2026-10-17T10:00:10.327135+00:00",
+        "level": "INFO",
+        "logger": "aegis.pipeline",
+        "event": "pipeline.request_start",
+        "trace_id": "30557b0c7e7396020a05fb67c3c8f531",
+        "query_id": "14c-1792231210"
+      },
+      {
+        "ts": "2026-10-17T10:00:10.445180+00:00",
+        "level": "WARNING",
+        "logger": "aegis.router",
+        "event": "router.api_error",
+        "trace_id": "30557b0c7e7396020a05fb67c3c8f531",
+        "error_type": "AuthenticationError",
+        "status_code": 401,
+        "detail": "Error code: 401 - {'error': {'message': 'Invalid API Key', 'type': 'invalid_request_error', 'code': 'invalid_api_key'}}"
+      },
+      {
+        "ts": "2026-10-17T10:00:10.452290+00:00",
+        "level": "WARNING",
+        "logger": "aegis.pipeline",
+        "event": "pipeline.escalated",
+        "trace_id": "30557b0c7e7396020a05fb67c3c8f531",
+        "query_id": "14c-1792231210",
+        "route": null,
+        "cause": "provider_unavailable",
+        "reason": "provider_unavailable: the routing LLM call failed on every provider",
+        "after_retrieval": false
+      },
+      {
+        "ts": "2026-10-17T10:00:10.453120+00:00",
+        "level": "INFO",
+        "logger": "aegis.pipeline",
+        "event": "pipeline.request_end",
+        "trace_id": "30557b0c7e7396020a05fb67c3c8f531",
+        "query_id": "14c-1792231210",
+        "cache_status": "miss",
+        "escalate": true,
+        "route": null,
+        "provider": null,
+        "stage_latencies_ms": {
+          "cache_lookup": 0.9,
+          "routing": 124.0,
+          "escalation": 0.8
+        }
+      }
+    ]
+  },
+  "C_generation_outage": {
+    "events": [
+      {
+        "type": "escalation",
+        "cause": "provider_unavailable",
+        "reason": "provider_unavailable: the generation LLM call failed on every provider",
+        "message": "This request has been escalated to a human agent.",
+        "route": "docs_howto",
+        "after_retrieval": true
+      },
+      {
+        "type": "done",
+        "trace_id": "8e839c78be50fdfa28d68c449f4dd378",
+        "cache_status": "miss",
+        "route": "docs_howto",
+        "escalate": true,
+        "citations": [],
+        "provider": null,
+        "prompt_version": null,
+        "stage_latencies_ms": {
+          "cache_lookup": 0.5,
+          "routing": 228.5,
+          "retrieval": 49.4,
+          "confidence": 257.1,
+          "generation": 378.1,
+          "escalation": 0.7
+        },
+        "rewritten_query": null
+      }
+    ],
+    "wall_ms": 917.8,
+    "logs": [
+      {
+        "ts": "2026-10-17T10:00:10.454217+00:00",
+        "level": "INFO",
+        "logger": "aegis.pipeline",
+        "event": "pipeline.request_start",
+        "trace_id": "8e839c78be50fdfa28d68c449f4dd378",
+        "query_id": "14c-1792231210"
+      },
+      {
+        "ts": "2026-10-17T10:00:11.137741+00:00",
+        "level": "WARNING",
+        "logger": "aegis.llm",
+        "event": "llm.provider_failed",
+        "trace_id": "8e839c78be50fdfa28d68c449f4dd378",
+        "provider": "groq",
+        "attempt": 1,
+        "error_type": "AuthenticationError",
+        "status_code": 401,
+        "detail": "Error code: 401 - {'error': {'message': 'Invalid API Key', 'type': 'invalid_request_error', 'code': 'invalid_api_key'}}",
+        "elapsed_ms": 140.7
+      },
+      {
+        "ts": "2026-10-17T10:00:11.365660+00:00",
+        "level": "WARNING",
+        "logger": "aegis.llm",
+        "event": "llm.provider_failed",
+        "trace_id": "8e839c78be50fdfa28d68c449f4dd378",
+        "provider": "gemini",
+        "attempt": 2,
+        "error_type": "ClientError",
+        "status_code": 400,
+        "detail": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang",
+        "elapsed_ms": 227.8
+      },
+      {
+        "ts": "2026-10-17T10:00:11.369080+00:00",
+        "level": "WARNING",
+        "logger": "aegis.pipeline",
+        "event": "pipeline.escalated",
+        "trace_id": "8e839c78be50fdfa28d68c449f4dd378",
+        "query_id": "14c-1792231210",
+        "route": "docs_howto",
+        "cause": "provider_unavailable",
+        "reason": "provider_unavailable: the generation LLM call failed on every provider",
+        "after_retrieval": true
+      },
+      {
+        "ts": "2026-10-17T10:00:11.369830+00:00",
+        "level": "INFO",
+        "logger": "aegis.pipeline",
+        "event": "pipeline.request_end",
+        "trace_id": "8e839c78be50fdfa28d68c449f4dd378",
+        "query_id": "14c-1792231210",
+        "cache_status": "miss",
+        "escalate": true,
+        "route": "docs_howto",
+        "provider": null,
+        "stage_latencies_ms": {
+          "cache_lookup": 0.5,
+          "routing": 228.5,
+          "retrieval": 49.4,
+          "confidence": 257.1,
+          "generation": 378.1,
+          "escalation": 0.7
+        }
+      }
+    ],
+    "cached_after": false
+  }
+}

@@ -37,6 +37,16 @@ class Route(StrEnum):
 
 ClassifyFn = Callable[[str], str]
 
+
+class RouterUnavailableError(Exception):
+    """The router's LLM call failed (quota, auth, outage) -- distinct from the
+    model answering with something unparseable. Raised rather than folded into
+    the billing fail-safe: an outage used to become a `billing_account_legal`
+    escalation, so the trace, the UI and the router eval all reported a billing
+    question that nobody asked. `AnswerPipeline` turns it into an escalation
+    with its own cause (design record 14f); an eval run stops on it instead of
+    scoring an outage as a prediction."""
+
 # Few-shot examples are hand-written and deliberately distinct from any
 # golden-set or negative-set query text -- reusing eval text here would
 # leak the test set into the prompt itself and invalidate the Phase 8
@@ -100,21 +110,16 @@ def _default_classify_fn(model: str, temperature: float, max_tokens: int) -> Cla
                 ],
             )
         except APIError as exc:
-            # Fail-safe behavior is unchanged, but it must not be invisible:
-            # a Groq quota outage once turned every query into a silent
-            # billing_account_legal escalation with no log line anywhere.
+            # Must not be invisible: a Groq quota outage once turned every
+            # query into a silent billing_account_legal escalation with no log
+            # line anywhere. Since design record 14f it is also not a billing
+            # escalation -- it raises, and the caller decides.
             log_event(
                 _log, logging.WARNING, "router.api_error",
                 error_type=type(exc).__name__, status_code=getattr(exc, "status_code", None),
                 detail=str(exc)[:300],
             )
-            # e.g. Groq's JSON-mode grammar constraint hitting
-            # `json_validate_failed` before a valid document closes
-            # (observed on the Phase 8 router eval). Returns "" so
-            # `RouterClassifier.classify`'s existing parse-failure path
-            # handles it the same as any other malformed output --
-            # fail safe to billing_account_legal, not a second code path.
-            return ""
+            raise RouterUnavailableError(f"router LLM call failed: {type(exc).__name__}") from exc
         return completion.choices[0].message.content or ""
 
     return classify
@@ -136,8 +141,7 @@ class RouterClassifier:
             parsed = json.loads(raw)
             return Route(parsed["route"])
         except (json.JSONDecodeError, KeyError, ValueError, TypeError):
-            if raw:  # "" means the API-error path already logged its own event
-                log_event(_log, logging.WARNING, "router.unparseable_output", raw=raw[:200])
+            log_event(_log, logging.WARNING, "router.unparseable_output", raw=raw[:200])
             # Fail safe, not fail open: unparseable/out-of-vocabulary model
             # output defaults to the hard-escalate route. Worst case is an
             # unnecessary human handoff; the alternative (silently treating

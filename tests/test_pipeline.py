@@ -411,3 +411,42 @@ def test_escalated_results_have_no_context_because_nothing_was_shown_to_an_llm()
     result = pipeline.answer(Query(id="q18", text="refund me"))
 
     assert result.context == [] and result.context_dropped_count == 0
+
+
+def test_warm_up_also_loads_the_query_encoder_through_the_retriever_last():
+    # Through the retriever, not the semantic cache: the semantic tier is off by
+    # default (design record 14h) but dense retrieval encodes every miss.
+    order: list[str] = []
+
+    class _WarmableRetriever(_FixedRetriever):
+        def search(self, query, top_k, **kwargs):
+            order.append("retrieval")
+            return super().search(query, top_k, **kwargs)
+
+        def warm_up(self, text: str) -> None:
+            order.append("encoder")
+
+    retriever = _WarmableRetriever([(_chunk("c1"), 0.9), (_chunk("c2"), 0.5)])
+    pipeline, tracer = _pipeline(router=_RaisingRouter(), llm=_RaisingLLM(), retriever=retriever)
+
+    timings = pipeline.warm_up()
+
+    assert order == ["retrieval", "encoder"]  # encoder last: absorbs the post-MPS first-CPU-pass cost
+    assert list(timings) == ["retrieval", "confidence", "encoder"]
+
+
+def test_semantic_tier_off_means_exact_cache_only():
+    exact_cache = _FakeCache(hit=None)
+    pipeline, _ = _pipeline(confidence=1.0, tau=0.1, llm=_FakeLLM("Use Depends [1]."), exact_cache=exact_cache)
+    pipeline.semantic_cache = None
+
+    result = pipeline.answer(Query(id="q-off", text="how do I make a query parameter required in FastAPI?"))
+
+    assert result.cache_status == CacheStatus.MISS and result.escalate is False
+    assert len(exact_cache.get_calls) == 1 and len(exact_cache.set_calls) == 1
+
+
+def test_semantic_tier_is_off_by_default():
+    from aegis.config import CacheSettings
+
+    assert CacheSettings().semantic_cache_enabled is False
