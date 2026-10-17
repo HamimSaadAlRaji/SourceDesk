@@ -164,3 +164,20 @@ batches also run real generation and real citation validation in-process; the fa
 Test prepared (`AEGIS_I_REAL_STACK=1 uv run python experiments/13i_gpu_wake_paired.py`), blocked on Groq quota.
 Earlier drafts of this section claimed idle gaps and the tracer each roughly doubled the cost; those claims did not
 survive a paired, same-query design and are retracted.
+
+## Follow-up 2026-10-01: the untested hypothesis is now tested, and refuted
+
+- **Real generation + validation in-process (13i, `AEGIS_I_REAL_STACK=1`, same queries, 70 s gaps, no abort):** plain
+  confidence p50 647 ms (n=6, max 1,034); with a throwaway rerank 516 ms. Same as the fake-stack run (656 ms), not ~2.4 s.
+- **First-call / per-shape compile cost (13k, one process, 3 repeated scorings per query):** call1 ~= call2 ~= call3 for
+  all six queries (e.g. 833/793/779 ms), including padded shapes never seen before. Refuted. Cost follows the padded
+  sequence length: (3,318) 238 ms, (3,353) 265, (3,495) 364, (3,512) 480-880.
+- **Power state:** the machine is on battery with Low Power Mode ON and the fast runs were fast. Not the explanation.
+- **Re-running the original baseline script (13c) on the exact 6-query morning-pilot sample, 70 s pacing, warm-up on:**
+  confidence ms, pilot (Sep 30) vs rerun (Oct 1): 2689 1,040 vs 972; 2884 1,420 vs 655; 3212 1,375 vs 527; **753 2,448 vs 2,586**;
+  219 2,318 vs 1,106. Generate-path wall times in the rerun: 3,234 / 3,734 / 2,745 ms (n=3).
+- **What this leaves:** query `753` costs ~0.5-0.8 s in 13i and 13k but ~2.5 s in 13c, reproduced across two 13c runs. Something
+  specific to the 13c harness (it reuses ONE pipeline instance and caches across queries; 13i rebuilds the pipeline per run)
+  inflates that stage for some queries. **Not bisected.** Consequence: the p95 verdict depends on the harness. 13c numbers say the
+  generate path is over budget (p95 5.6 s in the 20-query run); the other harnesses imply a materially faster confidence stage but
+  were not run end to end, so no p95 can be claimed from them. The budget criterion remains unmet and unresolved.

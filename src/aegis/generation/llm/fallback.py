@@ -42,14 +42,15 @@ class FallbackLLMClient:
             raise ValueError("FallbackLLMClient needs at least one provider")
         self.providers = providers
 
-    def _stream_with_provider(
+    def stream_with_provider(
         self,
         messages: list[dict[str, str]],
         temperature: float,
         top_p: float,
         max_tokens: int,
     ) -> Iterator[tuple[str, str]]:
-        """Shared core for `stream`/`generate`/`generate_with_provider` --
+        """Shared core for `stream`/`generate`/`generate_with_provider`, and the
+        entry point `GenerationPipeline.generate(on_token=...)` streams through --
         yields `(provider_name, token)` pairs so callers that care which
         provider actually answered (the bake-off script, future request
         logging) can get that without the client holding any mutable
@@ -85,7 +86,7 @@ class FallbackLLMClient:
         top_p: float = 1.0,
         max_tokens: int = 1024,
     ) -> Iterator[str]:
-        for _, token in self._stream_with_provider(messages, temperature, top_p, max_tokens):
+        for _, token in self.stream_with_provider(messages, temperature, top_p, max_tokens):
             yield token
 
     def generate(
@@ -109,7 +110,7 @@ class FallbackLLMClient:
         but content-free response)."""
         provider_name: str | None = None
         parts: list[str] = []
-        for name, token in self._stream_with_provider(messages, temperature, top_p, max_tokens):
+        for name, token in self.stream_with_provider(messages, temperature, top_p, max_tokens):
             provider_name = name
             parts.append(token)
         return "".join(parts), provider_name

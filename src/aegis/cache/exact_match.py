@@ -25,10 +25,25 @@ from pathlib import Path
 from pydantic import BaseModel
 
 
+class CitedChunk(BaseModel):
+    """A validated citation with everything needed to render it, so a cache
+    hit can replay `citation` stream events without re-fetching the corpus
+    (the cache is already scoped to one `corpus_version`, so the text can't go
+    stale relative to the entry that carries it)."""
+
+    citation_id: int
+    chunk_id: str
+    doc_id: str
+    heading_path: list[str] = []
+    text: str
+
+
 class CachedAnswer(BaseModel):
     text: str
     citations: list[str]
     provider: str | None
+    # Default [] keeps entries written before this field existed readable.
+    cited: list[CitedChunk] = []
 
 
 def normalize_query(text: str) -> str:

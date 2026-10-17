@@ -138,3 +138,14 @@ def test_markdown_report_shows_the_decision_path_evidence_and_answer():
 
     for expected in ("how do I use dependency injection", "docs_howto", "[1]", "some real chunk text for c1", "use Depends", "v1"):
         assert expected in md
+
+
+def test_rewritten_query_is_surfaced_from_the_root_output():
+    obs = [
+        {"name": "answer_query", "type": "SPAN", "input": {"query_id": "q", "query": "what about it?"},
+         "output": {"cache_status": "exact_hit", "rewritten_query": "standalone"}, "latency_ms": 1.0},
+        {"name": "cache_lookup", "type": "SPAN", "input": {}, "output": {"cache_status": "exact_hit"}, "latency_ms": 1.0},
+    ]
+    trail = build_audit_trail(obs, trace_id="t")
+    assert trail.query_text == "what about it?" and trail.rewritten_query == "standalone"
+    assert "standalone" in render_markdown(trail, [])

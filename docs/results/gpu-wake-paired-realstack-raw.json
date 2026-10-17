@@ -1,0 +1,122 @@
+[
+  {
+    "k": 0,
+    "arm": "wake",
+    "query_id": "golden::issue::2689",
+    "route": "known_issue",
+    "provider": null,
+    "confidence_stage_ms": 752.0191250077914,
+    "wake_ms": 54.624083000817336,
+    "routing_ms": 423.04954200517386
+  },
+  {
+    "k": 1,
+    "arm": "plain",
+    "query_id": "golden::issue::2689",
+    "route": "known_issue",
+    "provider": null,
+    "confidence_stage_ms": 1021.2838750012452,
+    "wake_ms": null,
+    "routing_ms": 280.8482910040766
+  },
+  {
+    "k": 2,
+    "arm": "plain",
+    "query_id": "golden::issue::2884",
+    "route": "docs_howto",
+    "provider": "groq",
+    "confidence_stage_ms": 527.6641670061508,
+    "wake_ms": null,
+    "routing_ms": 232.92408300039824
+  },
+  {
+    "k": 3,
+    "arm": "wake",
+    "query_id": "golden::issue::2884",
+    "route": "docs_howto",
+    "provider": "groq",
+    "confidence_stage_ms": 444.42541600437835,
+    "wake_ms": 182.56883398862556,
+    "routing_ms": 226.4586670062272
+  },
+  {
+    "k": 4,
+    "arm": "wake",
+    "query_id": "golden::issue::3212",
+    "route": "docs_howto",
+    "provider": null,
+    "confidence_stage_ms": 347.0193749963073,
+    "wake_ms": 171.36704100994393,
+    "routing_ms": 236.5420419955626
+  },
+  {
+    "k": 5,
+    "arm": "plain",
+    "query_id": "golden::issue::3212",
+    "route": "docs_howto",
+    "provider": null,
+    "confidence_stage_ms": 469.6977919957135,
+    "wake_ms": null,
+    "routing_ms": 235.2594580006553
+  },
+  {
+    "k": 6,
+    "arm": "plain",
+    "query_id": "golden::issue::753",
+    "route": "docs_howto",
+    "provider": "groq",
+    "confidence_stage_ms": 766.7216249974445,
+    "wake_ms": null,
+    "routing_ms": 241.36695799825247
+  },
+  {
+    "k": 7,
+    "arm": "wake",
+    "query_id": "golden::issue::753",
+    "route": "docs_howto",
+    "provider": "groq",
+    "confidence_stage_ms": 587.8832079906715,
+    "wake_ms": 221.7968339973595,
+    "routing_ms": 275.4639170016162
+  },
+  {
+    "k": 8,
+    "arm": "wake",
+    "query_id": "golden::issue::219",
+    "route": "known_issue",
+    "provider": "groq",
+    "confidence_stage_ms": 994.6009580016835,
+    "wake_ms": 178.82370800361969,
+    "routing_ms": 280.4509170091478
+  },
+  {
+    "k": 9,
+    "arm": "plain",
+    "query_id": "golden::issue::219",
+    "route": "known_issue",
+    "provider": "groq",
+    "confidence_stage_ms": 1033.873250009492,
+    "wake_ms": null,
+    "routing_ms": 270.6259160040645
+  },
+  {
+    "k": 10,
+    "arm": "plain",
+    "query_id": "golden::issue::11104",
+    "route": "known_issue",
+    "provider": "groq",
+    "confidence_stage_ms": 432.51474999124184,
+    "wake_ms": null,
+    "routing_ms": 364.3272089975653
+  },
+  {
+    "k": 11,
+    "arm": "wake",
+    "query_id": "golden::issue::11104",
+    "route": "known_issue",
+    "provider": "groq",
+    "confidence_stage_ms": 288.431708002463,
+    "wake_ms": 183.86725000164006,
+    "routing_ms": 265.19145899510477
+  }
+]

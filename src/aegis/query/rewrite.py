@@ -11,9 +11,13 @@ injects a fake `rewrite_fn`, the real Groq path is exercised by
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Callable
 
 from aegis.config import settings
+from aegis.observability.logging import get_logger, log_event
+
+_log = get_logger(__name__)
 
 # (role, text) turns, oldest first. Only the user's own prior turns matter
 # for resolving "it"/"that"/ellipsis -- assistant turns are included too
@@ -47,7 +51,13 @@ def _default_rewrite_fn(model: str, temperature: float) -> RewriteFn:
                     {"role": "user", "content": f"Conversation so far:\n{history_text}\n\nFollow-up: {query}"},
                 ],
             )
-        except APIError:
+        except APIError as exc:
+            # Falling back to the raw query is the right fail-safe, but it must
+            # not be silent: the router once hid a quota outage the same way.
+            log_event(
+                _log, logging.WARNING, "rewrite.api_error",
+                error_type=type(exc).__name__, status_code=getattr(exc, "status_code", None), detail=str(exc)[:300],
+            )
             return ""
         return completion.choices[0].message.content or ""
 
@@ -72,4 +82,6 @@ class QueryRewriter:
         if not history:
             return query
         rewritten = self._rewrite_fn(history, query).strip()
+        if not rewritten:
+            log_event(_log, logging.WARNING, "rewrite.blank_output", query_chars=len(query))
         return rewritten or query

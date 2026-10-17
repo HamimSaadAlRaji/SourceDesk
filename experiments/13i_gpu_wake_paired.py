@@ -113,10 +113,18 @@ def main() -> int:
             reranker.rerank("wake", dummy_pair, top_k=1)
             wake_ms = (time.perf_counter() - t) * 1000.0
         r = pipe.answer(Query(id=q.id, text=q.text))
-        row = {"k": k, "arm": arm, "query_id": q.id, "route": r.route.value if r.route else None,
+        row = {"k": k, "arm": arm, "query_id": q.id, "route": r.route.value if r.route else None, "provider": r.provider,
                "confidence_stage_ms": r.stage_latencies_ms.get("confidence"), "wake_ms": wake_ms,
                "routing_ms": r.stage_latencies_ms.get("routing")}
         rows.append(row)
+        if REAL_STACK:
+            # Contaminated-run guard. These are docs questions: a billing route means the router's API call failed
+            # into its fail-safe (Groq quota); a non-groq provider means generation fell back to Gemini (quota again,
+            # and it would burn Gemini's daily cap). Either way the run no longer measures what it claims to.
+            if row["route"] == "billing_account_legal" or (r.provider not in (None, "groq") and not r.escalate):
+                OUT.write_text(json.dumps(rows, indent=2))
+                print(f"ABORT at run {k}: route={row['route']} provider={r.provider} -- quota/provider failure, data not trustworthy", flush=True)
+                return 2
         print(f"{k:2d} {arm:5s} {q.id[-12:]:>12s} route={row['route']} confidence={row['confidence_stage_ms']} wake={wake_ms}", flush=True)
     OUT.write_text(json.dumps(rows, indent=2))
 

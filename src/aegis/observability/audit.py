@@ -39,6 +39,9 @@ class AuditTrail(BaseModel):
     trace_id: str | None = None
     query_id: str | None = None
     query_text: str | None = None
+    # Set when the request was a follow-up resolved against history: what the
+    # cache, router and retriever actually saw instead of `query_text`.
+    rewritten_query: str | None = None
     cache_status: str | None = None
     route: str | None = None
     escalated: bool = False
@@ -103,6 +106,7 @@ def build_audit_trail(observations: list[dict[str, Any]], trace_id: str | None =
         trace_id=trace_id,
         query_id=root_in.get("query_id"),
         query_text=root_in.get("query"),
+        rewritten_query=root_out.get("rewritten_query"),
         cache_status=out("cache_lookup").get("cache_status"),
         route=out("routing").get("route"),
         escalated=bool(out("escalation").get("escalated", False)),
@@ -189,6 +193,8 @@ def resolve_evidence(trail: AuditTrail, lookup: Callable[[str], Chunk | None]) -
 def render_markdown(trail: AuditTrail, evidence: list[EvidenceItem], excerpt_chars: int = 500) -> str:
     L: list[str] = [f"# Audit trail — trace `{trail.trace_id or 'unknown'}`", ""]
     L += ["## Request", "", f"- Query (`{trail.query_id}`): {trail.query_text!r}", f"- Cache: **{trail.cache_status}**"]
+    if trail.rewritten_query:
+        L.insert(-1, f"- Resolved against conversation history to: {trail.rewritten_query!r}")
     if trail.route:
         L.append(f"- Route: **{trail.route}**")
     outcome = f"escalated to a human — {trail.escalation_reason}" if trail.escalated else "answered"

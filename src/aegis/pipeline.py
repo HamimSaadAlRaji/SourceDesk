@@ -22,16 +22,19 @@ including the tracer, so this is unit-testable with fakes
 from __future__ import annotations
 
 import logging
+import queue
+import threading
 import time
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from enum import StrEnum
 from typing import Protocol
 
 from pydantic import BaseModel
 
-from aegis.cache.exact_match import CachedAnswer
+from aegis.cache.exact_match import CachedAnswer, CitedChunk
 from aegis.config import settings
+from aegis.events import CitationEvent, DoneEvent, ErrorEvent, EscalationEvent, PipelineEvent, TokenEvent
 from aegis.observability.logging import bind_trace_id, get_logger, log_event
 from aegis.generation.pipeline import GenerationPipeline
 from aegis.guardrails.confidence import (
@@ -41,6 +44,7 @@ from aegis.guardrails.confidence import (
     build_escalation_payload,
     decide_escalation,
 )
+from aegis.query.rewrite import History
 from aegis.router.classifier import Route
 from aegis.router.policy import decide as decide_route
 from aegis.types import Chunk, Query, Retrieved
@@ -63,6 +67,10 @@ class _Router(Protocol):
 
 class _Retriever(Protocol):
     def search(self, query: str, top_k: int, **kwargs) -> list[tuple[Chunk, float]]: ...
+
+
+class _Rewriter(Protocol):
+    def rewrite(self, history: list[tuple[str, str]], query: str) -> str: ...
 
 
 class _Span(Protocol):
@@ -118,13 +126,21 @@ class PipelineResult(BaseModel):
     # `retrieved`, in the numbering the answer's [n] citations refer to.
     context: list[ContextEntry] = []
     context_dropped_count: int = 0
+    # Set only when a follow-up was resolved against history into a different
+    # standalone query; `query` then holds that standalone text (what the cache,
+    # router and retriever saw). The user's original is in the trace's root input.
+    rewritten_query: str | None = None
 
 
 # Phase 14's real human-handoff mechanism doesn't exist yet (progress.md,
 # Phase 12 Unit 6) -- this is a placeholder response, not a routing/comms
 # integration. Its only job today is to be the text a trace/audit-trail
 # reconstruction shows for an escalated query.
+EventSink = Callable[[PipelineEvent], None]
 _log = get_logger("pipeline")
+# What a client is told on failure. Provider exception text can carry account/org
+# identifiers (a Groq 429 includes the org id), so details go to the log only.
+_ERROR_MESSAGE = "The request could not be completed."
 _ESCALATION_MESSAGE = "This request has been escalated to a human agent."
 _WARM_UP_QUERY = "how do I declare a query parameter"
 
@@ -158,6 +174,7 @@ class AnswerPipeline:
         corpus_version: str,
         retrieval_top_k: int = 10,
         tau: float = settings.confidence.tau,
+        rewriter: _Rewriter | None = None,
     ) -> None:
         self.exact_cache = exact_cache
         self.semantic_cache = semantic_cache
@@ -169,6 +186,7 @@ class AnswerPipeline:
         self.corpus_version = corpus_version
         self.retrieval_top_k = retrieval_top_k
         self.tau = tau
+        self.rewriter = rewriter
 
     def warm_up(self) -> dict[str, float]:
         """Pay lazy model-load and first-call costs at startup instead of on
@@ -184,8 +202,39 @@ class AnswerPipeline:
             self.confidence_scorer.score(_WARM_UP_QUERY, candidates)
         return timings
 
-    def answer(self, query: Query) -> PipelineResult:
+    def answer(
+        self, query: Query, on_event: EventSink | None = None, history: History | None = None
+    ) -> PipelineResult:
+        """Blocking entry point. With `on_event`, typed events are emitted as the
+        request progresses (tokens live, citations after validation, `done` last);
+        without it generation uses the original non-streaming call path."""
+        return self._run(query, on_event, self.tracer.create_trace_id(), history)
+
+    def answer_stream(self, query: Query, history: History | None = None) -> Iterator[PipelineEvent]:
+        """Same request, as an iterator of events. The work runs on ONE worker thread
+        and is handed over via a queue: the OTel span context managers and the
+        trace-id ContextVar must open and close on the same thread, which they would
+        not if a web server pulled this generator from a thread pool, one `next()`
+        per call. Failures become a terminal `error` event, never an exception."""
+        events: queue.Queue = queue.Queue()
+        end = object()
         trace_id = self.tracer.create_trace_id()
+
+        def work() -> None:
+            try:
+                self._run(query, events.put, trace_id, history)
+            except Exception as exc:  # noqa: BLE001 -- anything a provider/index SDK raises
+                events.put(ErrorEvent(code=type(exc).__name__, message=_ERROR_MESSAGE, trace_id=trace_id))
+            finally:
+                events.put(end)
+
+        threading.Thread(target=work, name="aegis-answer", daemon=True).start()
+        while (item := events.get()) is not end:
+            yield item
+
+    def _run(
+        self, query: Query, on_event: EventSink | None, trace_id: str, history: History | None = None
+    ) -> PipelineResult:
         with bind_trace_id(trace_id), self.tracer.start_as_current_observation(
             name="answer_query",
             as_type="span",
@@ -194,9 +243,24 @@ class AnswerPipeline:
         ) as root:
             log_event(_log, logging.INFO, "pipeline.request_start", query_id=query.id)
             timings: dict[str, float] = {}
-            result = self._answer(query, timings).model_copy(
-                update={"trace_id": trace_id, "stage_latencies_ms": timings}
-            )
+            try:
+                effective = query
+                if history and self.rewriter is not None:
+                    with _timed(timings, "rewrite"):
+                        effective = self._rewrite(query, history)
+                result = self._answer(effective, timings, on_event).model_copy(
+                    update={
+                        "trace_id": trace_id,
+                        "stage_latencies_ms": timings,
+                        "rewritten_query": effective.text if effective.text != query.text else None,
+                    }
+                )
+            except Exception as exc:
+                log_event(
+                    _log, logging.ERROR, "pipeline.error",
+                    query_id=query.id, error_type=type(exc).__name__, detail=str(exc)[:500],
+                )
+                raise
             log_event(
                 _log, logging.INFO, "pipeline.request_end",
                 query_id=query.id, cache_status=result.cache_status.value, escalate=result.escalate,
@@ -204,12 +268,27 @@ class AnswerPipeline:
                 stage_latencies_ms={k: round(v, 1) for k, v in timings.items()},
             )
             root.update(output=result.model_dump(mode="json", exclude={"query"}))
-            return result
+        # After the root span has closed, so the id in `done` names a finished trace.
+        if on_event is not None:
+            on_event(
+                DoneEvent(
+                    trace_id=trace_id, cache_status=result.cache_status.value,
+                    route=result.route.value if result.route else None, escalate=result.escalate,
+                    rewritten_query=result.rewritten_query,
+                    citations=result.citations, provider=result.provider, prompt_version=result.prompt_version,
+                    stage_latencies_ms={k: round(v, 1) for k, v in timings.items()},
+                )
+            )
+        return result
 
-    def _answer(self, query: Query, timings: dict[str, float]) -> PipelineResult:
+    def _answer(self, query: Query, timings: dict[str, float], emit: EventSink | None) -> PipelineResult:
         with _timed(timings, "cache_lookup"):
             cached, status = self._check_cache(query)
         if cached is not None:
+            if emit is not None:
+                emit(TokenEvent(text=cached.text))
+                for c in cached.cited:
+                    emit(CitationEvent(**c.model_dump()))
             return PipelineResult(
                 query=query,
                 cache_status=status,
@@ -224,7 +303,7 @@ class AnswerPipeline:
         route_outcome = decide_route(route)
         if route_outcome.escalate:
             with _timed(timings, "escalation"):
-                return self._escalate(query, status, route=route, reason=route_outcome.reason)
+                return self._escalate(query, status, emit, route=route, reason=route_outcome.reason)
 
         with _timed(timings, "retrieval"):
             candidates = self._retrieve(query)
@@ -237,6 +316,7 @@ class AnswerPipeline:
                 return self._escalate(
                     query,
                     status,
+                    emit,
                     route=route,
                     reason=escalation_outcome.reason,
                     candidates=candidates,
@@ -244,7 +324,15 @@ class AnswerPipeline:
                     payload=payload,
                 )
 
-        return self._generate(query, status, route, candidates, confidence, timings)
+        return self._generate(query, status, route, candidates, confidence, timings, emit)
+
+    def _rewrite(self, query: Query, history: History) -> Query:
+        with self.tracer.start_as_current_observation(
+            name="rewrite", as_type="span", input={"query": query.text, "history": history}
+        ) as span:
+            text = self.rewriter.rewrite(history, query.text)
+            span.update(output={"rewritten_query": text, "changed": text != query.text})
+            return query.model_copy(update={"text": text})
 
     def _check_cache(self, query: Query) -> tuple[CachedAnswer | None, CacheStatus]:
         with self.tracer.start_as_current_observation(name="cache_lookup", as_type="span") as span:
@@ -292,6 +380,7 @@ class AnswerPipeline:
         self,
         query: Query,
         status: CacheStatus,
+        emit: EventSink | None,
         route: Route,
         reason: str,
         candidates: list[tuple[Chunk, float]] | None = None,
@@ -306,6 +395,13 @@ class AnswerPipeline:
             name="escalation", as_type="guardrail", input={"reason": reason}
         ) as span:
             span.update(output={"escalated": True, "reason": reason})
+            if emit is not None:
+                emit(
+                    EscalationEvent(
+                        reason=reason, message=_ESCALATION_MESSAGE, route=route.value,
+                        after_retrieval=candidates is not None,
+                    )
+                )
             return PipelineResult(
                 query=query,
                 cache_status=status,
@@ -326,6 +422,7 @@ class AnswerPipeline:
         candidates: list[tuple[Chunk, float]],
         confidence: ConfidenceResult,
         timings: dict[str, float],
+        emit: EventSink | None,
     ) -> PipelineResult:
         retrieved = [Retrieved(chunk=c, score=s, rank=i) for i, (c, s) in enumerate(candidates, start=1)]
 
@@ -336,7 +433,8 @@ class AnswerPipeline:
                 model=self.generation.llm.__class__.__name__,
                 input={"prompt_version": self.generation.prompt.version},
             ) as gen_span:
-                draft = self.generation.generate(query, retrieved)
+                on_token = (lambda t: emit(TokenEvent(text=t))) if emit is not None else None
+                draft = self.generation.generate(query, retrieved, on_token=on_token)
                 context = [
                     ContextEntry(
                         citation_id=pc.citation_id, chunk_id=pc.chunk.id, content_hash=pc.chunk.content_hash, score=pc.score,
@@ -365,7 +463,22 @@ class AnswerPipeline:
                     output={"citations": gen_result.citations, "claim_count": len(gen_result.validation.claims)}
                 )
 
-        answer = CachedAnswer(text=gen_result.text, citations=gen_result.citations, provider=gen_result.provider)
+        validated = set(gen_result.citations)
+        cited = [
+            CitedChunk(
+                citation_id=pc.citation_id, chunk_id=pc.chunk.id, doc_id=pc.chunk.doc_id,
+                heading_path=pc.chunk.heading_path, text=pc.chunk.text,
+            )
+            for pc in sorted(draft.context.chunks, key=lambda pc: pc.citation_id)
+            if pc.chunk.id in validated
+        ]
+        if emit is not None:
+            for c in cited:
+                emit(CitationEvent(**c.model_dump()))
+
+        answer = CachedAnswer(
+            text=gen_result.text, citations=gen_result.citations, provider=gen_result.provider, cited=cited
+        )
         self.exact_cache.set(query.text, self.corpus_version, answer)
         self.semantic_cache.set(query.text, self.corpus_version, answer)
 

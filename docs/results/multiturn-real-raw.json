@@ -1,0 +1,301 @@
+[
+  {
+    "id": "rewrite_eval::golden::issue::2735",
+    "stratum": "error_debugging",
+    "turn1": "FastAPI documentation is not loading due to issues with the Swagger UI bundle.",
+    "turn2": "What's the exact CDN URL causing the problem?",
+    "assistant_chars": 1005,
+    "assistant_escalated": false,
+    "A": {
+      "hit": false,
+      "recall": 0.0,
+      "n_retrieved": 10,
+      "escalate": true,
+      "rewritten_query": null,
+      "latency_ms": {
+        "cache_lookup": 4.164457990555093,
+        "routing": 192.8035830060253,
+        "retrieval": 53.51729200629052,
+        "confidence": 1014.2891249997774,
+        "escalation": 0.43287500739097595
+      },
+      "text": "This request has been escalated to a human agent."
+    },
+    "B": {
+      "hit": true,
+      "recall": 0.21052631578947367,
+      "n_retrieved": 10,
+      "escalate": false,
+      "rewritten_query": "What is the exact CDN URL causing the Swagger UI bundle loading issue in the FastAPI documentation?",
+      "latency_ms": {
+        "rewrite": 269.6516660071211,
+        "cache_lookup": 168.09320900938474,
+        "routing": 194.29433401091956,
+        "retrieval": 24.975499996799044,
+        "confidence": 1405.9318329964299,
+        "generation": 626.039499999024,
+        "validation": 0.6798749964218587
+      },
+      "text": "The exact CDN URL causing the Swagger UI bundle loading issue is `https://cdn.jsdelivr.net/npm/swagger-ui-dist@3/swagger-ui-bundle.js` [4]."
+    },
+    "C": {
+      "hit": false,
+      "recall": 0.0,
+      "n_retrieved": 0,
+      "escalate": false,
+      "rewritten_query": "What is the exact CDN URL for the Swagger UI bundle that is causing the FastAPI documentation loading issue?",
+      "latency_ms": {
+        "rewrite": 285.0825000059558,
+        "cache_lookup": 178.503749993979
+      },
+      "text": "The exact CDN URL causing the Swagger UI bundle loading issue is `https://cdn.jsdelivr.net/npm/swagger-ui-dist@3/swagger-ui-bundle.js` [4]."
+    },
+    "error": null
+  },
+  {
+    "id": "rewrite_eval::golden::issue::1034",
+    "stratum": "multi_hop",
+    "turn1": "FastAPI supports creating complex class dependencies with multiple levels of sub-dependencies",
+    "turn2": "Can you show an example of how to parameterize a class dependency on a sub-dependency like the OAuth2PasswordBearer scheme?",
+    "assistant_chars": 397,
+    "assistant_escalated": false,
+    "A": {
+      "hit": true,
+      "recall": 0.1,
+      "n_retrieved": 10,
+      "escalate": false,
+      "rewritten_query": null,
+      "latency_ms": {
+        "cache_lookup": 3.002332989126444,
+        "routing": 1350.5099169997266,
+        "retrieval": 24.324916012119502,
+        "confidence": 2816.115042005549,
+        "generation": 18148.71537500585,
+        "validation": 12569.144500012044
+      },
+      "text": "Yes, you can parameterize a dependency by using a factory function that returns a closure, which allows you to pass the `OAuth2PasswordBearer` instance and other configuration values [9].\n\nHere is an example based on the provided context:\n\n```python\nfrom typing import Callable\nfrom fastapi import Fa"
+    },
+    "B": {
+      "hit": false,
+      "recall": 0.0,
+      "n_retrieved": 0,
+      "escalate": false,
+      "rewritten_query": "Can you show an example of how to parameterize a FastAPI class dependency on a sub-dependency like the OAuth2PasswordBearer scheme?",
+      "latency_ms": {
+        "rewrite": 307.83191599766724,
+        "cache_lookup": 154.8444579966599
+      },
+      "text": "Yes, you can parameterize a dependency by using a factory function that returns a closure, which allows you to pass the `OAuth2PasswordBearer` instance and other configuration values [9].\n\nHere is an example based on the provided context:\n\n```python\nfrom typing import Callable\nfrom fastapi import Fa"
+    },
+    "C": {
+      "hit": false,
+      "recall": 0.0,
+      "n_retrieved": 0,
+      "escalate": false,
+      "rewritten_query": "Can you show an example of how to parameterize a class dependency on a sub-dependency like the OAuth2PasswordBearer scheme in FastAPI?",
+      "latency_ms": {
+        "rewrite": 236.34899999888148,
+        "cache_lookup": 153.6786249926081
+      },
+      "text": "Yes, you can parameterize a dependency by using a factory function that returns a closure, which allows you to pass the `OAuth2PasswordBearer` instance and other configuration values [9].\n\nHere is an example based on the provided context:\n\n```python\nfrom typing import Callable\nfrom fastapi import Fa"
+    },
+    "error": null
+  },
+  {
+    "id": "rewrite_eval::golden::issue::257",
+    "stratum": "how_to",
+    "turn1": "When using path variables in FastAPI, you can pass an entire path to a route as a parameter.",
+    "turn2": "Is it possible to achieve this using the `path` type as described in the Starlette issue #525?",
+    "assistant_chars": 428,
+    "assistant_escalated": false,
+    "A": {
+      "hit": true,
+      "recall": 0.16666666666666666,
+      "n_retrieved": 10,
+      "escalate": false,
+      "rewritten_query": null,
+      "latency_ms": {
+        "cache_lookup": 4.100292004295625,
+        "routing": 1360.4425409866963,
+        "retrieval": 22.90474998881109,
+        "confidence": 753.0624170030933,
+        "generation": 14753.30345799739,
+        "validation": 0.9433749946765602
+      },
+      "text": "Yes, it is possible to use the `path` type in path variables as described in the referenced Starlette issue [1]. FastAPI supports declaring a path parameter that contains a full path by using the `:path` suffix in the route definition, such as `/files/{file_path:path}` [2]. This functionality is pro"
+    },
+    "B": {
+      "hit": false,
+      "recall": 0.0,
+      "n_retrieved": 0,
+      "escalate": false,
+      "rewritten_query": "Is it possible to pass an entire path to a route as a parameter in FastAPI using the `path` type as described in the Starlette issue #525?",
+      "latency_ms": {
+        "rewrite": 286.5863749902928,
+        "cache_lookup": 128.1710000039311
+      },
+      "text": "Yes, you can pass an entire path to a route as a parameter in FastAPI by using the `path` type in the path variable declaration [4][7]. This is achieved using internal tools from Starlette, as OpenAPI does not natively support declaring a path parameter to contain a path inside [6]. For example, you"
+    },
+    "C": {
+      "hit": false,
+      "recall": 0.0,
+      "n_retrieved": 0,
+      "escalate": false,
+      "rewritten_query": "Is it possible to pass an entire path to a route as a parameter in FastAPI using the `path` type as described in the Starlette issue #525?",
+      "latency_ms": {
+        "rewrite": 243.40787500841543,
+        "cache_lookup": 2.2850420064060017
+      },
+      "text": "Yes, you can pass an entire path to a route as a parameter in FastAPI by using the `path` type in the path variable declaration [4][7]. This is achieved using internal tools from Starlette, as OpenAPI does not natively support declaring a path parameter to contain a path inside [6]. For example, you"
+    },
+    "error": null
+  },
+  {
+    "id": "rewrite_eval::golden::issue::4391",
+    "stratum": "error_debugging",
+    "turn1": "I'm experiencing a stack overflow error while using FastAPI for building a high-performance API.",
+    "turn2": "Could you tell me more about the specific scenario where this error occurs, like the function or endpoint that causes the overflow?",
+    "assistant_chars": 441,
+    "assistant_escalated": false,
+    "A": {
+      "hit": false,
+      "recall": 0.0,
+      "n_retrieved": 10,
+      "escalate": true,
+      "rewritten_query": null,
+      "latency_ms": {
+        "cache_lookup": 4.351667012088001,
+        "routing": 1454.4548750127433,
+        "retrieval": 13.714667002204806,
+        "confidence": 1625.6870420038467,
+        "escalation": 0.41954100015573204
+      },
+      "text": "This request has been escalated to a human agent."
+    },
+    "B": {
+      "hit": false,
+      "recall": 0.0,
+      "n_retrieved": 0,
+      "escalate": false,
+      "rewritten_query": "Could you tell me more about the specific scenario where the stack overflow error occurs in your FastAPI application, such as the function or endpoint that causes the overflow?",
+      "latency_ms": {
+        "rewrite": 247.36162500630599,
+        "cache_lookup": 153.81179199903272
+      },
+      "text": "The provided context does not contain any information about stack overflow errors in FastAPI, their causes, or how to resolve them [1][2][3][4][5][6][7][8][9][10]. The context blocks only list environment details (OS, FastAPI version, Python version) from various GitHub issues and do not describe sp"
+    },
+    "C": {
+      "hit": false,
+      "recall": 0.0,
+      "n_retrieved": 0,
+      "escalate": false,
+      "rewritten_query": "Could you tell me more about the specific scenario where the FastAPI stack overflow error occurs, such as the function or endpoint that causes the overflow?",
+      "latency_ms": {
+        "rewrite": 224.89741700701416,
+        "cache_lookup": 152.47483299754094
+      },
+      "text": "The provided context does not contain any information about stack overflow errors in FastAPI, their causes, or how to resolve them [1][2][3][4][5][6][7][8][9][10]. The context blocks only list environment details (OS, FastAPI version, Python version) from various GitHub issues and do not describe sp"
+    },
+    "error": null
+  },
+  {
+    "id": "rewrite_eval::golden::issue::2834",
+    "stratum": "ambiguous",
+    "turn1": "I am trying to maintain a community profile for my FastAPI project",
+    "turn2": "Can I attach a pull request to add the missing files?",
+    "assistant_chars": 49,
+    "assistant_escalated": true,
+    "A": {
+      "hit": false,
+      "recall": 0.0,
+      "n_retrieved": 10,
+      "escalate": true,
+      "rewritten_query": null,
+      "latency_ms": {
+        "cache_lookup": 3.69654200039804,
+        "routing": 208.43324999441393,
+        "retrieval": 22.537750002811663,
+        "confidence": 2680.4463750013383,
+        "escalation": 0.3076249995501712
+      },
+      "text": "This request has been escalated to a human agent."
+    },
+    "B": {
+      "hit": false,
+      "recall": 0.0,
+      "n_retrieved": 0,
+      "escalate": true,
+      "rewritten_query": "Can I attach a pull request to add the missing files to my FastAPI project's community profile?",
+      "latency_ms": {
+        "rewrite": 224.14474999823142,
+        "cache_lookup": 147.94908399926499,
+        "routing": 221.52766700310167,
+        "escalation": 0.991583990980871
+      },
+      "text": "This request has been escalated to a human agent."
+    },
+    "C": {
+      "hit": false,
+      "recall": 0.0,
+      "n_retrieved": 0,
+      "escalate": true,
+      "rewritten_query": "Can I attach a pull request to add the missing files to my FastAPI project's community profile?",
+      "latency_ms": {
+        "rewrite": 206.5331670019077,
+        "cache_lookup": 0.8535410015610978,
+        "routing": 3340.5564590066206,
+        "escalation": 1.1951670021517202
+      },
+      "text": "This request has been escalated to a human agent."
+    },
+    "error": null
+  },
+  {
+    "id": "rewrite_eval::golden::issue::2484",
+    "stratum": "conceptual",
+    "turn1": "FastAPI applications are typically built as asynchronous services,",
+    "turn2": "how does the asynchronous nature of your service impact request execution order?",
+    "assistant_chars": 463,
+    "assistant_escalated": false,
+    "A": {
+      "hit": false,
+      "recall": 0.0,
+      "n_retrieved": 10,
+      "escalate": true,
+      "rewritten_query": null,
+      "latency_ms": {
+        "cache_lookup": 3.758999999263324,
+        "routing": 1319.5858340041013,
+        "retrieval": 28.45112500654068,
+        "confidence": 2297.2804170130985,
+        "escalation": 0.30949999927543104
+      },
+      "text": "This request has been escalated to a human agent."
+    },
+    "B": {
+      "hit": false,
+      "recall": 0.0,
+      "n_retrieved": 0,
+      "escalate": false,
+      "rewritten_query": "How does the asynchronous nature of FastAPI services impact request execution order?",
+      "latency_ms": {
+        "rewrite": 257.1776660042815,
+        "cache_lookup": 168.96712500602007
+      },
+      "text": "FastAPI is an ASGI web framework that uses asynchronous code powered by coroutines with `async` and `await` syntax [4][7]. Path operation functions defined with `async def` run on the main thread, whereas functions defined with `def` run in a separate thread from a threadpool [5]. If you have a util"
+    },
+    "C": {
+      "hit": false,
+      "recall": 0.0,
+      "n_retrieved": 0,
+      "escalate": false,
+      "rewritten_query": "How does the asynchronous nature of FastAPI services impact request execution order?",
+      "latency_ms": {
+        "rewrite": 249.52570800087415,
+        "cache_lookup": 0.9995840082410723
+      },
+      "text": "FastAPI is an ASGI web framework that uses asynchronous code powered by coroutines with `async` and `await` syntax [4][7]. Path operation functions defined with `async def` run on the main thread, whereas functions defined with `def` run in a separate thread from a threadpool [5]. If you have a util"
+    },
+    "error": null
+  }
+]

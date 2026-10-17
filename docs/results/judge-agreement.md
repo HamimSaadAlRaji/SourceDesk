@@ -109,3 +109,24 @@ right, and knowing that is the real deliverable.
   a lower-variance-inducing rubric structure for Gemini specifically — then re-run once quota resets.
 - A root-cause pass on `faithfulness=0.7977` (below the 0.90 target).
 - Every model used here is quota-exhausted as of this session; nothing above can be re-tested until reset.
+
+## Update 2026-10-01 — first paired κ under the fixed rubric (partial)
+
+Re-ran `experiments/11g_judge_rubric_rescore.py` (design record 11f). Raw: `judge-agreement-batch-raw-rubric-fix.json`.
+
+- **Groq judge (`gpt-oss-120b`): complete, 29/29** (the 3 rows left over from the quota wall are filled in). Distribution: 1×1, 3×1, 4×12, 5×15 — 27 of 29 scores are 4 or 5.
+- **Gemini judge: 11/29.** Its free-tier daily cap (20 requests/day) ran out again partway through, so 18 rows have no Gemini score.
+- **Paired N = 11.** Raw agreement 0.6364; **Cohen's κ = 0.2143** (unweighted and quadratic are identical here). Pre-fix: κ = −0.0161 at N = 9. Plan bar: 0.6 — **still not met**.
+
+Confusion matrix (Groq rows × Gemini cols, scores 4–5 only; no other cell is occupied):
+
+| | Gemini 4 | Gemini 5 |
+|---|---|---|
+| Groq 4 | 1 | 4 |
+| Groq 5 | 0 | 6 |
+
+**How much weight this number can bear: very little.** Gemini scored 10 of 11 paired answers a perfect 5, so it barely varies; with one rater almost constant, κ is unstable (high raw agreement can coexist with low κ, and a single additional row can move it a lot). All 4 disagreements run the same direction (Groq 4, Gemini 5). The "reserve 5" anchor added in the rubric fix moved the Groq judge but did **not** cure Gemini's ceiling effect. Both judges now sit at the top of the scale (Groq: 27/29 at 4–5), which limits what any agreement statistic can show here. The rows with Gemini scores are simply the first 11 processed, not a random subset.
+
+**Remaining:** 18 Gemini scores. The script is resumable — re-running it fills only those (about one day of Gemini quota). Until then κ under the fixed rubric is measured on 11 pairs, not 29.
+
+**Correction:** earlier notes said `make eval` would pick up the new κ automatically. It will not. `EvalSettings.generation_batch_raw_path` points at the original pre-fix file (`judge-agreement-batch-raw.json`), so the scorecard still reports κ = −0.0161. Which file the scorecard should report (or whether to show both) is an open decision.

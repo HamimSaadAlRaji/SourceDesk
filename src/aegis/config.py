@@ -565,6 +565,39 @@ class LangfuseSettings(BaseSettings):
     environment: str = "dev"
 
 
+class ApiSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="API_", env_file=".env", extra="ignore")
+
+    # Request-size cap at the HTTP boundary, so an absurd body never reaches the
+    # router/encoder/LLM. Measured over the 180 golden queries: p50 773 chars,
+    # p95 4,351, max 16,755 (many are whole GitHub issue bodies; 43 exceed
+    # 2,000). 20,000 clears the observed max; it is a guard rail, not a tuned
+    # value. Phase 15 owns real input hardening and revisits it.
+    max_query_chars: int = 20000
+    max_comment_chars: int = 1000
+
+    # Conversation memory. `max_history_messages` bounds the request payload
+    # (422 above it). The rewriter is then shown only the last
+    # `history_window_messages`, each cut to `history_message_chars`: a
+    # pronoun almost always refers to the last exchange or two, and every
+    # extra character is rewriter input on a path that already has an LLM call
+    # in it. These two are guard rails, not tuned: Phase 8 measured rewriting
+    # only on one short user turn (docs/results/query-understanding-ablation.md),
+    # so how it behaves with long assistant answers in history is measured in
+    # design record 14d, not assumed.
+    max_history_messages: int = 20
+    history_window_messages: int = 6
+    history_message_chars: int = 1000
+
+    # Where /chat interactions and /feedback votes persist (one sqlite file).
+    interactions_db_path: Path = REPO_ROOT / "data" / "feedback" / "interactions.sqlite"
+
+    # /trace polls Langfuse until ingestion settles (8-14 s for a fresh trace,
+    # design record 13b). 20 s covers that with margin; a trace still absent
+    # after it is reported as not found / not yet ingested rather than hanging.
+    trace_max_wait_s: float = 20.0
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
@@ -586,6 +619,7 @@ class Settings(BaseSettings):
     eval: EvalSettings = EvalSettings()
     cache: CacheSettings = CacheSettings()
     langfuse: LangfuseSettings = LangfuseSettings()
+    api: ApiSettings = ApiSettings()
 
 
 settings = Settings()

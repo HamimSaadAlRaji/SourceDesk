@@ -44,3 +44,12 @@ def test_rewrite_output_is_stripped():
     result = rewriter.rewrite([("user", "context")], "and that?")
 
     assert result == "standalone query"
+
+
+def test_blank_rewrite_falls_back_to_raw_query_and_logs_it(caplog):
+    import logging
+
+    rewriter = QueryRewriter(rewrite_fn=lambda history, query: "  ")
+    with caplog.at_level(logging.WARNING):
+        assert rewriter.rewrite([("user", "hi")], "what about it?") == "what about it?"
+    assert any("rewrite.blank_output" in r.getMessage() for r in caplog.records)

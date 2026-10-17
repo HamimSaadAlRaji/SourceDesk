@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aegis — FastAPI answers with sources</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header>
+    <h1>Aegis</h1>
+    <p>Answers about FastAPI, cited to the source text. When it isn't confident, it hands off to a human instead of guessing.</p>
+  </header>
+  <main id="thread" aria-live="polite"></main>
+  <form id="form" autocomplete="off">
+    <textarea id="query" rows="2" maxlength="20000" placeholder="Ask about FastAPI…" required></textarea>
+    <button id="send" type="submit">Ask</button>
+    <button id="reset" type="button" title="Forget the conversation">New chat</button>
+  </form>
+  <script src="/static/sse.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -323,6 +323,107 @@ criterion. Open items carried: (1) that confidence-stage gap; (2) Phase 12 cost 
 measured generation; (3) audit-trail retention/export; (4) an outage-driven escalation's `escalation_reason`
 still reads as a billing escalation.
 
+**Phase 11 judge-κ rescore run, 2026-10-01 (partial)** (`docs/results/judge-agreement.md` update). Ran
+`experiments/11g_judge_rubric_rescore.py`: Groq judge now complete (29/29); Gemini scored 11/29 before its
+20/day cap. **Paired N=11: κ = 0.2143, raw agreement 0.636 (pre-fix: -0.0161 at N=9); still below the 0.6 bar.**
+Caveat: Gemini gave 10/11 paired answers a 5, so κ is unstable at this skew; all 4 disagreements are Groq 4 /
+Gemini 5; the "reserve 5" anchor did not cure Gemini's ceiling effect. 18 Gemini scores remain (script is
+resumable, ~1 day of Gemini quota). **Correction to earlier notes: `make eval` does NOT pick up the rescore** --
+`EvalSettings.generation_batch_raw_path` still points at the original pre-fix raw file, so the scorecard still
+reports κ = -0.0161. Decision needed: report the fixed-rubric κ (and/or both) in the scorecard. Not changed.
+
+**Phase 13 confidence-gap follow-up, 2026-10-01** (`docs/results/latency-budget.md` follow-up section,
+`experiments/13k_shape_first_call.py`). Ran the previously-untested hypothesis: real router + generation +
+validation in-process (13i real-stack, no abort): confidence p50 647 ms plain / 516 ms woken -- **refuted**, same
+as fakes. Also refuted: per-shape first-call compile cost (13k: call1 ~= call2 ~= call3) and power state
+(battery + Low Power Mode ON, still fast). The stage's cost does follow padded sequence length (238 ms at 318
+tokens -> 480-880 ms at 512). **Still unexplained:** query `753` costs ~0.5-0.8 s in 13i/13k but ~2.5 s in the 13c
+batch script (reproduced in 2 runs: pilot and rerun); something harness-specific (13c reuses one pipeline and its
+caches across queries) inflates the stage; not bisected. **The p95 < 3 s criterion remains unmet and
+unresolved; the verdict depends on the harness.** Rerun generate-path wall times 3,234/3,734/2,745 ms (n=3).
+**Phase 9 sampling sweep NOT run:** needs ~100k qwen tokens; today's window still holds this morning's real-stack
+runs and yesterday's evening batches, headroom unknown (a probe only proves >=16k). Run once the window clears
+(after ~20:00 local): `uv run python experiments/09a_sampling_sweep.py` (resumable).
+
+## Phase 14 — API, Streaming & UI
+
+**Scope** (plan.md, Days 16-17, topic 35): FastAPI `POST /chat` (SSE) / `GET /health` / `GET /trace/{id}` /
+`POST /feedback`; typed SSE events (`token`, `citation`, `escalation`, `done`, `error`); conversation memory
+wired to Phase 8's rewriting; static HTML+vanilla JS UI with a visibly distinct escalation state; feedback ->
+review queue; rate limiting / validation / graceful provider failure. Exit: streaming works in a browser,
+citations clickable to real source text, escalation visibly different, multi-turn resolves, feedback persists.
+
+**Unit 1 complete as of 2026-10-01** (design record 14, `src/aegis/events.py`, `src/aegis/pipeline.py`,
+`tests/test_pipeline_stream.py`, `experiments/14a_stream_smoke.py`). `AnswerPipeline.answer_stream()` yields
+typed events; contract pinned by tests (answer `token+ citation* done`; cache hit same shapes; escalation
+`escalation done`; failure `token* error`, terminal). **Decision (user-confirmed via `AskUserQuestion`): stream
+live, validate after** -- not less safe than today, since the non-streaming pipeline already serves answer text
+whether or not every claim validates. One implementation (`_run`) with an optional event sink; no sink = original
+non-streaming path, so evals/tests are unaffected. Work runs on one worker thread behind a queue so OTel spans
+and the trace-id ContextVar never straddle threads. `error` events carry only the exception class + fixed
+message (provider exceptions can include org ids). Cache entries now store `CitedChunk` so a hit replays real
+`citation` events (field defaults to `[]`; old entries still load). `uv run pytest -q`: 508/508 (+12). **Real run
+(n=1):** first token 1,298 ms, 85 token events over 252 ms, `citation` at 1,921 ms (371 ms after the last token),
+`done` 1,927 ms; cache replay of the same query 3 ms. **Streaming buys less than the plan assumes:** the model
+emits the whole answer in ~250 ms, so the first-token wait is the pre-generation path (routing + retrieval +
+confidence), not generation. Not verified: real mid-stream failure, client disconnect, a real browser.
+
+**Unit 2 complete as of 2026-10-01** (design record 14b, `src/aegis/api/app.py`, `src/aegis/api/main.py`,
+`src/aegis/factory.py`, `ApiSettings`, `tests/test_api.py`). `POST /chat` streams the typed events as SSE
+(hand-written frames over `StreamingResponse`; no SSE library), `GET /health`, pipeline injected into
+`create_app()`, real pipeline built + warmed in the lifespan. Validation failures are HTTP 422 before the pipeline
+runs; pipeline failures are a terminal `error` event under HTTP 200. Deps added: `fastapi`, `uvicorn`, dev `httpx`.
+`max_query_chars=20000`, set from the measured golden-query lengths (max 16,755; a 2,000 cap would reject 43/180).
+`uv run pytest -q`: 513/513 (+5). **Real server, real HTTP (small n):** first token 965-1,824 ms on 3 fresh
+generated answers; 3 escalations returned `escalation`+`done`; exact-cache repeat 7 ms; blank query 422; client
+disconnect after first token left the server healthy but the pipeline ran to completion (no cancellation).
+**Unresolved contradiction:** one fresh query had a 10,023 ms confidence stage and one request spent 28.7 s in
+`validation` (tier-2 LLM call, cause not checked) -- same unexplained variance as Phase 13, still threatens p95 < 3 s.
+Experiments were not re-pointed at the factory (they record what produced published numbers).
+Not verified: browser consumption, concurrent requests, mid-stream provider failure through HTTP.
+
+**Unit 3 complete as of 2026-10-01** (design record 14c, `src/aegis/api/{app,store,audit_service}.py`,
+`tests/test_api.py`, `tests/test_interaction_store.py`). `GET /trace/{id}` wraps the Phase 13 audit trail + evidence
+(id must be 32 hex chars); `POST /feedback` records up/down + comment against a `trace_id`. `/chat` now records
+each completed interaction (query, answer text shown, escalated, cache status) server-side in sqlite, so a vote
+is accepted only for a trace the server issued (404 otherwise) and the feedback -> golden-candidate loop does not
+depend on Langfuse's 30-day retention or on client-supplied text. Second vote replaces the first. Streams that
+end in `error` are not recorded. `uv run pytest -q`: 524/524 (+11). **Real run (n=1):** vote recorded 200,
+unknown trace 404, `/trace` on a fresh trace 200 in **24.8 s** (soft 20 s cap; ingestion lag) with all 6 stages,
+no warnings/inconsistencies, 10/10 evidence `ok`; vote survived a server restart. Open: `/trace` and `trace_id`
+are unauthenticated and `/trace` returns query + chunk text (Phase 15 surface); no rate limit yet; review
+queue / golden-candidate export not built.
+
+**Unit 4 complete as of 2026-10-01 -- wiring done, "resolves correctly" NOT demonstrated** (design record 14d,
+`src/aegis/pipeline.py`, `src/aegis/api/app.py`, `src/aegis/query/rewrite.py`, `experiments/14b_multiturn_real.py`).
+`POST /chat` takes optional `history`; Phase 8's `QueryRewriter` runs as the first stage so cache/router/retriever
+see the standalone question; `done` carries `rewritten_query`; `rewrite` is its own trace span; audit trail and
+interaction store record both texts. No history = no rewriter call. Rewriter API errors / blank output now logged.
+Client holds history (server stateless); window 6 msgs x 1,000 chars (unmeasured guard rails). `uv run pytest -q`:
+539/539. **Real HTTP:** follow-up + history -> standalone query, answered, rewrite stage 856 ms; same follow-up with
+no history escalated. **n=6 end-to-end retrieval check:** hit@10 A(no history) 2/6, B(user turn) 1/6, C(user turn +
+real answer) 0/6; escalations 4/6 -> 1/6 -> 1/6. Rewriting converts abstentions into answers but retrieval gain is
+not shown at this n and regime C (assistant answer in history) is unmeasured at scale -- Phase 8's +52.7% NDCG@5
+covers regime B only. Exit criterion "multi-turn follow-ups resolve correctly" stays OPEN.
+
+**Unit 5 complete as of 2026-10-01** (design record 14e, `src/aegis/api/static/{index.html,app.js,sse.js,style.css}`,
+`tests/test_ui_static.py`). Static page served at `/`: fetch+stream-reader SSE client (incremental parser, node-tested
+with a split frame), validated `[n]` -> clickable chip expanding the real source chunk, unvalidated `[n]` struck
+through, escalation as a distinct amber card, history sent + "Searched for" shown, 👍/👎 (+comment) -> `/feedback`,
+time-to-first-text per answer; model/corpus text only via `textContent` (test asserts no innerHTML); bold/code
+rendered from DOM nodes. `uv run pytest -q`: 542/542. **Verified in a real browser (Playwright, n=1 session):**
+streaming + 15 citation chips, chip click opened `doc::tutorial/body.md` text, escalation card (screenshot viewed),
+👎 persisted with rewritten query. **Findings, not fixed:** (1) the follow-up "what about making it required?" was
+rewritten correctly but served as a **semantic cache hit** on the earlier generic "declare a query parameter"
+answer -- the 0.88 threshold didn't separate the pair; (2) cold first request: first text 22.7 s -- cache_lookup
+9.3 s (cache path not covered by warm-up) + generation 17.9 s on Gemini (why Groq wasn't used unknown; fallback
+logs nothing). Not checked: dark mode, mobile, a11y, mid-stream failure in browser, escalation wording is
+router-internal. Phase 14 exit: streaming ✔, clickable citations ✔, escalation distinct ✔, feedback persists ✔,
+**multi-turn correct: open** (wiring works; regime-C eval owed; cache-collision example above).
+
+**Next action:** user's choice among: review queue + golden-candidate export; rate limiting + graceful provider
+failure (+ log fallback failover); semantic-cache collision / cold cache_lookup investigation; regime-C multi-turn eval.
+
 ### Phase 11 wrap-up (2026-09-26)
 
 Everything code-, analysis-, and documentation-side that doesn't require new LLM quota is complete: all 6
@@ -383,7 +484,7 @@ either. Open Questions #1 and #16 and the DoD tracker rows below reflect this ex
 |---|---|
 | **Day** | 13 of 21 (in progress) |
 | **Phase** | 13 of 19 (in progress, build list complete, 3 of 4 exit criteria met -- p95 < 3 s unmet). Phase 12 complete (all 6 units, exit criteria met). Phase 11 wrapped up (all 6 units + rubric fix + faithfulness root cause done; real paired κ deferred to the user, pending Gemini quota). Phase 9's sampling-sweep grid re-scoped and half-completed (2 of 4 configs real), remaining 2 also deferred to the user |
-| **Design records written** | 26 files across phases 0-13 (lettered sub-records inflate this past a literal 1-per-phase count; phases 14-19 have none yet) |
+| **Design records written** | 27 files across phases 0-13 (lettered sub-records inflate this past a literal 1-per-phase count; phases 14-19 have none yet) |
 | **Golden set** | 180 dev + 40 holdout, frozen and hashed (Phase 4) |
 | **Definition of Done** | 3 of 10 criteria met (#1: Recall@10 + MRR lift; #3: escalation confusion matrix; #8: LLM-judge agreement, measured — real result is **not met**, κ≈0 vs. ≥0.6 target, itself a valid, reported outcome). `make eval` (Unit 6) now surfaces this and the faithfulness miss automatically, in one command. |
 | **Blockers** | Both providers re-exhausted again as of 2026-09-26 running the real N=26 rubric-fix re-score: `openai/gpt-oss-120b` (TPD) and `gemini-3.5-flash` (20/day, which did not clear even across the calendar-day rollover — its quota-day boundary doesn't align with local midnight). Gemini has now returned **zero** real scores under the fixed rubric across two separate attempts — real inter-judge κ is still completely unmeasured. `qwen/qwen3.8-27b` (generation) is now *also* TPD-exhausted (200,000/day, newly discovered running the sampling sweep re-run) — 2 of 4 sweep configs got real data before the wall. Not currently blocking: Units 5 and 6 (custom metrics, scorecard — both zero LLM cost) shipped regardless, and both the groq-side refusal fix (N=26) and the temperature=0.0 sweep configs (N=20 each) are real-verified. |
@@ -410,7 +511,7 @@ Legend: ⬜ not started · 🟡 in progress · ✅ complete · ⏭️ cut
 | 11 | **Generation eval + judge validation** ⚑ | 13 | 🟡 | RAGAS + Cohen's κ |
 | 12 | Caching, delta indexing & cost | 14 | 🟡 | Cache hit rate, cost table |
 | 13 | Observability & latency budget | 15 | 🟡 | p95 < 3s, per-stage breakdown |
-| 14 | API, streaming & UI | 16–17 | ⬜ | Working demo w/ visible escalation |
+| 14 | API, streaming & UI | 16–17 | 🟡 | Working demo w/ visible escalation |
 | 15 | Security hardening | 18½ | ⬜ | Adversarial suite |
 | 16 | **CI evaluation gate** ⚑ | 18½ | ⬜ | Gate that fails on regression |
 | 17 | LangGraph port & framework comparison | 19 | ⬜ | Comparison writeup, both paths pass eval |
@@ -656,6 +757,7 @@ Every non-obvious choice, its alternatives, and why. Append-only.
 | 2026-09-26 | Added config-level resumability to `09a_sampling_sweep.py` before wrapping up Phase 11, even though no immediate re-run was planned this session | Leave the script as-is, since it already checkpoints incrementally per config | The user will run the remaining 2 configs themselves later, without this session's context -- as written, a plain re-run would have silently overwritten the 2 real, already-completed temperature=0.0 configs (no existing-file check before starting the grid). Fixed so the deferred task is safe to just run, not something that needs remembering an unwritten caveat about preserving data by hand first. |
 | 2026-09-26 | **Phase 13: Langfuse Cloud (free tier), not self-hosted** | Full self-hosted Langfuse v3 stack (web+worker+Postgres+ClickHouse+Redis+MinIO, per the official docker-compose); self-hosted Langfuse v2 (Postgres-only) | Measured, not assumed: Langfuse's own docs recommend 4 cores/16 GiB for the v3 self-host stack alone; this machine's Docker Desktop is allocated 7.75 GiB total, already sharing that with Qdrant (~750 MiB), and the host's full 16 GiB also has to cover MPS embedding inference outside Docker. Real capacity conflict, not routine. Presented all 3 options with a recommendation (`AskUserQuestion`, full stack recommended); **user chose Cloud** — a deliberate deviation from plan.md's literal "self-hosted" wording, disclosed here rather than silently substituted. Free tier (50k units/month, 30-day retention, no card) comfortably covers this project's real traffic scale (7 traced stages/query × a few hundred dev/eval queries, nowhere near 50k/month). Full reasoning: design record 13. |
 | 2026-09-28 | **Built a minimal end-to-end `AnswerPipeline` orchestrator inside Phase 13 (Unit 2), not deferred to Phase 14** | Trace at the experiment-script level only, without a real orchestrator; wait and let Phase 14 build it | No orchestrated request path existed anywhere in this codebase -- Phases 5-12 each shipped one stage in isolation, wired together only ad hoc inside experiment scripts. Phase 13's own build item #1 ("tracing every stage") presupposes a real request to attach spans to, and the audit-trail demo (build item #5) needs a real evidence object to reconstruct from -- neither is satisfiable against a batch script. Flagged the gap directly (`AskUserQuestion`) rather than silently picking a scope; user confirmed building it now. Phase 14 wraps this exact object in FastAPI/SSE rather than rebuilding it -- not duplicated scope, built at the point it was first actually needed. Full reasoning: design record 13b SS2-3. |
+| 2026-10-01 | **Phase 14: stream tokens live, validate citations after** (`/chat` events: `token`, then `citation`s, then `done`) | Validate first then replay as a stream; stream live and retract/escalate on validation failure | Confirmed with the user (`AskUserQuestion`, recommended option). The non-streaming pipeline already serves answer text regardless of claim validation (validation only decides which citations are listed), so streaming live doesn't weaken the guarantee; replay-after-validation would make streaming cosmetic (first visible text ~0.6 s later, measured) without changing what is served; retraction changes Phase 9/10 behavior and exceeds plan.md's Phase 14 scope. Full reasoning: design record 14. |
 
 ---
 
@@ -677,7 +779,7 @@ Every non-obvious choice, its alternatives, and why. Append-only.
 | 11 | `evaluating-generation.md` — written as 7 lettered sub-records instead (CLAUDE.md §3 convention): `11-groq-model-replacement-and-ragas-wiring.md`, `11b-cohens-kappa-utility.md`, `11c-llm-as-judge.md`, `11d-judge-agreement-batch.md`, `11e-eval-scorecard.md`, `11f-judge-rubric-refusal-fix.md`, `11h-faithfulness-root-cause.md` | 11 | ✅ |
 | 12 | `caching-delta-indexing-and-cost.md` — written as lettered sub-records instead (CLAUDE.md §3 convention): `12-exact-match-cache.md`, `12b-semantic-cache.md`; more units to follow | 12 | 🟡 |
 | 13 | `observability-and-latency.md` | 13 | ⬜ |
-| 14 | `serving-streaming-and-ux.md` | 14 | ⬜ |
+| 14 | `serving-streaming-and-ux.md` — lettered sub-records: `14-streaming-pipeline.md`, `14b-api-sse.md`, `14c-trace-and-feedback.md`, `14d-conversation-memory.md`, `14e-static-ui.md`; more to follow | 14 | 🟡 |
 | 15 | `rag-security.md` | 15 | ⬜ |
 | 16 | `ci-eval-gates.md` | 16 | ⬜ |
 | 17 | `frameworks-and-orchestration.md` | 17 | ⬜ |

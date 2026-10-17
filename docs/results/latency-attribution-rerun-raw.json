@@ -1,0 +1,140 @@
+[
+  {
+    "query_id": "negative::out_of_corpus::4",
+    "is_negative": true,
+    "cold_start": true,
+    "pace_seconds": 70.0,
+    "warm_up_ms": {
+      "retrieval": 14.157666999381036,
+      "confidence": 16399.6844170033
+    },
+    "cache_status": "miss",
+    "escalate": true,
+    "route": "docs_howto",
+    "provider": null,
+    "confidence": 0.10983955432931236,
+    "stage_latencies_ms": {
+      "cache_lookup": 1.345333002973348,
+      "routing": 305.9349170071073,
+      "retrieval": 26.736583007732406,
+      "confidence": 200.97441699181218,
+      "escalation": 0.8983329898910597
+    },
+    "wall_ms": 540.1615419978043,
+    "trace_id": "3e2b2921af18753bdb5985311dd086ef",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::2689",
+    "is_negative": false,
+    "cold_start": false,
+    "pace_seconds": 70.0,
+    "warm_up_ms": null,
+    "cache_status": "miss",
+    "escalate": true,
+    "route": "known_issue",
+    "provider": null,
+    "confidence": 0.2294946600820999,
+    "stage_latencies_ms": {
+      "cache_lookup": 4.106082997168414,
+      "routing": 275.6681250029942,
+      "retrieval": 12.517167007899843,
+      "confidence": 972.3989580088528,
+      "escalation": 0.38170900370460004
+    },
+    "wall_ms": 1268.4452079993207,
+    "trace_id": "1c37ebdf87cac251205a8cce4ecb9111",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::2884",
+    "is_negative": false,
+    "cold_start": false,
+    "pace_seconds": 70.0,
+    "warm_up_ms": null,
+    "cache_status": "miss",
+    "escalate": false,
+    "route": "docs_howto",
+    "provider": "groq",
+    "confidence": 0.584490657660059,
+    "stage_latencies_ms": {
+      "cache_lookup": 2.1162919874768704,
+      "routing": 312.3855000012554,
+      "retrieval": 25.76200000476092,
+      "confidence": 654.7749159944942,
+      "generation": 1459.1972500056727,
+      "validation": 779.358667001361
+    },
+    "wall_ms": 3242.3022919974755,
+    "trace_id": "36d711cf828eed6660d23aa4cbe2283e",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::3212",
+    "is_negative": false,
+    "cold_start": false,
+    "pace_seconds": 70.0,
+    "warm_up_ms": null,
+    "cache_status": "miss",
+    "escalate": true,
+    "route": "docs_howto",
+    "provider": null,
+    "confidence": 0.037671749386431676,
+    "stage_latencies_ms": {
+      "cache_lookup": 5.407082993770018,
+      "routing": 244.78191600064747,
+      "retrieval": 20.636458008084446,
+      "confidence": 527.1913750038948,
+      "escalation": 0.5897919909330085
+    },
+    "wall_ms": 801.6439589991933,
+    "trace_id": "bb90deaf3f71227868e99d7e4e308a5e",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::753",
+    "is_negative": false,
+    "cold_start": false,
+    "pace_seconds": 70.0,
+    "warm_up_ms": null,
+    "cache_status": "miss",
+    "escalate": false,
+    "route": "docs_howto",
+    "provider": "groq",
+    "confidence": 0.6096835244128507,
+    "stage_latencies_ms": {
+      "cache_lookup": 3.502833002130501,
+      "routing": 254.07491700025275,
+      "retrieval": 50.652458012336865,
+      "confidence": 2585.942541991244,
+      "generation": 823.5714999900665,
+      "validation": 2.3134590010158718
+    },
+    "wall_ms": 3734.1860000015004,
+    "trace_id": "b810d6f9f3a6c3556aeb09983911056e",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::219",
+    "is_negative": false,
+    "cold_start": false,
+    "pace_seconds": 70.0,
+    "warm_up_ms": null,
+    "cache_status": "miss",
+    "escalate": false,
+    "route": "known_issue",
+    "provider": "groq",
+    "confidence": 0.6799784191470588,
+    "stage_latencies_ms": {
+      "cache_lookup": 4.229875004966743,
+      "routing": 447.7905830135569,
+      "retrieval": 16.203708000830375,
+      "confidence": 1105.9547500044573,
+      "generation": 1162.534457995207,
+      "validation": 0.6043750036042184
+    },
+    "wall_ms": 2744.825707995915,
+    "trace_id": "b404a6e923ff8179692bb906d8286f99",
+    "error": null
+  }
+]

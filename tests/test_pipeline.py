@@ -167,6 +167,7 @@ def _pipeline(
     exact_cache=None,
     semantic_cache=None,
     tau: float = 0.5,
+    rewriter=None,
 ) -> tuple[AnswerPipeline, NullTracer]:
     tracer = NullTracer()
     pipeline = AnswerPipeline(
@@ -179,6 +180,7 @@ def _pipeline(
         tracer=tracer,
         corpus_version="test-corpus-v1",
         tau=tau,
+        rewriter=rewriter,
     )
     return pipeline, tracer
 

@@ -1,0 +1,131 @@
+[
+  {
+    "query_id": "negative::out_of_corpus::4",
+    "is_negative": true,
+    "cold_start": true,
+    "pace_seconds": 70.0,
+    "cache_status": "miss",
+    "escalate": true,
+    "route": "docs_howto",
+    "provider": null,
+    "confidence": 0.10983955432931236,
+    "stage_latencies_ms": {
+      "cache_lookup": 2.0653329993365332,
+      "routing": 541.6522079976858,
+      "retrieval": 20.801375001610722,
+      "confidence": 17030.74912500597,
+      "escalation": 0.7967499986989424
+    },
+    "wall_ms": 17598.48695799883,
+    "trace_id": "920d63ebb8ab5fb2a0017e8668246cef",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::2689",
+    "is_negative": false,
+    "cold_start": false,
+    "pace_seconds": 70.0,
+    "cache_status": "miss",
+    "escalate": true,
+    "route": "known_issue",
+    "provider": null,
+    "confidence": 0.2294946600820999,
+    "stage_latencies_ms": {
+      "cache_lookup": 5.189582996536046,
+      "routing": 237.1934999973746,
+      "retrieval": 51.40620900056092,
+      "confidence": 1040.3382079966832,
+      "escalation": 0.43287500011501834
+    },
+    "wall_ms": 1339.328458001546,
+    "trace_id": "7f3649bda8708197cb9be0a387c22277",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::2884",
+    "is_negative": false,
+    "cold_start": false,
+    "pace_seconds": 70.0,
+    "cache_status": "miss",
+    "escalate": false,
+    "route": "docs_howto",
+    "provider": "groq",
+    "confidence": 0.584490657660059,
+    "stage_latencies_ms": {
+      "cache_lookup": 5.666667006153148,
+      "routing": 205.5621660038014,
+      "retrieval": 19.122708996292204,
+      "confidence": 1419.682207997539,
+      "generation": 1346.9113749961252,
+      "validation": 493.18920899531804
+    },
+    "wall_ms": 3498.1514160026563,
+    "trace_id": "760b192565c4c2095dcc78e42c4895d7",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::3212",
+    "is_negative": false,
+    "cold_start": false,
+    "pace_seconds": 70.0,
+    "cache_status": "miss",
+    "escalate": true,
+    "route": "docs_howto",
+    "provider": null,
+    "confidence": 0.037671749386431676,
+    "stage_latencies_ms": {
+      "cache_lookup": 7.566833002783824,
+      "routing": 212.4427079979796,
+      "retrieval": 15.85483300004853,
+      "confidence": 1375.205875003303,
+      "escalation": 0.5761670036008582
+    },
+    "wall_ms": 1615.868540997326,
+    "trace_id": "25370a41416c4c813dcfb60eb8b00163",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::753",
+    "is_negative": false,
+    "cold_start": false,
+    "pace_seconds": 70.0,
+    "cache_status": "miss",
+    "escalate": false,
+    "route": "docs_howto",
+    "provider": "groq",
+    "confidence": 0.6096835244128507,
+    "stage_latencies_ms": {
+      "cache_lookup": 4.449416999705136,
+      "routing": 307.71266700321576,
+      "retrieval": 31.11029200226767,
+      "confidence": 2447.7289999995264,
+      "generation": 816.7804580007214,
+      "validation": 1.6577909991610795
+    },
+    "wall_ms": 3620.7274999978836,
+    "trace_id": "dcb9210195bcccb2a3cca50fb59e277f",
+    "error": null
+  },
+  {
+    "query_id": "golden::issue::219",
+    "is_negative": false,
+    "cold_start": false,
+    "pace_seconds": 70.0,
+    "cache_status": "miss",
+    "escalate": false,
+    "route": "known_issue",
+    "provider": "groq",
+    "confidence": 0.6799784191470588,
+    "stage_latencies_ms": {
+      "cache_lookup": 4.6427080014836974,
+      "routing": 225.42266699747415,
+      "retrieval": 36.2739159972989,
+      "confidence": 2317.7162499996484,
+      "generation": 918.6311250014114,
+      "validation": 1.0132090028491803
+    },
+    "wall_ms": 3510.5732079973677,
+    "trace_id": "a63b88cf1e8534639bfa21edc0132da7",
+    "error": null
+  }
+]

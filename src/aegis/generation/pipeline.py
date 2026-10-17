@@ -10,6 +10,7 @@ fakes (`tests/test_generation_pipeline.py`); the real path is exercised by
 
 from __future__ import annotations
 
+from collections.abc import Callable, Iterator
 from typing import Protocol
 
 from pydantic import BaseModel
@@ -25,6 +26,10 @@ class _LLMClient(Protocol):
     def generate_with_provider(
         self, messages: list[dict[str, str]], temperature: float, top_p: float, max_tokens: int
     ) -> tuple[str, str | None]: ...
+
+    def stream_with_provider(
+        self, messages: list[dict[str, str]], temperature: float, top_p: float, max_tokens: int
+    ) -> Iterator[tuple[str, str]]: ...
 
 
 class GenerationResult(BaseModel):
@@ -66,15 +71,31 @@ class GenerationPipeline:
         self.top_p = top_p
         self.max_tokens = max_tokens
 
-    def generate(self, query: Query, retrieved: list[Retrieved]) -> DraftAnswer:
+    def generate(
+        self, query: Query, retrieved: list[Retrieved], on_token: Callable[[str], None] | None = None
+    ) -> DraftAnswer:
+        """With `on_token`, tokens are handed to the callback as the provider
+        produces them (Phase 14 streaming); the returned draft is identical
+        either way, since `generate_with_provider` is itself a join of this stream."""
         context = pack_context(retrieved, self.budget_tokens)
         context_block = format_context(context)
         messages = self.prompt.build_messages(query.text, context_block)
 
-        text, provider = self.llm.generate_with_provider(
+        if on_token is None:
+            text, provider = self.llm.generate_with_provider(
+                messages, temperature=self.temperature, top_p=self.top_p, max_tokens=self.max_tokens
+            )
+            return DraftAnswer(query=query, text=text, context=context, provider=provider)
+
+        parts: list[str] = []
+        provider: str | None = None
+        for name, token in self.llm.stream_with_provider(
             messages, temperature=self.temperature, top_p=self.top_p, max_tokens=self.max_tokens
-        )
-        return DraftAnswer(query=query, text=text, context=context, provider=provider)
+        ):
+            provider = name
+            parts.append(token)
+            on_token(token)
+        return DraftAnswer(query=query, text="".join(parts), context=context, provider=provider)
 
     def validate(self, draft: DraftAnswer) -> GenerationResult:
         validation = self.validator.validate(draft.text, draft.context)
