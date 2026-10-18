@@ -33,11 +33,32 @@
     {
       "temperature": 0.5,
       "top_p": 1.0,
-      "mean_valid_citation_rate": NaN,
-      "mean_latency_ms": NaN,
-      "n_succeeded": 0,
-      "n_failed": 20,
-      "claim_status_counts": {}
+      "mean_valid_citation_rate": 0.735,
+      "mean_latency_ms": 25401.50013329694,
+      "n_succeeded": 20,
+      "n_failed": 0,
+      "claim_status_counts": {
+        "unsupported": 11,
+        "supported_lexical": 55,
+        "supported_entailment": 13,
+        "exempt": 7,
+        "missing_citation": 13
+      }
+    },
+    {
+      "temperature": 1.0,
+      "top_p": 1.0,
+      "mean_valid_citation_rate": 0.6546345811051694,
+      "mean_latency_ms": 25292.90293141008,
+      "n_succeeded": 17,
+      "n_failed": 3,
+      "claim_status_counts": {
+        "supported_lexical": 41,
+        "unsupported": 7,
+        "supported_entailment": 8,
+        "missing_citation": 14,
+        "exempt": 3
+      }
     }
   ],
   "raw": [
@@ -400,6 +421,339 @@
       "tier2_calls": 2,
       "latency_ms": 17578.69345799554,
       "answer_text": "To implement authentication on GraphQL routes in FastAPI, you can use FastAPI's dependency injection system to apply authentication checks to the route handler [1][4].\n\nFor authenticating the entire GraphQL route, you can add a dependency to the API route definition. For example, you can use `router.add_api_route` with a `dependencies` parameter that includes your authentication logic, such as `Depends(get_api_key)` [3]. This approach ensures that the authentication check is performed before the GraphQL request is processed [3].\n\nIf you need to authenticate only specific mutations or queries, the provided context does not contain specific instructions for implementing per-operation authentication within the GraphQL schema itself. However, the general recommendation for adding authentication to path operations in FastAPI is to use a dependency [4]. You can also see an example where a dependency like `Authorize: AuthJWT = Depends()` is used in a route that handles GraphQL requests [1].\n\nNote that while FastAPI integrates with GraphQL libraries like Strawberry or graphene, the authentication mechanism relies on FastAPI's standard dependency injection rather than GraphQL-specific middleware [1][3][4][7]."
+    },
+    {
+      "query_id": "golden::issue::2689",
+      "temperature": 0.5,
+      "top_p": 1.0,
+      "valid_citation_rate": 0.25,
+      "tier2_calls": 3,
+      "latency_ms": 1968.6081670224667,
+      "answer_text": "Yes, when a Pydantic model is used for both the request body parameter and the `response_model`, its validators (including `@root_validator`) will execute twice [2]. This occurs because FastAPI validates the incoming data against the parameter's model and then validates the returned object against the `response_model` [2]. Although the `response_model` is technically \"cloned\" to prevent security issues related to subclasses, this cloning process still results in a second validation pass for the model's logic [1]. Consequently, any custom validation logic, such as checking relationships between fields in a `@root_validator`, will run again during the response serialization step [2]."
+    },
+    {
+      "query_id": "golden::issue::2884",
+      "temperature": 0.5,
+      "top_p": 1.0,
+      "valid_citation_rate": 0.6666666666666666,
+      "tier2_calls": 3,
+      "latency_ms": 20236.38070799643,
+      "answer_text": "In FastAPI, you can specify which database a table is defined for by using the `__bind_key__` attribute in your SQLAlchemy model, similar to how it works in Flask-SQLAlchemy [5]. This attribute, combined with a `SQLALCHEMY_BINDS` configuration, allows you to map different models to different database connections [5].\n\nFor example, you can define a model with a specific bind key like this:\n\n```python\nclass User(Base):\n    __bind_key__ = 'users'\n    __tablename__ = \"users\"\n    id = Column('id', Integer, primary_key=True)\n    username = Column('username', String(255), unique=True)\n```\n\nThis works in conjunction with a configuration that maps bind keys to specific database URIs:\n\n```python\nSQLALCHEMY_DATABASE_URI = 'postgres://localhost/main'\nSQLALCHEMY_BINDS = {\n    'users':        'mysqldb://localhost/users',\n    'appmeta':      'sqlite:////path/to/appmeta.db'\n}\n```\n\nThis approach is supported in FastAPI when using SQLAlchemy, as demonstrated in the provided context [5]."
+    },
+    {
+      "query_id": "golden::issue::3212",
+      "temperature": 0.5,
+      "top_p": 1.0,
+      "valid_citation_rate": 0.5,
+      "tier2_calls": 0,
+      "latency_ms": 13420.491292024963,
+      "answer_text": "The provided context does not contain information about how to add routes that include an equal sign (`=`) in the URL path or how to handle query parameters formatted as `key=value` pairs directly in the route definition [1][3][4][5][6][7][8][9][10].\n\nThe context discusses various other routing and parameter handling topics, such as:\n*   Handling anchor tags (`#`) in paths [1].\n*   Using `Form` for data [3].\n*   Adding prefixes and tags to `APIRouter` [5].\n*   Catching generic paths or \"everything else\" [7].\n*   Accepting string arguments as request body fields rather than query parameters [9].\n*   Supporting multiple query parameters with the same name [10].\n*   Defining multiple path operations for the same method [8].\n*   Handling path parameters like `Path` and `str` [2].\n*   Suggested enhancements for default values in route functions [4].\n*   Typing annotations for internal methods [6].\n\nNone of these examples demonstrate or explain how to create a route where the path itself contains an equal sign (e.g., `/animal=lorem/ipsum`) or how to parse such a specific URL structure. Therefore, I cannot provide a specific solution for this case based on the available context."
+    },
+    {
+      "query_id": "golden::issue::753",
+      "temperature": 0.5,
+      "top_p": 1.0,
+      "valid_citation_rate": 1.0,
+      "tier2_calls": 1,
+      "latency_ms": 23940.488666004967,
+      "answer_text": "Based on the provided context, there is no information regarding a feature request to add a `name` keyword argument to the `Depends` class for `APIRouter` or `include_router` to automatically inject dependency results as named keyword arguments into path operation functions [2][3][5][8][9][10].\n\nThe documentation and issues provided confirm that dependencies can be applied at the `APIRouter` or `include_router` level to apply logic to all path operations in that router [1][3][5][8][10]. However, these contexts do not describe a mechanism for automatically passing the *result* of a top-level dependency as a specific named parameter to individual path operation functions without declaring that parameter explicitly in the function signature [4][9][10].\n\nTherefore, I cannot confirm if this specific feature request has been implemented or how it would behave, as the provided context does not contain enough information to answer this question [2][3][5][7][8][9][10]."
+    },
+    {
+      "query_id": "golden::issue::219",
+      "temperature": 0.5,
+      "top_p": 1.0,
+      "valid_citation_rate": 0.5,
+      "tier2_calls": 3,
+      "latency_ms": 36231.53754102532,
+      "answer_text": "To correctly type file upload handlers in FastAPI and satisfy static type checkers like mypy, you should use the `Annotated` type hint from the `typing` module [10]. This approach allows you to specify the `UploadFile` type while using `File(...)` as the default value without triggering type incompatibility errors [10].\n\nHere is how you can implement a correctly typed handler for a single file:\n\n```python\nfrom typing import Annotated\nfrom fastapi import FastAPI, File, UploadFile\n\napp = FastAPI()\n\n@app.post(\"/api/uploadone\")\nasync def upload_file(file: Annotated[UploadFile, File(...)]) -> Dict[str, str]:\n    return {\"filename\": file.filename}\n```\n\nFor handling a list of files, you can apply the same pattern using `List[UploadFile]`:\n\n```python\nfrom typing import Annotated, List\nfrom fastapi import FastAPI, File, UploadFile\n\napp = FastAPI()\n\n@app.post(\"/api/upload\")\nasync def upload_files(files: Annotated[List[UploadFile], File(...)]) -> Dict[str, List[str]]:\n    return {\"filenames\": [file.filename for file in files]}\n```\n\nFastAPI documentation demonstrates using `Annotated` to define file parameters, including optional files where the default is `None` [10]. While earlier examples in the context show the `file: UploadFile = File(...)` syntax [4][5][7], the `Annotated` syntax is the modern approach that resolves the type checking issues described in the question [10]."
+    },
+    {
+      "query_id": "golden::issue::11104",
+      "temperature": 0.5,
+      "top_p": 1.0,
+      "valid_citation_rate": 0.5,
+      "tier2_calls": 1,
+      "latency_ms": 19188.58012504643,
+      "answer_text": "The provided context does not contain information about the specific bug where upgrading `python-multipart` to version 0.0.7 causes \"There was an error parsing the body\" or 400 errors during file uploads in FastAPI 0.94.1 [1][2][3][4][5][6][7][8][9][10]. The context blocks only list general issue resolutions for various older FastAPI versions (ranging from 0.45.0 to 0.81.0) and do not address the `python-multipart` version 0.0.7 compatibility issue or the specific security advisory mentioned in your question."
+    },
+    {
+      "query_id": "golden::issue::2786",
+      "temperature": 0.5,
+      "top_p": 1.0,
+      "valid_citation_rate": 0.6666666666666666,
+      "tier2_calls": 1,
+      "latency_ms": 29843.22099998826,
+      "answer_text": "Based on the provided context, the behavior you are observing where opening multiple tabs causes the last one to wait is likely due to how the ASGI server (uvicorn) handles concurrency and thread pools, rather than the `async def` endpoint itself exhausting a thread pool in the way you suspect.\n\nHere is the breakdown of the expected behavior and relevant technical details:\n\n1.  **Async Endpoints and Threading:** `async def` endpoints run in a single thread (the event loop thread), and each request is handled as a coroutine [7]. Unlike synchronous `def` endpoints, which are handled in a thread pool, `async def` endpoints do not inherently spawn a new thread per request [7]. Therefore, the idea that you are \"exhausting the thread pool\" specifically because of the `async def` definition is incorrect; the bottleneck is likely elsewhere, such as the server's connection limits or how the streaming response interacts with the event loop [7].\n\n2.  **Cancellation and Blocking in Async Generators:** An `async` task can only be cancelled when it reaches an `await` statement [1]. If an async generator does not have `await` statements (or if they are not yielding control back to the event loop effectively), it may block the event loop or fail to handle cancellation properly [1]. In your first scenario, you included `await asyncio.sleep(0.01)`, which should allow the event loop to handle other tasks [1]. However, if the server or the specific version of uvicorn/FastAPI has limitations on concurrent connections or if the streaming implementation interacts with the thread pool for other reasons (like background tasks or dependencies), you might hit limits [6][7].\n\n3.  **Synchronous vs. Asynchronous Streaming:** If you remove the `await` from the generator, the generator becomes a synchronous generator (or an async generator that doesn't yield control), which can block the event loop [1"
+    },
+    {
+      "query_id": "golden::issue::760",
+      "temperature": 0.5,
+      "top_p": 1.0,
+      "valid_citation_rate": 1.0,
+      "tier2_calls": 0,
+      "latency_ms": 21303.561999986414,
+      "answer_text": "FastAPI natively supports Python standard library `dataclasses` for request bodies and responses without requiring you to explicitly convert them to Pydantic models [4]. This support is achieved internally by using Pydantic to convert standard dataclasses into Pydantic's own flavor of dataclasses, which allows FastAPI to handle data validation, serialization, and documentation in the same way it does for Pydantic models [4]. You can use standard `dataclasses` directly in path operation functions, and FastAPI will serialize the data to JSON even if you return dictionaries or other standard types, provided you specify a `response_model` [3][6].\n\nIf you encounter issues with automatically generated API documentation or specific compatibility problems, you can swap the standard `dataclasses` import with `pydantic.dataclasses`, which serves as a drop-in replacement [6]. For example, you can define your dataclasses using `from pydantic.dataclasses import dataclass` while still importing `field` from the standard `dataclasses` library [3][6]. This approach can help resolve specific bugs, such as `KeyError` exceptions when loading OpenAPI docs with Pydantic dataclasses in request bodies [9].\n\nHowever, keep in mind that standard dataclasses cannot do everything Pydantic models can do, so you may still need to use Pydantic models for certain advanced features [4]. Additionally, there have been reported issues with specific combinations of features, such as using Pydantic v2, standard dataclasses, UUIDs, and `from __future__ import annotations`, which can cause errors [8]. There have also been issues with returning dataclasses containing fields like `datetime` or `pathlib` objects that are compatible with Pydantic but not with Python's standard JSON encoder [5]."
+    },
+    {
+      "query_id": "golden::issue::1767",
+      "temperature": 0.5,
+      "top_p": 1.0,
+      "valid_citation_rate": 0.75,
+      "tier2_calls": 3,
+      "latency_ms": 29973.34587498335,
+      "answer_text": "The provided context does not contain information about whether the `openapi_prefix` parameter was removed in version 0.59.0, nor does it confirm the specific changelog structure or policy for listing breaking changes in that version [2].\n\nHowever, the context notes that FastAPI follows Semantic Versioning conventions where breaking changes and new features are added in \"MINOR\" versions, while \"PATCH\" versions are for bug fixes and non-breaking changes [2]. The context also shows examples of release notes entries that document new features and updates, such as adding support for `openapi_examples` [3] or OpenAPI 3.1.0 [8], but it does not provide a specific section or guarantee for how minor breaking changes like the one you described are categorized or listed in the changelog.\n\nI cannot make a commitment regarding future changelog formatting or guarantee that such a section exists in the official documentation based solely on the provided text [2]."
+    },
+    {
+      "query_id": "golden::issue::12965",
+      "temperature": 0.5,
+      "top_p": 1.0,
+      "valid_citation_rate": 0.75,
+      "tier2_calls": 1,
+      "latency_ms": 42398.0894999695,
+      "answer_text": "Based on the provided context, there is no information stating that FastAPI will support a `QUERY` HTTP method or provide an `app.query` decorator [1].\n\nThe context only contains a user's feature request and discussion about adding this capability, noting that they were trying to create a GET route with a request body but encountered an error in Swagger UI [1]. The other provided context blocks are merely checklists for reporting issues and do not contain information about FastAPI's behavior or future features [2][3][4][5][6][7][8][9][10]. Therefore, I cannot confirm if or when this feature will be implemented based solely on the provided text."
+    },
+    {
+      "query_id": "golden::issue::15764",
+      "temperature": 0.5,
+      "top_p": 1.0,
+      "valid_citation_rate": 0.8,
+      "tier2_calls": 0,
+      "latency_ms": 31097.575624997262,
+      "answer_text": "Based on the provided context, I cannot confirm the specific regression in version 0.137.0 or the changes made in PR #15745, as these details are not present in the context blocks. However, the context confirms that the `generate_unique_id_function` is a documented feature where the function receives an `APIRoute` object and is expected to return a string [10]. The documentation explicitly provides an example of this pattern accessing `route.tags` and `route.name` [3][10].\n\nWhile the provided text does not address the static type-checking visibility of `APIRoute.tags` in version 0.137.0, it does show that `tags` is a valid parameter passed to `APIRoute` and is used in the documented `generate_unique_id_function` examples [3][4][10]. The context notes that `APIRoute` accepts a `tags` parameter in its initialization [4], and the documentation for generating clients relies on accessing `route.tags` to create unique operation IDs [3][10]."
+    },
+    {
+      "query_id": "golden::issue::2735",
+      "temperature": 0.5,
+      "top_p": 1.0,
+      "valid_citation_rate": 1.0,
+      "tier2_calls": 0,
+      "latency_ms": 24175.698124978226,
+      "answer_text": "The issue where the `/docs` page fails to load is often caused by the browser being unable to fetch the `swagger-ui-bundle.js` file from the CDN, which results in the Swagger UI not rendering [2]. This can happen if you are on a private network without internet access, as the default documentation relies on external CDN links for its JavaScript and CSS assets [4][6].\n\nTo resolve this, you can self-host the Swagger UI assets by overriding the default documentation generator functions [4][3]. The official documentation for this process is located in the \"Extending OpenAPI\" section under \"Self-hosting JavaScript and CSS for docs\" [3]. Additionally, if you are seeing a blank page despite a 200 status code, it may be due to a browser-specific configuration or CORS issue, and testing in a different browser or operating system can help isolate whether the problem is environmental or code-related [2]."
+    },
+    {
+      "query_id": "golden::issue::5857",
+      "temperature": 0.5,
+      "top_p": 1.0,
+      "valid_citation_rate": 1.0,
+      "tier2_calls": 0,
+      "latency_ms": 30928.17437503254,
+      "answer_text": "The provided context does not contain enough information to answer your question, as the excerpts are primarily issue templates and bug reports rather than documentation explaining specific behavior, features, or solutions [1][2][3][4][5][6][7][8][9][10]."
+    },
+    {
+      "query_id": "golden::issue::2934",
+      "temperature": 0.5,
+      "top_p": 1.0,
+      "valid_citation_rate": 0.3333333333333333,
+      "tier2_calls": 1,
+      "latency_ms": 33505.454332975205,
+      "answer_text": "The provided context does not contain information explaining why `ORJSONResponse` fails when returning a dictionary with integer keys, nor does it provide a specific solution or documentation update regarding this behavior.\n\nThe context does confirm that `ORJSONResponse` is available in `fastapi.responses` and can be set as the `default_response_class` for the application [10]. It also notes that `ORJSONResponse` was added to FastAPI to replace `ujson` due to maintenance concerns with `ujson` [10]. Additionally, the context mentions that `ORJSONResponse` has had issues with specific types like `AnyUrl` in the past, causing `Internal Server Error` in some versions [7]. However, none of the provided blocks address the specific issue of integer keys in dictionaries or the difference in serialization behavior between the default JSON response class and `ORJSONResponse` for this case.\n\nTherefore, I cannot answer the question about the specific breakage with integer keys using only the provided context."
+    },
+    {
+      "query_id": "golden::issue::2549",
+      "temperature": 0.5,
+      "top_p": 1.0,
+      "valid_citation_rate": 0.6,
+      "tier2_calls": 2,
+      "latency_ms": 20868.379749997985,
+      "answer_text": "To achieve live-streaming of output from sequential commands in a FastAPI endpoint, you should use a `StreamingResponse` combined with an asynchronous generator that yields data as each command completes [9].\n\nHere is how you can modify your endpoint to stream the output of `check_one`, `check_two`, and `check_three` as they are processed:\n\n```python\nfrom fastapi import FastAPI\nfrom fastapi.responses import StreamingResponse\n\napp = FastAPI()\n\n# Assume these are async functions that yield or return data\nasync def check_one():\n    # Simulate work and yield data\n    yield \"check_one output\\n\"\n\nasync def check_two():\n    yield \"check_two output\\n\"\n\nasync def check_three():\n    yield \"check_three output\\n\"\n\nasync def stream_status():\n    async for chunk in check_one():\n        yield chunk\n    async for chunk in check_two():\n        yield chunk\n    async for chunk in check_three():\n        yield chunk\n\n@app.get(\"/status\")\nasync def status():\n    return StreamingResponse(stream_status(), media_type=\"text/plain\")\n```\n\nKey points from the context:\n1.  **Use `yield`**: When you declare `response_class=StreamingResponse` (or return a `StreamingResponse` object directly), you can use `yield` to send each chunk of data in turn [9].\n2.  **StreamingResponse**: This class is specifically designed to return data to the client as soon as it is available, rather than waiting for the entire response to be built [3][7].\n3.  **Async Generators**: By using an `async def` generator function that yields data from each check function, you ensure that the data is streamed live to the client as each step completes, rather than buffering everything until the end [7][9].\n\nNote: If your `check_XXX` functions are currently synchronous and use `"
+    },
+    {
+      "query_id": "golden::issue::1653",
+      "temperature": 0.5,
+      "top_p": 1.0,
+      "valid_citation_rate": 0.8333333333333334,
+      "tier2_calls": 0,
+      "latency_ms": 21137.275624962058,
+      "answer_text": "Based on the provided context, FastAPI does not support receiving an uploaded file as the entire raw body (e.g., using `curl --data-binary` or Postman's \"binary body\" option without a form field key). Instead, files must be uploaded as \"form data,\" which requires a specific key-value pair where the key matches the parameter name defined in the endpoint [2].\n\nIf you attempt to send the file as the raw body without this form field key, FastAPI will return an error indicating that the required field is missing, as it strictly expects the file to be part of the form data structure [2]. To successfully upload a file, you must use the `File` dependency (or `UploadFile` with `File()`) which instructs FastAPI to parse the incoming request as form data rather than a JSON body or raw binary stream [2][8].\n\nFor example, using `curl`, you would need to specify the form field name (e.g., `-F \"file=@example.txt\"`) rather than using `--data-binary` [2]. The documentation explicitly states that to declare file bodies, you must use `File`, otherwise parameters are interpreted as query or JSON body parameters, and files are uploaded as \"form data\" [2]."
+    },
+    {
+      "query_id": "golden::issue::1266",
+      "temperature": 0.5,
+      "top_p": 1.0,
+      "valid_citation_rate": 0.75,
+      "tier2_calls": 1,
+      "latency_ms": 28376.9970840076,
+      "answer_text": "Based on the provided context, there is no information indicating that FastAPI supports defining reusable request bodies under `#/components/requestBodies` or that the `ref_prefix` is configurable to point to that location [1][3][4][5][6][7][8][9][10].\n\nThe context confirms that FastAPI generates OpenAPI specifications where request bodies are defined inline within the path operations or reference schemas located in `#/components/schemas` [3][5]. Specifically, when using a `$ref`, the object containing it cannot contain additional properties, which is why `allOf` is used to combine references with descriptions, implying the current structure relies on the standard schema components rather than a separate `requestBodies` component section [5].\n\nSince the provided text does not contain documentation or issue resolutions regarding the `components/requestBodies` feature or the hardcoding of `REF_PREFIX` to `#/components/schemas` as described in your question, I cannot confirm or deny the specific implementation details of `get_openapi_operation_request_body()` or provide a method to move request bodies to `#/components/requestBodies` using the available context."
+    },
+    {
+      "query_id": "golden::issue::58",
+      "temperature": 0.5,
+      "top_p": 1.0,
+      "valid_citation_rate": 1.0,
+      "tier2_calls": 1,
+      "latency_ms": 21444.210375018883,
+      "answer_text": "Yes, it is possible to stream large files in FastAPI by using the `StreamingResponse` class from Starlette, which accepts an iterable object and sends the response as a stream [3][9].\n\nTo implement this, you can define an asynchronous generator that yields chunks from the request body using `request.stream()` and return a `StreamingResponse` with that generator [10]. Here is a code pattern demonstrating this integration:\n\n```python\nfrom fastapi import FastAPI, Request\nfrom fastapi.responses import StreamingResponse\n\napp = FastAPI()\n\nasync def stream_request(request: Request):\n    async for chunk in request.stream():\n        yield chunk\n\n@app.get(\"/\")\ndef stream_file(request: Request):\n    return StreamingResponse(stream_request(request))\n```\n[10]\n\nAlternatively, for proxying or forwarding requests, you can use `httpx` to build a request with the raw headers and body content, then return a `StreamingResponse` that iterates over the raw response data [1].\n\nNote that when using a generic `Request` parameter for streaming, FastAPI does not automatically generate OpenAPI documentation for the request body, as it typically assumes files are sent as `FormData` [7]. To address this, you can use the `custom_openapi` parameter in your path operation to manually define the `requestBody` schema for the binary stream [2]."
+    },
+    {
+      "query_id": "golden::issue::1743",
+      "temperature": 0.5,
+      "top_p": 1.0,
+      "valid_citation_rate": 0.8,
+      "tier2_calls": 2,
+      "latency_ms": 41932.820624962915,
+      "answer_text": "Yes, you can decorate a path operation function, but doing so can interfere with FastAPI\u2019s ability to inspect the function\u2019s signature for parameters like query strings, path variables, or request bodies [3]. If a custom decorator replaces or wraps the original function in a way that hides its signature, FastAPI may fail to correctly inject parameters, leading to errors such as a `TypeError` for missing arguments or an ASGI internal server error instead of a standard 422 validation error [3].\n\nTo avoid these issues while still applying custom logic (such as authorization or RBAC checks), you can use FastAPI\u2019s dependency injection system, which allows you to define reusable functions that run before the path operation without altering the path operation function\u2019s signature [7][10]. Alternatively, you can extend the routing mechanism by creating a custom `APIRoute` class that modifies the route handler, allowing you to inspect or modify the final handler signature without breaking FastAPI\u2019s parameter injection [5].\n\nIf you must use a decorator, ensure that it preserves the original function\u2019s signature (for example, by using `functools.wraps`), but be aware that even with `functools.wraps`, complex wrappers that introduce additional parameters (like `request` or `key`) may still cause conflicts with FastAPI\u2019s parameter resolution [3]."
+    },
+    {
+      "query_id": "golden::issue::2855",
+      "temperature": 0.5,
+      "top_p": 1.0,
+      "valid_citation_rate": 1.0,
+      "tier2_calls": 1,
+      "latency_ms": 16059.111874958035,
+      "answer_text": "To implement authentication on GraphQL routes in FastAPI, you can use dependency injection with the `Depends` parameter, as demonstrated in the provided code examples where `AuthJWT` is injected into the request handler [1]. For authenticating specific queries or mutations, you can define separate API routes with different dependencies; for instance, you can add a `POST` route with a `Depends(get_api_key)` for protected operations and a separate `GET` route without that dependency for public access like the GraphiQL IDE [3]. The recommended library for integrating GraphQL with FastAPI is Strawberry, which uses type annotations similar to FastAPI's design [7]."
+    },
+    {
+      "query_id": "golden::issue::2689",
+      "temperature": 1.0,
+      "top_p": 1.0,
+      "valid_citation_rate": 0.6666666666666666,
+      "tier2_calls": 1,
+      "latency_ms": 28525.216457957868,
+      "answer_text": "When a Pydantic model is used as both a request body parameter and the `response_model` for the same endpoint, the model\u2019s validators (including `root_validator`) are executed twice: once for the incoming request data and a second time when the returned object is validated against the cloned `response_model` [1][2].\n\nDuring the response validation phase, the originally declared `response_model` class is \"cloned\" to prevent subclasses from bypassing field filtering; if the response model is a Pydantic model class (or contains them), a different, cloned version of the model is created to filter the returned object to only the declared fields [1]. This cloning and re-validation process is what causes your `ensure_bigger` validator to run a second time with the values from the response object, rather than being skipped as a redundant check [1]."
+    },
+    {
+      "query_id": "golden::issue::2884",
+      "temperature": 1.0,
+      "top_p": 1.0,
+      "valid_citation_rate": 1.0,
+      "tier2_calls": 4,
+      "latency_ms": 47348.57420803746,
+      "answer_text": "In the provided context, there is no direct mechanism within FastAPI itself to specify which database a SQLAlchemy table is defined for; instead, this functionality relies on SQLAlchemy's features, such as using `__bind_key__` and `SQLALCHEMY_BINDS` alongside declarative base meta classes [5]. For example, you can implement a `BindMetaMixin` that reads a `__bind_key__` attribute from each model class and applies it to the table's `info` dictionary so that SQLAlchemy knows which engine to use [5]. This setup allows different models to be mapped to specific databases by setting attributes like `__bind_key__ = 'users'` on classes that inherit from a base configured with this mixin [5]. While FastAPI issues mention that multiple databases can be managed by creating several dependencies [6], the actual determination of which database a table belongs to is handled by the underlying SQLAlchemy configuration as demonstrated in the example with `SQLALCHEMY_BINDS` [5].\n\nI cannot provide additional configuration details beyond what is shown in the context regarding how to fully integrate `__bind_key__` with a FastAPI application's dependency injection system, as the provided examples focus primarily on the SQLAlchemy setup pattern [5][6]."
+    },
+    {
+      "query_id": "golden::issue::3212",
+      "temperature": 1.0,
+      "top_p": 1.0,
+      "valid_citation_rate": 0.5,
+      "tier2_calls": 0,
+      "latency_ms": 13797.237167018466,
+      "answer_text": "The provided context does not contain enough information to answer how to add routes that include an equal sign (`=`) in the path, nor does it show how to accept the values following the equal sign (such as `animal` and `lorem Ipsum`) as string arguments.\n\nContexts such as [7] and [2] discuss route ordering and path separators (like `/`), and context [1] notes that the Request parsing step does something special for anchor tags (`#`), but none of the provided blocks mention handling the `=` sign in a route definition or capturing parameters that resemble query strings in the path portion."
+    },
+    {
+      "query_id": "golden::issue::753",
+      "temperature": 1.0,
+      "top_p": 1.0,
+      "valid_citation_rate": 0.75,
+      "tier2_calls": 2,
+      "latency_ms": 31703.015874954872,
+      "answer_text": "The provided context does not contain information about a feature to add a `name` keyword argument to the `Depends` class or a specific mechanism to automatically inject dependency results into path operation functions under a named keyword argument [3][5][8].\n\nThe documentation confirms that dependencies can be defined at the `APIRouter` level or when including a router, and that they apply to all path operations in that scope [1][3][5][8]. However, the standard way to access the result of a dependency is to declare it as a parameter in the path operation function (e.g., `user: User = Depends(get_user)`) [4][10]. The provided context does not support the specific feature request of using a `name` argument in `Depends` to automatically map the result to a function argument without explicit declaration in the function signature."
+    },
+    {
+      "query_id": "golden::issue::219",
+      "temperature": 1.0,
+      "top_p": 1.0,
+      "valid_citation_rate": 1.0,
+      "tier2_calls": 0,
+      "latency_ms": 26202.88008300122,
+      "answer_text": "To correctly type file upload handlers and avoid `mypy` errors regarding \"Incompatible default\" values, use `Annotated` to separate the type information from the `File(...)` default value [2][10].\n\nHere is how to define a single required file upload handler:\n\n```python\nfrom typing import Annotated\nfrom fastapi import FastAPI, File, UploadFile\n\napp = FastAPI()\n\n@app.post(\"/api/uploadone\")\nasync def upload_file(\n    file: Annotated[UploadFile, File()]\n) -> dict[str, str]:\n    return {\"filename\": file.filename}\n```\n\nHere is how to define a handler for a list of required files:\n\n```python\nfrom typing import Annotated, List\nfrom fastapi import FastAPI, File, UploadFile\n\napp = FastAPI()\n\n@app.post(\"/api/upload\")\nasync def upload_files(\n    files: Annotated[List[UploadFile], File()]\n) -> dict[str, list[str]]:\n    return {\"filenames\": [file.filename for file in files]}\n```\n\nUsing `Annotated` tells static type checkers that the type is `UploadFile` or `List[UploadFile]`, while FastAPI still recognizes the `File()` dependency to parse the multipart/form-data body [2][4]. If you need to make the file optional, you can use `Annotated[UploadFile | None, File()] = None` [10]."
+    },
+    {
+      "query_id": "golden::issue::11104",
+      "temperature": 1.0,
+      "top_p": 1.0,
+      "valid_citation_rate": 0.0,
+      "tier2_calls": 0,
+      "latency_ms": 7561.949625029229,
+      "answer_text": "The provided context does not contain information about the specific bug involving `python-multipart==0.0.7`, file uploads, or the \"There was an error parsing the body\" error in FastAPI version 0.94.1, so I cannot answer this question using only the provided sources."
+    },
+    {
+      "query_id": "golden::issue::2786",
+      "temperature": 1.0,
+      "top_p": 1.0,
+      "valid_citation_rate": 0.75,
+      "tier2_calls": 2,
+      "latency_ms": 28812.67337501049,
+      "answer_text": "It appears that even when using `async def` endpoints and async generators with `StreamingResponse`, the response streaming process may still involve or interact with a thread pool in a way that limits concurrent connections, as evidenced by the behavior where the 7th tab fails to load until another tab is closed [2].\n\nThe documentation warns that `async` tasks can only be cancelled when they reach an `await` statement, and without proper `await`s (like `await anyio.sleep(0)`), generators may not be cancelled properly and can keep running even after cancellation is requested [1]. This necessity for `await` points suggests that the event loop mechanics are critical for proper concurrency and cancellation in streaming responses [1].\n\nWhile `async def` endpoints are intended to run on the event loop without blocking, user reports indicate that blocking operations or specific patterns (such as long-running tasks in async generators) can lead to bottlenecks where new requests are blocked or the application gets stuck, potentially exhausting available resources or threads [2][6][10]. The documentation notes that if there is no `await` in a generator, it cannot be cancelled properly, which is highlighted as being even more important for large or infinite streams [1].\n\nDespite the expectation that `async` endpoints avoid thread pools, the observed behavior of blocking after opening 6-7 tabs suggests that the underlying server implementation (e.g., uvicorn) or the way `StreamingResponse` interacts with the application may impose limits on concurrent streaming connections [2]. The context provided does not offer a definitive explanation for why `async` streaming specifically hits this ~6 connection limit in the described scenario, but it confirms that `StreamingResponse` takes async generators and streams the response body [1][8].\n\nTo handle streaming data more conveniently and manage cancellation behind the scenes, the documentation recommends following the \"Stream Data\" style rather than returning `StreamingResponse` directly [1]."
+    },
+    {
+      "query_id": "golden::issue::760",
+      "temperature": 1.0,
+      "top_p": 1.0,
+      "valid_citation_rate": 1.0,
+      "tier2_calls": 0,
+      "latency_ms": 20933.509333000984,
+      "answer_text": "FastAPI natively supports standard Python `dataclasses` for request bodies and responses without requiring you to explicitly convert them to Pydantic models [4]. This support is technically implemented because FastAPI is built on top of Pydantic, which has internal support for converting standard dataclasses into Pydantic's own flavor underneath the hood [4]. You can use standard `dataclasses` just as you would Pydantic models to declare requests and responses [4]. Additionally, FastAPI supports the `pydantic.dataclasses` decorator, which serves as a drop-in replacement for standard `dataclasses` and can be used if you encounter issues with automatically generated API documentation [6]. While FastAPI supports dataclasses for tasks including data validation, serialization, and documentation, they cannot perform every function that full Pydantic models can, so you might still need Pydantic models for certain features [4]."
+    },
+    {
+      "query_id": "golden::issue::1767",
+      "temperature": 1.0,
+      "top_p": 1.0,
+      "valid_citation_rate": 0.6666666666666666,
+      "tier2_calls": 2,
+      "latency_ms": 28506.985375017393,
+      "answer_text": "The provided context does not contain information confirming that the parameter `openapi_prefix` was removed from the `get_openapi` function in FastAPI version 0.59.0 [2]. While the context notes that versions below `1.0.0` may introduce breaking changes in \"MINOR\" version updates [2], it does not provide specific release notes or changelog entries for version 0.59.0 or any other version that document this specific removal [2]. Consequently, based solely on the provided documents, I cannot verify the existence of a separate changelog section for breaking changes nor confirm the specific behavior cited in your question."
+    },
+    {
+      "query_id": "golden::issue::12965",
+      "temperature": 1.0,
+      "top_p": 1.0,
+      "valid_citation_rate": 1.0,
+      "tier2_calls": 0,
+      "latency_ms": 26019.021667016204,
+      "answer_text": "Whether FastAPI will support the QUERY HTTP method (e.g., `app.query`) is not covered in the provided context [1][2][3][4][5][6][7][8][9][10]."
+    },
+    {
+      "query_id": "golden::issue::15764",
+      "temperature": 1.0,
+      "top_p": 1.0,
+      "valid_citation_rate": 0.0,
+      "tier2_calls": 0,
+      "latency_ms": 29782.49145898735,
+      "answer_text": "Sorry, I'm unable to answer this question with the information at hand."
+    },
+    {
+      "query_id": "golden::issue::2735",
+      "temperature": 1.0,
+      "top_p": 1.0,
+      "valid_citation_rate": 1.0,
+      "tier2_calls": 0,
+      "latency_ms": 24198.257457988802,
+      "answer_text": "This issue typically occurs when the client's environment blocks requests to the external CDN (e.g., no internet connection, corporate firewall, or specific browser/configuration issues) [2][4]. FastAPI\u2019s default documentation pages load the `swagger-ui-bundle.js` and `swagger-ui.css` files from the `jsdelivr` CDN [2][3].\n\nIf you cannot access the internet or prefer to host these files locally, you have several options:\n\n1.  **Self-host the assets and override the docs route:** You can download the Swagger UI JavaScript and CSS files to your project and serve them via a static file route [4][6]. You can then reuse the documentation generator functions from `fastapi.openapi.docs` to create a custom route for `/docs` that points to your local files instead of the CDN [4]. The FastAPI documentation includes a guide on how to self-host these assets [3].\n2.  **Use a local static folder:** One suggested approach is to store the CSS and JavaScript files in a `static` folder within your project and modify the paths in the HTML template served by FastAPI, though modifying the source code in `site-packages` is generally not recommended [6].\n\nIf you are online and still experiencing errors, it may be related to your specific browser or OS configuration; testing in a different browser or environment can help isolate the issue [2]."
+    },
+    {
+      "query_id": "golden::issue::5857",
+      "temperature": 1.0,
+      "top_p": 1.0,
+      "valid_citation_rate": 0.16666666666666666,
+      "tier2_calls": 2,
+      "latency_ms": 42838.69579201564,
+      "answer_text": "Based on the provided context, there is no information explaining how to resolve the `FastAPIError: Invalid args for response field! Hint: check that <class 'starlette.responses.FileResponse'> is a valid pydantic field type` error when using `FileResponse` as a return type with `add_api_route` in FastAPI version 0.89.0 [2]. While issue [2] documents that this regression occurred when upgrading from 0.88.0 to 0.89.0 and provides a stack trace indicating the error originates in `fastapi/utils.py` during the creation of a response field [2], the context does not contain a resolution, fix, or workaround provided by the maintainers or community members.\n\nThe other provided context blocks ([1], [3], [4], [5], [6], [7], [8], [9], [10]) consist primarily of issue checklists describing the reporter's due diligence (such as searching documentation and other issues) or relate to unrelated bugs regarding POST request body validation (`dict` error) [1] and path converters [3]. They do not contain technical steps to fix the `FileResponse` type error in `add_api_route`.\n\nTherefore, I cannot provide a specific solution based solely on the supplied text."
+    },
+    {
+      "query_id": "golden::issue::2934",
+      "temperature": 1.0,
+      "top_p": 1.0,
+      "valid_citation_rate": 0.6666666666666666,
+      "tier2_calls": 1,
+      "latency_ms": 37404.54054198926,
+      "answer_text": "When using `ORJSONResponse`, FastAPI will refuse to serialize a dictionary that uses integers as keys, resulting in a failure because ORJSON does not automatically cast integer keys to strings the way the default `json` library does [7][10]. You can still populate your FastAPI app to use `ORJSONResponse` by passing `default_response_class=ORJSONResponse` to the `FastAPI` constructor, or by using it at the individual route level [10]. If you expect to return dictionaries with non-string keys, you must ensure they are serialized into valid JSON (with string keys) before passing them to the response, or stick to the default JSON response class which handles that conversion automatically [7][10]."
+    },
+    {
+      "query_id": "golden::issue::2549",
+      "temperature": 1.0,
+      "top_p": 1.0,
+      "valid_citation_rate": 0.5454545454545454,
+      "tier2_calls": 0,
+      "latency_ms": 15328.461874974892,
+      "answer_text": "To stream the output of several commands from a FastAPI endpoint, you can use `StreamingResponse` with the `yield` keyword. Declare `response_class=StreamingResponse` in your path operation function so that you can use `yield` to send each chunk of data in turn [9].\n\nHere is how you might adjust your endpoint based on the provided context:\n\n1.  **Create an async generator function** that yields the output of each command as its data becomes available. You can use `yield` to send each chunk of data in turn [9].\n2.  **Update your endpoint** to return `StreamingResponse`. For example, if you use an async generator `status_stream()` that yields the outputs of `check_one`, `check_two`, and `check_three`, you would return `return StreamingResponse(status_stream())` [7][9].\n3.  **Remove `response_model`**: Since you are returning a `StreamingResponse`, you generally do not use `response_model` in the same way as a standard JSON response. The context shows examples where `StreamingResponse` is returned directly with a `media_type`, such as `media_type=\"text/plain\"` [7].\n\nExamples from the context show returning a `StreamingResponse` with an async generator that yields data [7][9]. In one specific example, the endpoint is defined as:\n\n```python\n@router.post(\"/service/{getorkill}/{procuuid}\", description=\"Stream WildFly Logs\")\nasync def POST_getlog(getorkill: str, procuuid: str):\n    if getorkill == \"getlog\":\n        return StreamingResponse(getlog(procuuid), media_type=\"text/plain\")\n```\n\nWhere `getlog` is an async generator function that yields decoded lines from a subprocess [7]. This pattern allows the data to be streamed to the client in chunks as it is produced, rather than waiting for all data to be ready ["
+    },
+    {
+      "query_id": "golden::issue::1653",
+      "temperature": 1.0,
+      "top_p": 1.0,
+      "valid_citation_rate": 0.6666666666666666,
+      "tier2_calls": 0,
+      "latency_ms": 20195.50974998856,
+      "answer_text": "The provided context does not contain information about a current or offered feature to support file uploads where the entire request body is the uploaded file without a specific form-data key.\n\nThe documentation and issues describe different behaviors:\n*   Standard FastAPI file uploads expect \"form data\" structures where the file is associated with a parameter name (the key) [2].\n*   If a user attempts to send the whole body as a binary file without the expected key (e.g., using `curl --data-binary` in a binary body context), FastAPI will return a validation error because it expects the specific key (such as `file`) to be present in the request [2].\n*   To accept files in a manner similar to accessing raw form inputs in other frameworks (like Flask\u2019s `request.files`), you can access the `request` object directly, although this bypasses automatic OpenAPI generation and UI documentation [5].\n*   You can make the file parameter optional to avoid errors if the key is missing, but this still relies on form-data parsing rather than treating the raw body as the file itself [3].\n\nThe provided text does not specify a native setting to automatically treat the raw request body as an `UploadFile` without a designated form-data key [1][2][4][5][8][9][10]."
+    },
+    {
+      "query_id": "golden::issue::2855",
+      "temperature": 1.0,
+      "top_p": 1.0,
+      "valid_citation_rate": 0.75,
+      "tier2_calls": 1,
+      "latency_ms": 820.3297919826582,
+      "answer_text": "To authenticate a GraphQL route in FastAPI, you can use dependency injection by adding a security dependency to the route that handles the GraphQL request [1][4]. For example, when using `starlette_graphene3` or similar integrations, you can attach authentication as a dependency to the API route that maps GET and POST (or WebSocket) requests to the GraphQL handler [3][4]. You can restrict authentication to specific queries or mutations by injecting dependencies into the resolver functions of your GraphQL schema (e.g., Strawberry or Graphene) rather than applying it globally to the entire `/graphql` route [4][7]. FastAPI\u2019s recommended approach for path operation security, including GraphQL endpoints, is to use dependencies such as a security function or OAuth2 flow [4][7]."
     }
   ]
 }

@@ -1,7 +1,7 @@
 # Aegis — Progress Log
 
 **Last updated:** 2026-10-17
-**Current phase:** Phase 15 — Security Hardening (⬜ not started). Phase 14 — API, Streaming & UI (🟢 complete 2026-10-17 — all 6 build items, all 5 exit criteria met). Phase 13 — Observability & the Latency Budget (🟡 in progress — build list complete, exit criteria 3 of 4 met -- p95 < 3 s unmet). Phase 12 — Caching, Delta Indexing & Cost (🟢 complete — all 6 units, exit criteria met). Phase 11 — Generation Eval, RAGAS & Judging the Judge (🟡 **wrapped up for this session** — every unit, fix, and root-cause investigation that could be done without waiting on quota is done and documented; exactly 2 real measurements are left, both **explicitly deferred to the user** to run themselves whenever quota allows, not queued as a future session's task; see "Phase 11 wrap-up" note below).
+**Current phase:** Phase 15 — Security Hardening (⬜ not started). Phase 14 — API, Streaming & UI (✅ complete 2026-10-17 — all 6 build items, all 5 exit criteria met). Phase 13 — Observability & the Latency Budget (🟡 in progress — build list complete, exit criteria 3 of 4 met -- p95 < 3 s unmet). Phase 12 — Caching, Delta Indexing & Cost (✅ complete — all 6 units, exit criteria met). Phase 11 — Generation Eval, RAGAS & Judging the Judge (🟡 **wrapped up for this session** — every unit, fix, and root-cause investigation that could be done without waiting on quota is done and documented; exactly 2 real measurements are left, both **explicitly deferred to the user** to run themselves whenever quota allows, not queued as a future session's task; see "Phase 11 wrap-up" note below).
 
 ## Phase 12 — Caching, Delta Indexing & Cost
 
@@ -493,8 +493,20 @@ worker up to 20 s; rate limit keyed on socket peer (no trusted proxy); feedback 
 **Carried, other:** semantic cache off pending a templated-negative re-tune (14h SS7); tier-2 entailment outage serves
 answers with all citations struck (14f); Phase 13 p95 < 3 s still unmet (14h's CPU/MPS first-pass finding may bear on it).
 
-**Next action:** Phase 15 -- Security Hardening (plan.md). Deferred-to-user items unchanged: Phase 11 judge kappa,
-Phase 9 sampling sweep (qwen quota used today by 14i -- run tomorrow).
+**Deferred-items run, 2026-10-18.** (1) **Phase 11 judge kappa, paired N=23/29 under the fixed rubric: kappa = 0.1321**
+(raw agreement 0.6522); trend 0.2143 (N=11) -> 0.1772 (N=13) -> 0.1321 (N=23) -- falling, not converging. Gemini gave
+22/23 a 5; all 8 disagreements are Groq 4 / Gemini 5. Gemini's ceiling effect survives the rubric fix, so this judge pair
+cannot validate the Groq judge regardless of N; needs a varying rater (human labels or another model) -- user decision,
+not changed. First attempt lost ~13 calls to a 5 requests/minute Gemini cap (not the daily one); added 13 s pacing to
+`11g`. 6 rows remain (daily cap). `docs/results/judge-agreement.md` updated. (2) **Phase 9 sampling sweep: grid
+complete (4/4).** valid_citation_rate: t=0.0 0.7296 (both top_p, identical), **t=0.5 0.7350** (n=20; `unsupported`
+6 -> 11, `missing_citation` 22 -> 13 -- same rate, more wrongly-cited claims), **t=1.0 0.6546** (n=17; last 3 queries hit
+qwen's 200k TPD cap). One run/config, no CI. **Decision unchanged: temperature=0.0.** Found and fixed: the script's
+regenerated report had overwritten the hand-written analysis in `sampling-sweep.md` (restored from git `7e3c6c6` and
+merged); its generated table now goes to `sampling-sweep-table.md`. qwen TPD is exhausted for today.
+
+**Next action:** Phase 15 -- Security Hardening (plan.md). Remaining quota-bound item: Phase 11 judge kappa, 6 Gemini rows (rerun `11g` tomorrow);
+the judge-pair problem itself needs a user decision (see 2026-10-18 note).
 
 ### Phase 11 wrap-up (2026-09-26)
 
@@ -558,7 +570,7 @@ either. Open Questions #1 and #16 and the DoD tracker rows below reflect this ex
 | **Phase** | 15 of 19 (not started). Phase 14 complete (all 6 build items, 5 of 5 exit criteria). Phase 13 build list complete, 3 of 4 exit criteria met -- p95 < 3 s unmet. Phase 12 complete (all 6 units, exit criteria met). Phase 11 wrapped up (all 6 units + rubric fix + faithfulness root cause done; real paired κ deferred to the user, pending Gemini quota). Phase 9's sampling-sweep grid re-scoped and half-completed (2 of 4 configs real), remaining 2 also deferred to the user |
 | **Design records written** | 27 files across phases 0-13 (lettered sub-records inflate this past a literal 1-per-phase count; phases 14-19 have none yet) |
 | **Golden set** | 180 dev + 40 holdout, frozen and hashed (Phase 4) |
-| **Definition of Done** | 3 of 10 criteria met (#1: Recall@10 + MRR lift; #3: escalation confusion matrix; #8: LLM-judge agreement, measured — real result is **not met**, κ≈0 vs. ≥0.6 target, itself a valid, reported outcome). `make eval` (Unit 6) now surfaces this and the faithfulness miss automatically, in one command. |
+| **Definition of Done** | 3 of 10 met (#1 Recall@10 + MRR lift; #3 escalation confusion matrix; #4 cache hit rate + cost/latency reduction). Measured but **not met**: #2 faithfulness (0.7977 vs ≥ 0.90), #6 p95 (5.6 s vs < 3 s), #8 judge κ (0.1321 at N=23 post-fix vs ≥ 0.6). Not started: #5, #7, #9, #10. `make eval` (Unit 6) now surfaces this and the faithfulness miss automatically, in one command. |
 | **Blockers** | Both providers re-exhausted again as of 2026-09-26 running the real N=26 rubric-fix re-score: `openai/gpt-oss-120b` (TPD) and `gemini-3.5-flash` (20/day, which did not clear even across the calendar-day rollover — its quota-day boundary doesn't align with local midnight). Gemini has now returned **zero** real scores under the fixed rubric across two separate attempts — real inter-judge κ is still completely unmeasured. `qwen/qwen3.8-27b` (generation) is now *also* TPD-exhausted (200,000/day, newly discovered running the sampling sweep re-run) — 2 of 4 sweep configs got real data before the wall. Not currently blocking: Units 5 and 6 (custom metrics, scorecard — both zero LLM cost) shipped regardless, and both the groq-side refusal fix (N=26) and the temperature=0.0 sweep configs (N=20 each) are real-verified. |
 
 ---
@@ -578,12 +590,12 @@ Legend: ⬜ not started · 🟡 in progress · ✅ complete · ⏭️ cut
 | 6 | **Retrieval eval & ablation grid** ⚑ | 7 | ✅ | The evidence table |
 | 7 | Reranking | 8 | ✅ | Pool-size vs latency curve |
 | 8 | Agentic router & query understanding | 9–10 | ✅ | Routing confusion matrix |
-| 9 | Grounded generation & citations | 11 | 🟡 | Citation validator |
+| 9 | Grounded generation & citations | 11 | 🟡 | Citation validator — sweep done 2026-10-18; open: "100% of claims cited" unmet (missing_citation 22/111 at t=0.0) |
 | 10 | **Calibrated abstention** ⚑ | 12 | ✅ | The escalation confusion matrix |
 | 11 | **Generation eval + judge validation** ⚑ | 13 | 🟡 | RAGAS + Cohen's κ |
-| 12 | Caching, delta indexing & cost | 14 | 🟡 | Cache hit rate, cost table |
+| 12 | Caching, delta indexing & cost | 14 | ✅ | Cache hit rate, cost table |
 | 13 | Observability & latency budget | 15 | 🟡 | p95 < 3s, per-stage breakdown |
-| 14 | API, streaming & UI | 16–17 | 🟢 | Working demo w/ visible escalation |
+| 14 | API, streaming & UI | 16–17 | ✅ | Working demo w/ visible escalation |
 | 15 | Security hardening | 18½ | ⬜ | Adversarial suite |
 | 16 | **CI evaluation gate** ⚑ | 18½ | ⬜ | Gate that fails on regression |
 | 17 | LangGraph port & framework comparison | 19 | ⬜ | Comparison writeup, both paths pass eval |
@@ -717,9 +729,9 @@ Legend: ⬜ not started · 🟡 in progress · ✅ complete · ⏭️ cut
 | 1 | Recall@10 + MRR lift, baseline → final | measured | Recall@10 +0.332 (4.4x), MRR +0.496 (2.35x) vs. worst measured config (sparse-only) — see `docs/results/retrieval-ablation.md` §7 for why Phase 0's literal baseline isn't corpus-comparable | ✅ |
 | 2 | RAGAS faithfulness | ≥ 0.90 | **Measured, target not met, real root cause found (2026-09-26):** mean=0.7977 (n=20/29). Two distinct real mechanisms, not one: (a) a genuine hallucination (`golden::issue::219`, 0.077) that RAGAS correctly caught and the citation validator + LLM judge both missed or fully missed; (b) a metric-structural blind spot where RAGAS's NLI check can't credit a correct negative/refusal claim (`golden::issue::15764`, 0.250, verified accurate). Recommend closing as a disclosed, explained limitation rather than chasing the number — "fixing" (b) would mean discouraging honest refusals, i.e. optimizing against Phase 10's own design. Satisfies plan.md's "written analysis of why not" exit-criterion alternative. `docs/results/faithfulness-root-cause.md` | ⚠️ |
 | 3 | Escalation confusion matrix published | 4 quadrants | 4 quadrants, real numbers: TN=126 FP=24 FN=3 TP=27 at tau=0.50 (`docs/results/confusion-matrix.md`) | ✅ |
-| 4 | Cache hit rate + cost/latency reduction | measured | — | ⬜ |
+| 4 | Cache hit rate + cost/latency reduction | measured | Zipf-simulated over the 150 dev intents (Phase 12 Unit 3): hit rate 56.7-86.7% at cold start (N=150, skew 0.8-1.6) rising to ~98% by N=9,000; latency/token reduction tracks hit rate (~98% at N=9,000); exact hit 0.0 ms vs miss 12,787.5 ms modeled (`docs/results/cache-performance.md`, `cost-per-query.md`). Caveats: simulated traffic (no real log); ceiling is a property of 150 intents; semantic tier (0.2-1.6% of hits) off since 2026-10-17 (14h) | ✅ |
 | 5 | CI gate demonstrably fails on regression | screenshot | — | ⬜ |
-| 6 | p95 end-to-end, retrieval path | < 3 s | — | ⬜ |
+| 6 | p95 end-to-end, retrieval path | < 3 s | **Measured, not met (Phase 13):** paced generate path 4.4 s p50 / 5.6 s p95; confidence-stage variance unexplained. Re-verify at P18 | 🟡 |
 | 7 | Failure analysis, categorized | written | — | ⬜ |
 | 8 | LLM-judge agreement (Cohen's κ) | ≥ 0.6 | **Measured pre-fix, target not met:** κ=-0.0161 (unweighted) / 0.0906 (quadratic), N=9 paired — real, methodology-substituted (inter-judge, not judge-vs-human; user declined to hand-label). Root cause identified and rubric fixed (Gemini ceiling-effect anchor + `gpt-oss-120b` refusal-penalizing rule), groq-side verified real at N=26. **Real paired κ under the fixed rubric is deferred to the user** — Gemini has 0/29 real scores under it (`experiments/11g_judge_rubric_rescore.py`, checkpoint-resumable, run once its quota allows). Surfaced automatically by `make eval` (Unit 6). `docs/results/judge-agreement.md` | ⚠️ |
 | 9 | Adversarial security suite passing | all pass | — | ⬜ |

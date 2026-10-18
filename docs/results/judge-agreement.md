@@ -130,3 +130,31 @@ Confusion matrix (Groq rows × Gemini cols, scores 4–5 only; no other cell is 
 **Remaining:** 18 Gemini scores. The script is resumable — re-running it fills only those (about one day of Gemini quota). Until then κ under the fixed rubric is measured on 11 pairs, not 29.
 
 **Correction:** earlier notes said `make eval` would pick up the new κ automatically. It will not. `EvalSettings.generation_batch_raw_path` points at the original pre-fix file (`judge-agreement-batch-raw.json`), so the scorecard still reports κ = −0.0161. Which file the scorecard should report (or whether to show both) is an open decision.
+
+## Update 2026-10-18 — paired N = 23 under the fixed rubric
+
+Re-ran `experiments/11g_judge_rubric_rescore.py` twice (resumable; Groq side already complete at 29/29).
+
+- **First attempt:** +2 Gemini scores. Most failures were HTTP 429 on `GenerateRequestsPerMinutePerProjectPerModel-FreeTier` (**5 requests/minute** on `gemini-3.6-flash`), because the script sent calls back to back. Also 503 "high demand" (capacity, not quota) and one malformed structured response. Added `GEMINI_PACE_S = 13.0` between Gemini calls.
+- **Second attempt (paced):** +10 Gemini scores, then the **daily** cap (`GenerateRequestsPerDayPerProjectPerModel-FreeTier`). Also 3× 503 and 2× `'NoneType' object is not iterable` (malformed instructor output).
+
+| Paired N | Raw agreement | Cohen's κ (unweighted = quadratic) |
+| --- | --- | --- |
+| 11 (2026-10-01) | 0.6364 | 0.2143 |
+| 13 (2026-10-18, first attempt) | 0.6154 | 0.1772 |
+| **23 (2026-10-18, paced)** | **0.6522** | **0.1321** |
+
+The bar is κ ≥ 0.6: **not met**. κ is falling as N grows, not converging toward the bar.
+
+**Score distribution over the 23 pairs:**
+
+| | 4 | 5 |
+| --- | --- | --- |
+| Groq (`gpt-oss-120b`) | 9 | 14 |
+| Gemini (`gemini-3.6-flash`) | 1 | 22 |
+
+Joint distribution: (4,4) × 1, **(4,5) × 8**, (5,5) × 14. Every disagreement is Groq 4 / Gemini 5. There is no case of Gemini scoring lower than Groq.
+
+**Reading.** The rubric fix (design record 11f) changed the Groq judge's behavior (n=29 under it), but not Gemini's. Gemini still gives 5 to 96% of answers, and under the fixed "reserve 5" anchor too. With one rater nearly constant, κ can't register agreement no matter how many rows are added. That's a property of this judge pair, not of sample size. Finishing the last 6 rows tomorrow will tighten the number but can't plausibly move it toward 0.6. Real implication: **inter-judge κ with Gemini as the second rater cannot validate the Groq judge.** Validation would need a rater that varies: human labels (the plan's original design, which the user previously declined to hand-label) or a different second model. That's a decision for the user; not changed here.
+
+**Remaining:** 6 Gemini scores (daily cap), resumable.

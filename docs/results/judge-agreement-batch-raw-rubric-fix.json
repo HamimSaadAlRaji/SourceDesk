@@ -92,7 +92,9 @@
       "latency_ms": 7201.564542003325
     },
     "judge_gemini": {
-      "error": "InstructorRetryException(\"503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}\")"
+      "score": 5,
+      "reasoning": "This is not a case where the context lacks the answer; context [5] explicitly provides code on how to implement `__bind_key__` using a custom metaclass in SQLAlchemy. \n\nThe assistant directly and accurately answered the user's question by showing how to set `__bind_key__`, configure multiple database binds, and define the custom metaclass `BindMetaMixin` required to handle the bind keys in SQLAlchemy/FastAPI. The response is clear, complete, and directly resolves the user's query.",
+      "latency_ms": 6952.189625008032
     }
   },
   {
@@ -479,7 +481,9 @@
       "latency_ms": 27591.191792002064
     },
     "judge_gemini": {
-      "error": "InstructorRetryException(\"503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}\")"
+      "score": 5,
+      "reasoning": "The user is asking whether FastAPI will support the QUERY HTTP method (`app.query`). \n\nChecking the provided context:\nThe context consists only of GitHub issue templates and a user discussion post ([1]) asking if FastAPI will ever support `app.query`. There is no documentation or official maintainer response in the context answering whether this feature is or will be supported.\n\nThe assistant correctly and explicitly identifies that the context only contains the user's discussion inquiry and does not contain information on whether FastAPI currently supports or plans to support the `QUERY` method. It honestly refuses to guess while summarizing what the context actually contains.\n\nAs per the critical rule, an honest refusal when the context lacks the answer is a correct and helpful response. There are no missed details in the context that would answer the question. Thus, this is a 5/5 response.",
+      "latency_ms": 7131.652540992945
     }
   },
   {
@@ -671,7 +675,9 @@
       "latency_ms": 44531.183457991574
     },
     "judge_gemini": {
-      "error": "InstructorRetryException(\"503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}\")"
+      "score": 5,
+      "reasoning": "This is a case where the provided context lacks the specific information needed to answer the user's question (specifically regarding ORJSONResponse failing on integer dictionary keys). The assistant correctly, clearly, and honestly acknowledged that the provided context does not contain this information, rather than inventing or guessing an answer. Following the critical rule, this honest refusal is the correct and most helpful behavior given the context, earning a top score.",
+      "latency_ms": 6822.653874987736
     }
   },
   {
@@ -718,7 +724,9 @@
       "latency_ms": 16900.014250000822
     },
     "judge_gemini": {
-      "error": "InstructorRetryException(\"503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}\")"
+      "score": 5,
+      "reasoning": "The context contains the necessary information to answer the question (specifically [9] on using `StreamingResponse` with `yield` and [7] showing a code example using `StreamingResponse`). Therefore, this is not a case where the context lacked the answer.\n\nThe assistant provided a clear, accurate, and complete response explaining how to use `StreamingResponse` with a generator yielding output sequentially, provided a minimal working code example, and explained how to handle the synchronous `check_XXX` functions (explaining that they need to yield data or have stdout captured rather than using standard `print`). The explanation directly and thoroughly resolves the user's question.",
+      "latency_ms": 8079.065833997447
     }
   },
   {
@@ -810,7 +818,9 @@
       "latency_ms": 32467.93162501126
     },
     "judge_gemini": {
-      "error": "InstructorRetryException(\"503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}\")"
+      "score": 5,
+      "reasoning": "This is a case where the context lacks the specific information needed to answer the question (how to support reusable `components/requestBodies` in FastAPI), and the assistant correctly and honestly stated so instead of inventing features or guessing.\n\nThe assistant directly addressed the user's question, analyzed the context regarding OpenAPI schema refs (`#/components/schemas`), and accurately concluded that the context does not provide a native built-in way to place reusable request bodies under `#/components/requestBodies`. Because the context lacks the required information and the assistant correctly identified this without hallucinating, this is an optimal response.",
+      "latency_ms": 7037.034249980934
     }
   },
   {
@@ -905,7 +915,7 @@
       "latency_ms": 35531.44533299201
     },
     "judge_gemini": {
-      "error": "InstructorRetryException(\"429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.5-flash\\\\nPlease retry in 285.836177ms.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '0s'}]}}\")"
+      "error": "InstructorRetryException(\"'NoneType' object is not iterable\")"
     }
   },
   {
@@ -952,7 +962,7 @@
       "latency_ms": 19911.003708009957
     },
     "judge_gemini": {
-      "error": "InstructorRetryException(\"429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.5-flash\\\\nPlease retry in 59.767239597s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-3.5-flash', 'location': 'global'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '59s'}]}}\")"
+      "error": "InstructorRetryException(\"503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}\")"
     }
   },
   {
@@ -998,7 +1008,9 @@
       "latency_ms": 44330.996707998565
     },
     "judge_gemini": {
-      "error": "InstructorRetryException(\"429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.5-flash\\\\nPlease retry in 59.252259109s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '59s'}]}}\")"
+      "score": 5,
+      "reasoning": "This is a case where the context lacks the answer to the user's specific question regarding regressions in form handling between versions v0.112.4 and v0.115.11, and the assistant correctly and honestly stated so. The assistant accurately pointed out that the context lacks information about PR #12134, PR #12117, or default value handling in `x-form-urlencoded` / `multipart` forms, while briefly summarizing what related form topics were actually present in the context. Since there is no missed information in the provided context and the refusal is accurate, clear, and helpful, this is the best possible response.",
+      "latency_ms": 6377.353082993068
     }
   },
   {
@@ -1044,7 +1056,9 @@
       "latency_ms": 31427.579916999093
     },
     "judge_gemini": {
-      "error": "InstructorRetryException(\"429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.5-flash\\\\nPlease retry in 58.896417628s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '58s'}]}}\")"
+      "score": 5,
+      "reasoning": "This is a case where the context lacks the answer and the assistant correctly said so. The provided context contains only GitHub issue templates and checklists, and contains no information regarding GitHub GraphQL queries, utility functions for tracking discussions, or contributor statistics. The assistant correctly identified that the context lacks the required information and provided a clear, accurate refusal without guessing.",
+      "latency_ms": 6236.45274998853
     }
   },
   {
@@ -1090,7 +1104,9 @@
       "latency_ms": 24271.3393340091
     },
     "judge_gemini": {
-      "error": "InstructorRetryException(\"429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.5-flash\\\\nPlease retry in 58.435284295s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-3.5-flash', 'location': 'global'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '58s'}]}}\")"
+      "score": 5,
+      "reasoning": "This is a case where the context lacks the complete answer\u2014specifically, how to consume/read the response body in FastAPI middleware (context [5] shows an attempt that fails with an `AttributeError` because response is a `StreamingResponse`, but provides no working solution). The assistant correctly answered the request body portion supported by context [4] and explicitly stated that the context does not contain a solution for reading the response body.\n\nThe response is clear, accurate to the context, properly addresses the request body handling, and honestly acknowledges the missing information for the response body without hallucinating or guessing. There is no concrete way to improve this given the provided context.",
+      "latency_ms": 7785.54895799607
     }
   },
   {
@@ -1137,7 +1153,9 @@
       "latency_ms": 47437.653707995196
     },
     "judge_gemini": {
-      "error": "InstructorRetryException(\"429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.5-flash\\\\nPlease retry in 58.117538145s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '58s'}]}}\")"
+      "score": 5,
+      "reasoning": "The context provided does not contain information about `SecretStr` or how FastAPI handles serialization of Pydantic models containing `SecretStr` fields. \n\nApplying the critical rule: the assistant correctly identified that the context lacks the necessary information to answer the user's question and honestly stated so, rather than inventing a solution. It accurately summarized what related topics were present in the context without misrepresenting them. Therefore, this is a 5/5 response as it is the best possible honest response given the available context.",
+      "latency_ms": 7254.035542020574
     }
   },
   {
@@ -1183,7 +1201,9 @@
       "latency_ms": 31643.400457993266
     },
     "judge_gemini": {
-      "error": "InstructorRetryException(\"429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.5-flash\\\\nPlease retry in 57.689317465s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '57s'}]}}\")"
+      "score": 5,
+      "reasoning": "This is a case where the provided context lacks the information needed to answer the question, and the assistant correctly and honestly stated so. \n\nThe context consists almost entirely of GitHub issue template checklists and meta-comments, with no technical resolution or diagnostic information explaining the latency issue related to FastAPI > 0.82.0 or PR #5122. The assistant acknowledged the user's question, summarized the brief mention of PR #5122 present in the text, and correctly stated that the context lacked sufficient details to resolve or explain the latency issue.\n\nSince there is no missing information from the context that the assistant failed to include, and the response is clear, accurate, and completely honest, it receives a top score.",
+      "latency_ms": 6857.11929196259
     }
   },
   {
@@ -1230,7 +1250,9 @@
       "latency_ms": 31712.912041999516
     },
     "judge_gemini": {
-      "error": "InstructorRetryException(\"429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.5-flash\\\\nPlease retry in 57.162570661s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-3.5-flash', 'location': 'global'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '57s'}]}}\")"
+      "score": 5,
+      "reasoning": "This is a case where the provided context lacks the information needed to answer the user's question, and the assistant accurately and honestly stated that it could not answer based on the context. The provided context blocks only contain standard GitHub issue template checklists and lack any technical details about dependency resolution performance regressions, Starlette/anyio changes, or optimization plans. The assistant's refusal is completely correct and appropriate.",
+      "latency_ms": 5891.7407499975525
     }
   },
   {
@@ -1277,7 +1299,9 @@
       "latency_ms": 1428.0816250102362
     },
     "judge_gemini": {
-      "error": "InstructorRetryException(\"429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.5-flash\\\\nPlease retry in 55.433093019s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '55s'}]}}\")"
+      "score": 5,
+      "reasoning": "This is a case where the context lacks the information needed to answer the question, and the assistant correctly and honestly stated that the context does not contain instructions or examples for multi-stage Docker builds to reduce image size. The assistant also provided a helpful breakdown of what the context did contain regarding Dockerfiles to demonstrate why it was insufficient, without making up or guessing information. Therefore, this is the best possible honest response given the context.",
+      "latency_ms": 5849.836917011999
     }
   },
   {
@@ -1323,7 +1347,7 @@
       "latency_ms": 1426.2348330084933
     },
     "judge_gemini": {
-      "error": "InstructorRetryException(\"429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.5-flash\\\\nPlease retry in 53.6030877s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '53s'}]}}\")"
+      "error": "InstructorRetryException(\"429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.6-flash\\\\nPlease retry in 5h47m29.844675386s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.6-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '20849s'}]}}\")"
     }
   },
   {

@@ -8,14 +8,28 @@ heading-aware, bge-large, no enrichment), prompt v1, N=20 dev-positive golden qu
 (lexically or via entailment). Not RAGAS faithfulness (Phase 11, `docs/results/faithfulness-root-cause.md`);
 named a proxy deliberately.
 
-## What got measured this run
+## Grid complete — 2026-10-18 (all 4 configs)
+
+The remaining two configs were run with the same resumable script (the two temperature=0.0 configs were reused, not re-run). The machine-generated table now lives in `sampling-sweep-table.md`; this file is the analysis.
 
 | temperature | top_p | N succeeded | N failed | mean valid_citation_rate | mean latency (ms) | claim status counts |
 |---|---|---|---|---|---|---|
 | 0.0 | 0.5 | 20 | 0 | 0.7296 | 23,847 | supported_lexical=59, supported_entailment=14, exempt=10, missing_citation=22, unsupported=6 |
 | 0.0 | 1.0 | 20 | 0 | 0.7296 | 26,411 | supported_lexical=59, supported_entailment=14, exempt=10, missing_citation=22, unsupported=6 |
-| 0.5 | 1.0 | 0 | 20 | — | — | — |
-| 1.0 | 1.0 | not attempted | — | — | — | — |
+| 0.5 | 1.0 | 20 | 0 | 0.7350 | 25,402 | supported_lexical=55, supported_entailment=13, exempt=7, missing_citation=13, unsupported=11 |
+| 1.0 | 1.0 | **17** | 3 | 0.6546 | 25,293 | supported_lexical=41, supported_entailment=8, exempt=3, missing_citation=14, unsupported=7 |
+
+The 3 temperature=1.0 failures were `qwen/qwen3.8-27b`'s **daily** cap (`Limit 200000, Used 197018–197056`). They were the last 3 queries of the run, so that row is n=17, not 20. Its mean is over 17 queries, and a different 17 from the other rows' 20.
+
+**Reading, with the sample size in mind (N=20, one run per config, no CI):**
+
+- **temperature 0.5 ≈ 0.0 on the proxy:** 0.7350 vs 0.7296, a +0.0054 difference that n=20 can't distinguish from noise. The claim mix moved, though: `unsupported` 6 → 11 (claims carrying a citation whose source doesn't back them) and `missing_citation` 22 → 13. The two shifts roughly cancel in the rate. Same rate, different failure mode: at 0.5 the model cites more often, and more often wrongly. For this project's North Star, a wrongly cited claim is worse than an uncited one, because it *looks* grounded.
+- **temperature 1.0 is worse:** 0.6546, −0.075 vs 0.0. Also fewer claims overall (73 counted vs 111 at 0.0, partly the n=17), consistent with shorter, looser answers. Not significance-tested.
+- **Latency does not move with temperature** (23.8–26.4 s mean across all four). The ~25 s means are dominated by pacing and rate-limit behavior in this script, not by decoding, so they say nothing about serving latency (Phase 13/14 measure that: ~1 s generation).
+
+**Decision unchanged: temperature=0.0** (`GenerationSettings`). No config beat it on the proxy beyond noise, 0.5 shifts errors toward the more dangerous kind, and 1.0 is measurably worse. top_p is irrelevant at 0.0 (identical results, explained below).
+
+## The earlier partial run (2026-09-26)
 
 **The two temperature=0.0 configs produced identical results** — same mean rate, same latency-adjacent
 range, same exact claim-status counts, across all 20 real queries. This is the expected, mechanistically
@@ -32,6 +46,8 @@ The fourth config was never attempted; the run was stopped once the TPD wall mad
 guaranteed, fast 429.
 
 ## What this means for the exit criterion
+
+*(As of 2026-09-26; superseded by the full grid above.)*
 
 The temperature x top_p grid plan.md asks for is still **not fully complete** — real data exists for 2 of 4
 planned configs, both at temperature=0.0. What is real and confirmed:
@@ -56,10 +72,4 @@ only 2/6 queries completed for the first config (`valid_citation_rate`=0.2500, t
 
 ## What's next
 
-**Deferred to the user**, to run once `qwen/qwen3.8-27b`'s TPD quota resets: `uv run python
-experiments/09a_sampling_sweep.py`. The script is now config-level resumable (added 2026-09-26, after this
-run) — it reads any existing `sampling-sweep-raw.json`, skips configs already at `n_succeeded == N_QUERIES`
-(the 2 temperature=0.0 configs above), and only runs the 2 remaining ones (temperature=0.5 and 1.0, both
-top_p=1.0), so it's now safe to just re-run the same command rather than needing to preserve today's data
-by hand. Each config used roughly 40,000-50,000 of the 200,000 TPD budget, so a fresh day's quota should
-comfortably cover both remaining configs in one sitting.
+Nothing for this sweep: the grid is complete as of 2026-10-18 (the 2026-09-26 "deferred to the user" note is closed). If revisited: one run per config at N=20 gives no confidence intervals. A repeat at temperature 0.5 would be the useful one, to check whether the `unsupported` 6 → 11 shift is real.

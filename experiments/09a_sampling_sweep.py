@@ -80,7 +80,9 @@ N_QUERIES = 20  # restored to Attempt 1's scale -- qwen3.8-27b's per-minute caps
 CONFIGS = [(0.0, 0.5), (0.0, 1.0), (0.5, 1.0), (1.0, 1.0)]  # (temperature, top_p)
 MAX_TOKENS = 400  # down from GroqSettings' default 1024 -- also a more realistic support-answer length
 SLEEP_SECONDS = 8  # real ITPM-safety pacing -- see 2026-09-26 docstring note
-RESULTS_MD = REPO_ROOT / "docs" / "results" / "sampling-sweep.md"
+# The generated table only: sampling-sweep.md holds the hand-written analysis,
+# which a regenerated report once overwrote (2026-10-18).
+RESULTS_MD = REPO_ROOT / "docs" / "results" / "sampling-sweep-table.md"
 RESULTS_RAW = REPO_ROOT / "docs" / "results" / "sampling-sweep-raw.json"
 
 

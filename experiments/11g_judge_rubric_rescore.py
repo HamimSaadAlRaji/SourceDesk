@@ -26,6 +26,9 @@ from aegis.eval.judge import build_gemini_judge, build_groq_judge
 
 SOURCE_RAW = REPO_ROOT / "docs" / "results" / "judge-agreement-batch-raw.json"
 RESULTS_RAW = REPO_ROOT / "docs" / "results" / "judge-agreement-batch-raw-rubric-fix.json"
+# gemini-3.6-flash free tier: 5 requests/minute (429 GenerateRequestsPerMinute,
+# 2026-10-18 run -- ~13 of that run's failures were this, not the daily cap).
+GEMINI_PACE_S = 13.0
 
 
 def load_source_rows() -> list[dict]:
@@ -85,6 +88,8 @@ def main() -> None:
                 row[key] = {"error": repr(exc)}
                 print(f"  {key} FAILED: {exc!r}")
             save_checkpoint(rows_by_id)
+            if key == "judge_gemini":
+                time.sleep(GEMINI_PACE_S)
 
     # --- Summary ---
     rows = list(rows_by_id.values())
