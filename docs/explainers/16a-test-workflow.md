@@ -25,7 +25,7 @@ Three constraints from this repo shaped it:
 | Ratchet (fail only if error count rises) | Cheap to adopt | Leaves 100+ known errors in place and needs baseline-file bookkeeping; no tool here does it natively for mypy. |
 | mypy on the core modules **(chosen)** | Covers where a silent bug corrupts every measurement (CLAUDE.md §6) | 18 files: `analysis/`, `chunking/`, `retrieval/fusion.py`, `guardrails/{confidence,citations}.py`, `router/policy.py`, `eval/metrics.py`. Remainder goes to `docs/future-work.md`. |
 | Tests only, no service container (skip the Qdrant test) | Simpler YAML | The one test that proves a deleted doc is unretrievable would never run in CI — exactly the test worth gating. |
-| Pin actions by commit SHA | Supply-chain hardening | Pinned by major tag (`checkout@v7`, `setup-uv@v10`) for now; SHA-pinning is noted in future work. The workflow has `contents: read` only and no secrets, which bounds the exposure. |
+| Pin actions by commit SHA | Supply-chain hardening | Pinned by tag (`checkout@v7` major tag, `setup-uv@v10.3.2` exact) for now; SHA-pinning is noted in future work. The workflow has `contents: read` only and no secrets, which bounds the exposure. |
 
 New dependencies (CLAUDE.md §2 requires justification): `ruff==0.17.1` and `mypy==2.4.0`, dev group only. Neither is something worth hand-rolling; both are pinned because their defaults and error sets move between releases.
 
@@ -70,6 +70,8 @@ The first pass under the project config found 36: 33 fixed by `ruff --fix` (impo
 - **ruff's defaults changed under me.** 103 vs 45 findings is the same code with different rules. That is the whole argument for the explicit list.
 - **`known-first-party = ["aegis"]` changed the count**: 45 findings with the explicit list under `--isolated`, 36 once the project config (which includes it) was in effect. I did not isolate which files moved; I set it so `aegis` sorts as first-party consistently in `src/` and `tests/`.
 - **CI only sees committed code.** 119 files are uncommitted at this moment, including all of Phase 15. The first push will lint and type-check code no human has looked at through CI before; expect the first run to find something the local run didn't (a platform difference, a dependency drift).
+
+- **First real GitHub run (2026-10-23, run 39984201410) failed in 7 s, before any step ran:** `Unable to resolve action astral-sh/setup-uv@v10`. I had taken `v10` from the latest release name (`v10.3.2`); that repo publishes only exact version tags (v10.0.1 … v10.3.2), no floating `v10`, whereas `actions/checkout` does publish `v7`. `actionlint` and the local rehearsal cannot catch this (they never resolve action refs). Fixed by pinning `v10.3.2`. Lesson: the rehearsal covers the commands, not the workflow plumbing; only a real run does.
 
 ## 7. Where this fits and what's next
 
