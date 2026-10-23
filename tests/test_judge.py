@@ -10,7 +10,7 @@ get integration tests" split CLAUDE.md's testing section calls for.
 import pytest
 from pydantic import ValidationError
 
-from aegis.eval.judge import HelpfulnessJudgment, Judge, JUDGE_PROMPT_TEMPLATE
+from aegis.eval.judge import JUDGE_PROMPT_TEMPLATE, HelpfulnessJudgment, Judge
 
 
 class _FakeInstructorLLM:

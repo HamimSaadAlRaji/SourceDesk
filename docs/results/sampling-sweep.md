@@ -3,7 +3,7 @@
 Phase 9, step 5. Re-scoped and re-run 2026-09-26 after `llama-3.3-70b-versatile` (the model used for the
 original attempts below) was retired entirely (Open Question #15) — this run uses `qwen/qwen3.8-27b`
 (`GroqSettings.model` as of Phase 11 Unit 1). Real run against Phase 6's winning retrieval config (dense,
-heading-aware, bge-large, no enrichment), prompt v1, N=20 dev-positive golden queries. Faithfulness proxy:
+heading-aware, bge-large, no enrichment), prompt v2 (corrected 2026-10-19 from "v1": v2 was already the default, `git show 7e3c6c6^`), N=20 dev-positive golden queries. Faithfulness proxy:
 `CitationValidator.valid_citation_rate` — fraction of citation-requiring claims that end up supported
 (lexically or via entailment). Not RAGAS faithfulness (Phase 11, `docs/results/faithfulness-root-cause.md`);
 named a proxy deliberately.

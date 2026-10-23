@@ -51,8 +51,22 @@ def chunk_point_id(chunk_id: str) -> str:
     return str(uuid.uuid5(_POINT_ID_NAMESPACE, chunk_id))
 
 
-def get_client() -> QdrantClient:
-    return QdrantClient(host=settings.qdrant.host, port=settings.qdrant.port)
+def get_client(read_only: bool = False) -> QdrantClient:
+    """`read_only=True` for the served pipeline (design record 15f): Qdrant's
+    read-only key can search but not write or delete. If an admin key is set
+    but no read-only key, this refuses rather than serving with write rights.
+    No keys configured at all = a local Qdrant without auth (no key sent)."""
+    q = settings.qdrant
+    if read_only:
+        if q.api_key and not q.read_only_api_key:
+            raise RuntimeError("QDRANT_API_KEY is set but no read-only key (QDRANT_READ_ONLY_API_KEY); refusing to serve "
+                               "with the admin key")
+        key = q.read_only_api_key or None
+    else:
+        key = q.api_key or None
+    # Plain HTTP is acceptable only because the port is bound to 127.0.0.1
+    # (docker-compose.yml); a remote Qdrant needs https=True.
+    return QdrantClient(host=q.host, port=q.port, api_key=key, https=False)
 
 
 def create_collection(

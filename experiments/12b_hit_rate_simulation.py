@@ -180,7 +180,7 @@ def run_simulation(
         tokens_without_cache += miss_tokens
 
         t0 = time.perf_counter()
-        exact_hit = exact_cache.get(query_text, CORPUS_VERSION)
+        exact_hit = exact_cache.get(query_text, CORPUS_VERSION, partition="full")
         t_exact = (time.perf_counter() - t0) * 1000
 
         if exact_hit is not None:
@@ -189,7 +189,7 @@ def run_simulation(
             latency_with_cache_ms += t_exact
         else:
             t0 = time.perf_counter()
-            semantic_hit = semantic_cache.get(query_text, CORPUS_VERSION)
+            semantic_hit = semantic_cache.get(query_text, CORPUS_VERSION, partition="full")
             t_semantic = (time.perf_counter() - t0) * 1000
 
             if semantic_hit is not None:
@@ -206,8 +206,8 @@ def run_simulation(
                     citations=[],
                     provider="groq",
                 )
-                exact_cache.set(query_text, CORPUS_VERSION, placeholder)
-                semantic_cache.set(query_text, CORPUS_VERSION, placeholder)
+                exact_cache.set(query_text, CORPUS_VERSION, placeholder, partition="full")
+                semantic_cache.set(query_text, CORPUS_VERSION, placeholder, partition="full")
 
         if request_num in checkpoint_set:
             checkpoints.append({

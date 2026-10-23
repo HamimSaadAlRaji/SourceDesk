@@ -13,6 +13,13 @@ const ESCALATION_WHY = {
   provider_unavailable: "Why: the answering service is unavailable right now, so a person will take this instead of a guess.",
 };
 
+// Shown after an answer that has already streamed (design record 15e): the text
+// can't be unsent, so the user is told plainly not to rely on that part.
+const WARNING_TEXT = {
+  unauthorized_commitment: "⚠ This answer contains a statement about refunds, billing or your account that this assistant is not allowed to make. Do not rely on it — it was not verified against any official policy and has been logged for review. Contact support for anything about billing.",
+  unvouched_risky_advice: "⚠ This answer tells you to install a package, open a link, or share a secret that FastAPI's official documentation does not mention. It may come from an untrusted GitHub comment. Do not run, open, or share it without checking the official docs first. It has been logged for review.",
+};
+
 const el = (tag, cls, text) => {
   const n = document.createElement(tag);
   if (cls) n.className = cls;
@@ -136,7 +143,11 @@ async function ask(text) {
         const ms = Math.round(performance.now() - t0);
         const cache = d.cache_status !== "miss" ? ` · cache: ${d.cache_status}` : "";
         meta.textContent = `${firstToken !== null ? `first text ${Math.round(firstToken)} ms · ` : ""}done ${ms} ms${cache}${d.provider ? ` · ${d.provider}` : ""}`;
-      } else {
+        for (const w of d.warnings || []) {
+          const box = el("div", "guardrail-warning", WARNING_TEXT[w] || "⚠ Part of this answer could not be verified. Do not rely on it.");
+          box.setAttribute("role", "alert");
+          card.prepend(box);
+        }
       }
       if (d.rewritten_query) target.append(el("div", "note", `Searched for: “${d.rewritten_query}”`));
       addFeedback(target, d.trace_id);

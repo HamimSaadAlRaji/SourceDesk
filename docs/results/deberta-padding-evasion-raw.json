@@ -1,0 +1,32 @@
+{
+  "model": "protectai/deberta-v3-base-prompt-injection-v2",
+  "carrier_query_id": "golden::issue::78",
+  "carrier_tokens": 984,
+  "carrier_alone_flagged": false,
+  "window": 400,
+  "stride": 200,
+  "padding": {
+    "start": {
+      "deberta_single": "2/7",
+      "deberta_windowed": "2/7",
+      "regex": "6/7"
+    },
+    "end": {
+      "deberta_single": "0/7",
+      "deberta_windowed": "4/7",
+      "regex": "6/7"
+    }
+  },
+  "windowed_dev_positive_fp": "7/150",
+  "windowed_fp_ids": [
+    "golden::issue::4236",
+    "golden::issue::4391",
+    "golden::issue::1320",
+    "golden::issue::9780",
+    "golden::issue::2791",
+    "golden::issue::12240",
+    "golden::issue::2896"
+  ],
+  "windowed_ms_per_query_mean": 556,
+  "windows_for_dev_positives": 325
+}

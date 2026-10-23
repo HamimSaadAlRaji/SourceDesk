@@ -4,8 +4,9 @@ from aegis.config import settings
 from aegis.generation.llm.fallback import AllProvidersFailedError, FallbackLLMClient
 from aegis.generation.llm.gemini_provider import GeminiProvider
 from aegis.generation.llm.groq_provider import GroqProvider
+from aegis.generation.llm.openai_provider import OpenAIProvider
 
-_PROVIDER_FACTORIES = {"groq": GroqProvider, "gemini": GeminiProvider}
+_PROVIDER_FACTORIES = {"openai": OpenAIProvider, "groq": GroqProvider, "gemini": GeminiProvider}
 
 
 def default_client(provider_order: list[str] | None = None) -> FallbackLLMClient:
@@ -19,5 +20,6 @@ __all__ = [
     "FallbackLLMClient",
     "GeminiProvider",
     "GroqProvider",
+    "OpenAIProvider",
     "default_client",
 ]

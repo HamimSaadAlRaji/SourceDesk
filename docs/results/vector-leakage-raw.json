@@ -1,0 +1,177 @@
+{
+  "vocab_size": 2168,
+  "n_chunks": 100,
+  "k": 10,
+  "seed": 15,
+  "precision_at_10": {
+    "from_vector": 0.188,
+    "from_vector_hub_corrected": 0.286,
+    "random_words": 0.015,
+    "most_frequent_words": 0.235
+  },
+  "chunks_with_half_or_more_correct": 3,
+  "chunks_with_half_or_more_correct_hub_corrected": 15,
+  "examples": [
+    {
+      "chunk_id": "issue::5721::heading_aware::3",
+      "doc_type": "issue",
+      "p_at_10_vector": 0.1,
+      "p_at_10_vector_hub_corrected": 0.1,
+      "top_words_hub_corrected": [
+        "docker",
+        "api_router",
+        "kubernetes",
+        "include_router",
+        "dockerfile",
+        "apirouter",
+        "anaconda",
+        "routers",
+        "virtualenvs",
+        "run_in_threadpool"
+      ],
+      "p_at_10_random": 0.0,
+      "p_at_10_frequent": 0.3,
+      "top_words": [
+        "api_router",
+        "apirouter",
+        "openapi",
+        "dotenv",
+        "docker",
+        "include_router",
+        "apiroute",
+        "kubernetes",
+        "virtualenvs",
+        "backends"
+      ]
+    },
+    {
+      "chunk_id": "doc::advanced/security/oauth2-scopes.md::heading_aware::11",
+      "doc_type": "documentation",
+      "p_at_10_vector": 0.4,
+      "p_at_10_vector_hub_corrected": 0.7,
+      "top_words_hub_corrected": [
+        "datetime",
+        "encoded_jwt",
+        "jwterror",
+        "timedelta",
+        "access_token_expire_minutes",
+        "import_from_string",
+        "verify_token",
+        "get_password_hash",
+        "token_data",
+        "timezone"
+      ],
+      "p_at_10_random": 0.0,
+      "p_at_10_frequent": 0.3,
+      "top_words": [
+        "timedelta",
+        "openapi",
+        "datetime",
+        "encoded_jwt",
+        "httptools_impl",
+        "import_from_string",
+        "httptools",
+        "get_openapi",
+        "token_data",
+        "ietf"
+      ]
+    },
+    {
+      "chunk_id": "issue::2546::heading_aware::0",
+      "doc_type": "issue",
+      "p_at_10_vector": 0.0,
+      "p_at_10_vector_hub_corrected": 0.1,
+      "top_words_hub_corrected": [
+        "base_events",
+        "on_event",
+        "httpbearer",
+        "apirouter",
+        "streamingresponse",
+        "apiroute",
+        "websocketdisconnect",
+        "event",
+        "happening",
+        "discussions"
+      ],
+      "p_at_10_random": 0.2,
+      "p_at_10_frequent": 0.4,
+      "top_words": [
+        "base_events",
+        "apirouter",
+        "apiroute",
+        "backend",
+        "on_event",
+        "api_router",
+        "httpbearer",
+        "apis",
+        "add_api_route",
+        "issuecomment"
+      ]
+    },
+    {
+      "chunk_id": "issue::484::heading_aware::2",
+      "doc_type": "issue",
+      "p_at_10_vector": 0.2,
+      "p_at_10_vector_hub_corrected": 0.2,
+      "top_words_hub_corrected": [
+        "type_error",
+        "errors",
+        "typeerror",
+        "message",
+        "type_",
+        "field_schema",
+        "value_error",
+        "token_type",
+        "error_wrappers",
+        "emailstr"
+      ],
+      "p_at_10_random": 0.0,
+      "p_at_10_frequent": 0.4,
+      "top_words": [
+        "type_error",
+        "errors",
+        "error_wrappers",
+        "type_",
+        "error_middleware",
+        "response_description",
+        "error",
+        "typeerror",
+        "message",
+        "arbitrary_types_allowed"
+      ]
+    },
+    {
+      "chunk_id": "doc::how-to/graphql.md::heading_aware::4",
+      "doc_type": "documentation",
+      "p_at_10_vector": 0.2,
+      "p_at_10_vector_hub_corrected": 0.2,
+      "top_words_hub_corrected": [
+        "graphql",
+        "graph",
+        "mongodb",
+        "postgresql",
+        "node",
+        "postgres",
+        "libraries",
+        "databases",
+        "resources",
+        "queries"
+      ],
+      "p_at_10_random": 0.0,
+      "p_at_10_frequent": 0.0,
+      "top_words": [
+        "graphql",
+        "documentation",
+        "graph",
+        "repositories",
+        "backends",
+        "protocols",
+        "queries",
+        "node",
+        "tutorials",
+        "query"
+      ]
+    }
+  ],
+  "elapsed_s": 33.9
+}

@@ -115,7 +115,9 @@ QUESTIONS = [
 def main() -> None:
     import json
 
-    client = QdrantClient(host=settings.qdrant.host, port=settings.qdrant.port)
+    from aegis.embedding.vector_store import get_client
+
+    client = get_client()
     embedder = TextEmbedding(model_name=settings.embedding.baseline_model)
     groq = Groq(api_key=settings.groq.api_key)
 

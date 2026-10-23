@@ -8,6 +8,7 @@ Phase 6 step 3) is one `RetrievalStrategy` value passed to `.search()`.
 
 from __future__ import annotations
 
+from collections.abc import Collection
 from enum import StrEnum
 from typing import Protocol
 
@@ -46,23 +47,24 @@ class HybridRetriever:
         product_area: str | None = None,
         doc_type: DocType | None = None,
         exclude_doc_id: str | None = None,
+        doc_types: Collection[DocType] | None = None,
     ) -> list[tuple[Chunk, float]]:
+        # Every filter goes to every leg. The sparse leg used to get only
+        # exclude_doc_id, so filters silently applied to dense alone (design
+        # record 15, A1: 33.8% of a docs-only top-10 was issues on the real corpus).
+        filters = dict(product_area=product_area, doc_type=doc_type, exclude_doc_id=exclude_doc_id, doc_types=doc_types)
         if strategy == RetrievalStrategy.DENSE:
-            return self.dense_index.search(
-                query, top_k=top_k, product_area=product_area, doc_type=doc_type, exclude_doc_id=exclude_doc_id
-            )
+            return self.dense_index.search(query, top_k=top_k, **filters)
 
         if strategy == RetrievalStrategy.SPARSE:
-            return self.sparse_index.search(query, top_k=top_k, exclude_doc_id=exclude_doc_id)
+            return self.sparse_index.search(query, top_k=top_k, **filters)
 
         if strategy not in (RetrievalStrategy.HYBRID_RRF, RetrievalStrategy.HYBRID_LINEAR):
             raise ValueError(f"Unknown retrieval strategy: {strategy!r}")
 
         pool = max(top_k, self.candidate_pool_size)
-        dense_results = self.dense_index.search(
-            query, top_k=pool, product_area=product_area, doc_type=doc_type, exclude_doc_id=exclude_doc_id
-        )
-        sparse_results = self.sparse_index.search(query, top_k=pool, exclude_doc_id=exclude_doc_id)
+        dense_results = self.dense_index.search(query, top_k=pool, **filters)
+        sparse_results = self.sparse_index.search(query, top_k=pool, **filters)
 
         if strategy == RetrievalStrategy.HYBRID_RRF:
             fused = reciprocal_rank_fusion(

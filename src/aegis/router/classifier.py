@@ -25,7 +25,6 @@ from enum import StrEnum
 from aegis.config import settings
 from aegis.observability.logging import get_logger, log_event
 
-
 _log = get_logger("router")
 
 
@@ -92,35 +91,28 @@ User: Our procurement team is asking whether your commercial support license ter
 Respond with JSON only, in the form {"route": "<one of the three labels above>"}. No other text."""
 
 
-def _default_classify_fn(model: str, temperature: float, max_tokens: int) -> ClassifyFn:
-    from groq import APIError, Groq
-
-    client = Groq(api_key=settings.groq.api_key)
+def _default_classify_fn(provider: str, model: str, temperature: float, max_tokens: int) -> ClassifyFn:
+    from aegis.generation.llm.chat import LLMCallError, chat_completion
 
     def classify(query: str) -> str:
         try:
-            completion = client.chat.completions.create(
-                model=model,
-                temperature=temperature,
-                max_tokens=max_tokens,
-                response_format={"type": "json_object"},
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": query},
-                ],
+            return chat_completion(
+                provider, model,
+                [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": query}],
+                temperature=temperature, max_tokens=max_tokens, purpose="router", json_mode=True,
             )
-        except APIError as exc:
-            # Must not be invisible: a Groq quota outage once turned every
-            # query into a silent billing_account_legal escalation with no log
-            # line anywhere. Since design record 14f it is also not a billing
-            # escalation -- it raises, and the caller decides.
+        except LLMCallError as exc:
+            # Must not be invisible: a quota outage once turned every query into
+            # a silent billing_account_legal escalation with no log line
+            # anywhere. Since design record 14f it is also not a billing
+            # escalation -- it raises, and the caller decides. Over the paid
+            # budget (15g) lands here too.
+            cause = exc.__cause__
             log_event(
-                _log, logging.WARNING, "router.api_error",
-                error_type=type(exc).__name__, status_code=getattr(exc, "status_code", None),
-                detail=str(exc)[:300],
+                _log, logging.WARNING, "router.api_error", provider=provider,
+                error_type=type(cause).__name__, status_code=exc.status_code, detail=str(cause)[:300],
             )
-            raise RouterUnavailableError(f"router LLM call failed: {type(exc).__name__}") from exc
-        return completion.choices[0].message.content or ""
+            raise RouterUnavailableError(f"router LLM call failed: {type(cause).__name__}") from exc
 
     return classify
 
@@ -129,11 +121,17 @@ class RouterClassifier:
     def __init__(
         self,
         classify_fn: ClassifyFn | None = None,
-        model: str = settings.router.model,
+        model: str | None = None,
         temperature: float = settings.router.temperature,
         max_tokens: int = settings.router.max_tokens,
+        provider: str = settings.router.provider,
     ) -> None:
-        self._classify_fn = classify_fn or _default_classify_fn(model, temperature, max_tokens)
+        if classify_fn is None:
+            from aegis.generation.llm.chat import resolve_role
+
+            provider, model = resolve_role(provider, model, settings.openai.router_model, settings.router.model)
+            classify_fn = _default_classify_fn(provider, model, temperature, max_tokens)
+        self._classify_fn = classify_fn
 
     def classify(self, query: str) -> Route:
         raw = self._classify_fn(query)

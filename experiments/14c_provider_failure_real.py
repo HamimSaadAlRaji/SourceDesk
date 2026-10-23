@@ -107,7 +107,7 @@ def main() -> None:
         events, wall = _events(pipeline, QUERY)
         out["C_generation_outage"] = {
             "events": events, "wall_ms": wall, "logs": logs.records[:],
-            "cached_after": pipeline.exact_cache.get(QUERY, pipeline.corpus_version) is not None,
+            "cached_after": pipeline.exact_cache.get(QUERY, pipeline.corpus_version, partition=pipeline.partition) is not None,
         }
 
     OUT.write_text(json.dumps(out, indent=2, default=str))

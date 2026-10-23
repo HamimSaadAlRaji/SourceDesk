@@ -9,8 +9,6 @@ Usage: `uv run python -m aegis.eval.build_candidates`
 
 from __future__ import annotations
 
-import json
-
 from aegis.config import settings
 from aegis.eval.harvest import harvest_candidates
 from aegis.eval.negatives import build_negative_queries

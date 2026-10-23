@@ -117,15 +117,24 @@ def export_candidates(
     return len(rows)
 
 
+def _safe(text: str) -> str:
+    """Every field shown here was typed by an anonymous HTTP caller (or
+    generated from it). Non-printable characters -- terminal escape
+    sequences, bidi overrides, newlines that could fake a queue entry -- are
+    shown as visible escapes, never sent to the reviewer's terminal
+    (design record 15, A5g)."""
+    return "".join(ch if ch.isprintable() else ch.encode("unicode_escape").decode("ascii") for ch in text)
+
+
 def _show(item: FeedbackRow, position: int, total: int, print_fn: Callable[[str], None]) -> None:
     print_fn("=" * 88)
-    print_fn(f"[{position}/{total}] vote: {'👎 down' if item.rating == 'down' else '👍 up'}   trace: {item.trace_id}")
+    print_fn(f"[{position}/{total}] vote: {'👎 down' if item.rating == 'down' else '👍 up'}   trace: {_safe(item.trace_id)}")
     if item.comment:
-        print_fn(f"comment: {item.comment}")
-    print_fn(f"asked: {item.query_text[:_PREVIEW]}")
+        print_fn(f"comment: {_safe(item.comment)}")
+    print_fn(f"asked: {_safe(item.query_text[:_PREVIEW])}")
     if item.rewritten_query:
-        print_fn(f"searched for (rewritten): {item.rewritten_query[:_PREVIEW]}")
-    print_fn(f"{'ESCALATED' if item.escalated else 'answer'} ({item.cache_status}): {item.answer_text[:_PREVIEW]}")
+        print_fn(f"searched for (rewritten): {_safe(item.rewritten_query[:_PREVIEW])}")
+    print_fn(f"{'ESCALATED' if item.escalated else 'answer'} ({item.cache_status}): {_safe(item.answer_text[:_PREVIEW])}")
 
 
 def _choose(prompt: str, options: list[str], default: str | None, input_fn: Callable[[str], str],

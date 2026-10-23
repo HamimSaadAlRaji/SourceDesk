@@ -7,7 +7,6 @@ from __future__ import annotations
 import json
 
 import pytest
-
 from fastapi.testclient import TestClient
 
 from aegis.api.app import create_app
@@ -164,19 +163,33 @@ def test_feedback_validation(tmp_path):
         assert c.post("/feedback", json={"trace_id": _TID, "rating": "up"}).status_code == 404
 
 
-def test_trace_endpoint_returns_audit_and_validates_id(tmp_path):
+_OPERATOR_KEY = "o" * 43
+
+
+@pytest.fixture
+def _operator_key(monkeypatch):
+    # /trace is operator-only since Phase 15 (design record 15c).
+    from aegis.api.auth import hash_key
+    from aegis.config import ApiKeyGrant
+
+    monkeypatch.setattr(settings.api, "api_keys",
+                        {hash_key(_OPERATOR_KEY): ApiKeyGrant(name="op", partition="full", can_trace=True)})
+    return {"Authorization": f"Bearer {_OPERATOR_KEY}"}
+
+
+def test_trace_endpoint_returns_audit_and_validates_id(tmp_path, _operator_key):
     audit = _FakeAudit({"trail": {"trace_id": _TID}, "evidence": []})
     app, _ = _app(tmp_path, [], audit=audit)
     with TestClient(app) as c:
-        assert c.get(f"/trace/{_TID}").json()["trail"]["trace_id"] == _TID
-        assert c.get("/trace/not-a-trace-id").status_code == 422
+        assert c.get(f"/trace/{_TID}", headers=_operator_key).json()["trail"]["trace_id"] == _TID
+        assert c.get("/trace/not-a-trace-id", headers=_operator_key).status_code == 422
     assert audit.calls == [_TID]
 
 
-def test_trace_not_found_is_404(tmp_path):
+def test_trace_not_found_is_404(tmp_path, _operator_key):
     app, _ = _app(tmp_path, [], audit=_FakeAudit(None))
     with TestClient(app) as c:
-        assert c.get(f"/trace/{_TID}").status_code == 404
+        assert c.get(f"/trace/{_TID}", headers=_operator_key).status_code == 404
 
 
 # ---- Unit 4: conversation history ---------------------------------------------------

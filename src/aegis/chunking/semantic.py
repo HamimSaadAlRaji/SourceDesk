@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Callable
+from typing import Any
 
 import numpy as np
 
@@ -34,7 +35,7 @@ from aegis.types import Chunk, Document
 EmbedFn = Callable[[list[str]], list[list[float]]]
 
 _SENTENCE_RE = re.compile(r'(?<=[.!?])\s+(?=[A-Z0-9"\'`])')
-_MODEL_CACHE: dict[str, object] = {}
+_MODEL_CACHE: dict[str, Any] = {}  # fastembed is imported lazily, so its type isn't nameable here
 
 
 def split_sentences(text: str) -> list[str]:

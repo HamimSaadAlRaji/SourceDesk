@@ -32,6 +32,7 @@ main { padding-bottom: 150px; }
 .source b { display: block; margin-bottom: 4px; overflow-wrap: anywhere; }
 .source pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 260px; overflow: auto; font: inherit; }
 .escalation { background: var(--esc-bg); border: 2px dashed var(--esc-line); color: var(--esc-fg); border-radius: 12px; padding: 12px 14px; margin-top: 8px; }
+.guardrail-warning { background: var(--esc-bg); border: 2px solid var(--esc-line); color: var(--esc-fg); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; font-weight: 600; }
 .escalation h2 { margin: 0 0 4px; font-size: 1rem; }
 .escalation p { margin: 4px 0; }
 .error { background: var(--err-bg); border: 1px solid var(--err-line); color: var(--err-fg); border-radius: 12px; padding: 10px 14px; margin-top: 8px; }

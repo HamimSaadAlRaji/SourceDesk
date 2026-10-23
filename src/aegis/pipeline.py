@@ -35,9 +35,15 @@ from pydantic import BaseModel
 from aegis.cache.exact_match import CachedAnswer, CitedChunk
 from aegis.config import settings
 from aegis.events import (
-    CitationEvent, DoneEvent, ErrorEvent, EscalationCause, EscalationEvent, PipelineEvent, TokenEvent,
+    CitationEvent,
+    DoneEvent,
+    ErrorEvent,
+    EscalationCause,
+    EscalationEvent,
+    PipelineEvent,
+    TokenEvent,
 )
-from aegis.observability.logging import bind_trace_id, get_logger, log_event
+from aegis.generation.llm.fallback import AllProvidersFailedError
 from aegis.generation.pipeline import DraftAnswer, GenerationPipeline
 from aegis.guardrails.confidence import (
     ConfidenceResult,
@@ -46,8 +52,8 @@ from aegis.guardrails.confidence import (
     build_escalation_payload,
     decide_escalation,
 )
+from aegis.observability.logging import bind_trace_id, get_logger, log_event
 from aegis.query.rewrite import History
-from aegis.generation.llm.fallback import AllProvidersFailedError
 from aegis.router.classifier import Route, RouterUnavailableError
 from aegis.router.policy import decide as decide_route
 from aegis.types import Chunk, Query, Retrieved
@@ -60,8 +66,8 @@ class CacheStatus(StrEnum):
 
 
 class _Cache(Protocol):
-    def get(self, query_text: str, corpus_version: str) -> CachedAnswer | None: ...
-    def set(self, query_text: str, corpus_version: str, answer: CachedAnswer) -> None: ...
+    def get(self, query_text: str, corpus_version: str, *, partition: str) -> CachedAnswer | None: ...
+    def set(self, query_text: str, corpus_version: str, answer: CachedAnswer, *, partition: str) -> None: ...
 
 
 class _Router(Protocol):
@@ -108,6 +114,7 @@ class PipelineResult(BaseModel):
     cache_status: CacheStatus
     escalate: bool
     text: str
+    warnings: list[str] = []  # e.g. "unauthorized_commitment" (design record 15e)
     route: Route | None = None
     citations: list[str] = []
     provider: str | None = None
@@ -182,7 +189,16 @@ class AnswerPipeline:
         retrieval_top_k: int = 10,
         tau: float = settings.confidence.tau,
         rewriter: _Rewriter | None = None,
+        # The partition this pipeline serves (design record 15b). Fixed at
+        # construction, never per request; it scopes both caches. A
+        # PartitionedRetriever must agree with it -- checked below, so the
+        # cache and retrieval layers can't be built for different partitions.
+        partition: str = settings.tenancy.default_partition,
     ) -> None:
+        bound = getattr(getattr(retriever, "partition", None), "name", None)
+        if bound is not None and bound != partition:
+            raise ValueError(f"retriever is bound to partition {bound!r} but the pipeline to {partition!r}")
+        self.partition = partition
         self.exact_cache = exact_cache
         self.semantic_cache = semantic_cache
         self.router = router
@@ -219,6 +235,12 @@ class AnswerPipeline:
             with _timed(timings, "encoder"):
                 warm_encoder(_WARM_UP_QUERY)
         return timings
+
+    @property
+    def _cache_version(self) -> str:
+        """Cache scope version: corpus plus answer configuration (#19, 15j). Read
+        per request, so swapping `generation.prompt` on a live pipeline re-scopes."""
+        return f"{self.corpus_version}::{self.generation.cache_fingerprint}"
 
     def answer(
         self, query: Query, on_event: EventSink | None = None, history: History | None = None
@@ -292,7 +314,7 @@ class AnswerPipeline:
                 DoneEvent(
                     trace_id=trace_id, cache_status=result.cache_status.value,
                     route=result.route.value if result.route else None, escalate=result.escalate,
-                    rewritten_query=result.rewritten_query,
+                    rewritten_query=result.rewritten_query, warnings=result.warnings,
                     citations=result.citations, provider=result.provider, prompt_version=result.prompt_version,
                     stage_latencies_ms={k: round(v, 1) for k, v in timings.items()},
                 )
@@ -362,12 +384,12 @@ class AnswerPipeline:
 
     def _check_cache(self, query: Query) -> tuple[CachedAnswer | None, CacheStatus]:
         with self.tracer.start_as_current_observation(name="cache_lookup", as_type="span") as span:
-            exact = self.exact_cache.get(query.text, self.corpus_version)
+            exact = self.exact_cache.get(query.text, self._cache_version, partition=self.partition)
             if exact is not None:
                 span.update(output={"cache_status": CacheStatus.EXACT_HIT.value})
                 return exact, CacheStatus.EXACT_HIT
 
-            semantic = self.semantic_cache.get(query.text, self.corpus_version) if self.semantic_cache else None
+            semantic = self.semantic_cache.get(query.text, self._cache_version, partition=self.partition) if self.semantic_cache else None
             if semantic is not None:
                 span.update(output={"cache_status": CacheStatus.SEMANTIC_HIT.value})
                 return semantic, CacheStatus.SEMANTIC_HIT
@@ -504,9 +526,13 @@ class AnswerPipeline:
         with _timed(timings, "validation"):
             with self.tracer.start_as_current_observation(name="validation", as_type="guardrail") as val_span:
                 gen_result = self.generation.validate(draft)
+                commitment = gen_result.validation.has_unauthorized_commitment
+                risky = gen_result.validation.has_unvouched_risky_advice
                 val_span.update(
-                    output={"citations": gen_result.citations, "claim_count": len(gen_result.validation.claims)}
+                    output={"citations": gen_result.citations, "claim_count": len(gen_result.validation.claims),
+                            "unauthorized_commitment": commitment, "unvouched_risky_advice": risky}
                 )
+        warnings = (["unauthorized_commitment"] if commitment else []) + (["unvouched_risky_advice"] if risky else [])
 
         validated = set(gen_result.citations)
         cited = [
@@ -521,18 +547,26 @@ class AnswerPipeline:
             for c in cited:
                 emit(CitationEvent(**c.model_dump()))
 
-        answer = CachedAnswer(
-            text=gen_result.text, citations=gen_result.citations, provider=gen_result.provider, cited=cited
-        )
-        self.exact_cache.set(query.text, self.corpus_version, answer)
-        if self.semantic_cache is not None:
-            self.semantic_cache.set(query.text, self.corpus_version, answer)
+        if warnings:
+            # Never cached: a cache hit replays text without re-validating it, so
+            # one injected "your refund is approved" (15e) or "pip install <typosquat>"
+            # (15l) would be served to everyone who asks the same question.
+            log_event(_log, logging.WARNING, "guardrail.answer_flagged", query_id=query.id, warnings=warnings,
+                      route=route.value if route else None)
+        else:
+            answer = CachedAnswer(
+                text=gen_result.text, citations=gen_result.citations, provider=gen_result.provider, cited=cited
+            )
+            self.exact_cache.set(query.text, self._cache_version, answer, partition=self.partition)
+            if self.semantic_cache is not None:
+                self.semantic_cache.set(query.text, self._cache_version, answer, partition=self.partition)
 
         return PipelineResult(
             query=query,
             cache_status=status,
             escalate=False,
             text=gen_result.text,
+            warnings=warnings,
             route=route,
             citations=gen_result.citations,
             provider=gen_result.provider,

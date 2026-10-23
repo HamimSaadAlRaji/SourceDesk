@@ -33,3 +33,15 @@ def test_build_messages_embeds_query_and_context_in_the_user_turn():
     user_content = messages[1]["content"]
     assert "what is Depends?" in user_content
     assert "[1] Depends is a function." in user_content
+
+
+def test_v2c_is_registered_and_keeps_v2_rendering():
+    """v2c (design record 15g2) changes only the system prompt: same
+    message shape and no block key, so v2-vs-v2c measures wording alone."""
+    v2c = get_prompt("v2c")
+    v2 = get_prompt("v2")
+    assert v2c.version == "v2c"
+    assert v2c.forgery_resistant is False
+    assert v2c.system_prompt != v2.system_prompt
+    messages = v2c.build_messages("what is Depends?", "[1] Depends is a function.")
+    assert messages[1] == v2.build_messages("what is Depends?", "[1] Depends is a function.")[1]

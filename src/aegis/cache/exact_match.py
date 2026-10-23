@@ -50,9 +50,17 @@ def normalize_query(text: str) -> str:
     return re.sub(r"\s+", " ", text.strip().lower())
 
 
-def _cache_key(query_text: str, corpus_version: str) -> str:
+def cache_scope(corpus_version: str, partition: str) -> str:
+    """What a cached answer is valid for. The partition is part of it so a hit
+    can never cross the retrieval-layer partition (design record 15b): without
+    it, a docs-partition caller asking the same text would be served an answer
+    built from issue chunks. Shared with the semantic cache."""
+    return f"{corpus_version}::partition={partition}"
+
+
+def _cache_key(query_text: str, corpus_version: str, partition: str) -> str:
     normalized = normalize_query(query_text)
-    return hashlib.sha256(f"{corpus_version}::{normalized}".encode()).hexdigest()
+    return hashlib.sha256(f"{cache_scope(corpus_version, partition)}::{normalized}".encode()).hexdigest()
 
 
 class ExactMatchCache:
@@ -67,8 +75,8 @@ class ExactMatchCache:
             )
             self._conn.commit()
 
-    def get(self, query_text: str, corpus_version: str) -> CachedAnswer | None:
-        key = _cache_key(query_text, corpus_version)
+    def get(self, query_text: str, corpus_version: str, *, partition: str) -> CachedAnswer | None:
+        key = _cache_key(query_text, corpus_version, partition)
         with self._lock:
             row = self._conn.execute(
                 "SELECT payload FROM exact_match_cache WHERE cache_key = ?", (key,)
@@ -77,8 +85,8 @@ class ExactMatchCache:
             return None
         return CachedAnswer.model_validate_json(row[0])
 
-    def set(self, query_text: str, corpus_version: str, answer: CachedAnswer) -> None:
-        key = _cache_key(query_text, corpus_version)
+    def set(self, query_text: str, corpus_version: str, answer: CachedAnswer, *, partition: str) -> None:
+        key = _cache_key(query_text, corpus_version, partition)
         with self._lock:
             self._conn.execute(
                 "INSERT OR REPLACE INTO exact_match_cache (cache_key, payload) VALUES (?, ?)",

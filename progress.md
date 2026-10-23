@@ -1,7 +1,7 @@
 # Aegis — Progress Log
 
-**Last updated:** 2026-10-17
-**Current phase:** Phase 15 — Security Hardening (⬜ not started). Phase 14 — API, Streaming & UI (✅ complete 2026-10-17 — all 6 build items, all 5 exit criteria met). Phase 13 — Observability & the Latency Budget (🟡 in progress — build list complete, exit criteria 3 of 4 met -- p95 < 3 s unmet). Phase 12 — Caching, Delta Indexing & Cost (✅ complete — all 6 units, exit criteria met). Phase 11 — Generation Eval, RAGAS & Judging the Judge (🟡 **wrapped up for this session** — every unit, fix, and root-cause investigation that could be done without waiting on quota is done and documented; exactly 2 real measurements are left, both **explicitly deferred to the user** to run themselves whenever quota allows, not queued as a future session's task; see "Phase 11 wrap-up" note below).
+**Last updated:** 2026-10-22 (Phase 16 unit 16a)
+**Current phase:** Phase 16 — CI Evaluation Gate (🟡 in progress — unit 16a `test.yml` written and rehearsed locally, not yet run on GitHub; `eval.yml` not started). Phase 15 — Security Hardening (✅ complete 2026-10-22 — units 15, 15b-15e done: attack suite + before results, tenant partitioning, access control, input boundary, injection defenses, Qdrant lock-down + vector leakage, OpenAI provider + $10 spend guard (15g); generation bake-off (15g1: planned gpt-4.1-mini lost to qwen) + prompt fit (15g2: stricter prompt worse, negative result); gpt-5-mini ties qwen (15g3) and is now the served generator; router re-eval (15g4): nano kept, billing 8/8; real-stack security batch (15h): v3 served, poisoned obedience 5/50 -> 0/50; OQ #18/#19/#20 fixed (15k/15j/15l); wrap-up (15i) done, all 4 exit criteria met). Phase 14 — API, Streaming & UI (✅ complete 2026-10-17 — all 6 build items, all 5 exit criteria met). Phase 13 — Observability & the Latency Budget (🟡 in progress — build list complete, exit criteria 3 of 4 met -- p95 < 3 s unmet). Phase 12 — Caching, Delta Indexing & Cost (✅ complete — all 6 units, exit criteria met). Phase 11 — Generation Eval, RAGAS & Judging the Judge (🟡 **wrapped up for this session** — every unit, fix, and root-cause investigation that could be done without waiting on quota is done and documented; exactly 2 real measurements are left, both **explicitly deferred to the user** to run themselves whenever quota allows, not queued as a future session's task; see "Phase 11 wrap-up" note below).
 
 ## Phase 12 — Caching, Delta Indexing & Cost
 
@@ -345,6 +345,273 @@ unresolved; the verdict depends on the harness.** Rerun generate-path wall times
 runs and yesterday's evening batches, headroom unknown (a probe only proves >=16k). Run once the window clears
 (after ~20:00 local): `uv run python experiments/09a_sampling_sweep.py` (resumable).
 
+## Phase 16 — The CI Evaluation Gate
+
+**Scope** (plan.md, Day 18, topic 30): (1) `test.yml`, (2) `eval.yml` failing the build on metric regressions incl. p95, (3) cost control
+(full suite on PRs, fast subset on pushes), (4) deliberate regression proves the gate, screenshotted, (5) metric diffs as PR comment.
+Exit: both workflows green on main; regression demonstrably fails the gate; diffs on PRs. **Never cut.**
+
+**Decisions (user, 2026-10-22):** lint = narrow gate (pinned ruff, explicit `E4,E7,E9,F,I`; mypy on 18 core modules; no mass reformat) ·
+eval runs on a **GitHub-hosted runner with a restored index** (`vectors_bge_large.npy` 75 MB + `chunks.jsonl` 27 MB, BM25 rebuilt; no
+corpus embedding on the runner) · LLM-backed checks in the PR gate, capped **~$0.15 per PR run, ~$1.50 reserved** (of ~$9.65 left),
+real cost of one run to be measured and reported before any workflow is wired.
+
+**Unit 16a complete as of 2026-10-22** (design record 16a, `.github/workflows/test.yml`, `pyproject.toml` ruff/mypy config + pinned dev
+deps, `docs/future-work.md` created). Clean-checkout rehearsal (fresh venv, no `.env`/`data/processed`, key-less Qdrant v1.18.3
+container): ruff clean, mypy clean (18 files), **744 passed, 2 skipped, 109 s** (local: 746 passed, 18 s). The 2 skips are the real-corpus
+tenant-bypass tests; they skip with a reason on a bare checkout and **fail** under `AEGIS_REQUIRE_CORPUS=1` (to be set by `eval.yml`).
+Gates verified to discriminate with a probe file (unused import -> F401; `-> str` returning `int` -> mypy return-value). Fixed along the
+way: 36 ruff findings (33 autofix, 3 by hand), 1 mypy error (`chunking/semantic.py` `_MODEL_CACHE`). Ruff 0.17.1 *defaults* report 103
+findings vs 45 with the explicit list, hence pinned + explicit. **Not yet run on GitHub** (actionlint clean + manual rehearsal only).
+**Open risks:** (a) 119 files are uncommitted incl. all of Phase 15 -- CI only sees committed code, and the user must commit/push (I cannot);
+(b) `uv sync` on Linux pulls CUDA torch (15 `nvidia-*` locked pkgs) -- first run decides if CPU-only torch is needed;
+(c) GitHub repo is private (2,000 free Linux min/month), so CI minutes are a budget.
+**Next:** 16b -- measure what `eval.yml` can do on a hosted runner (index restore, BM25 rebuild, CPU query-encode + rerank time for 180
+queries), then pick thresholds from the Phase 6/10/11 baselines with tolerance bands.
+
+## Phase 15 — Security Hardening
+
+**Scope** (plan.md, Day 18½, topic 36): the five attack classes (indirect injection, KB leakage, tenant separation,
+vector reconstruction, input validation). Exit: `tests/security/` >= 10 attacks; injection attempts fail, documented
+before/after; tenant bypass provably impossible; `docs/results/security-assessment.md`.
+
+**Unit 1 complete as of 2026-10-18 -- attacks written and run BEFORE any defense** (design record 15,
+`tests/security/{conftest,test_attack_retrieval_partition,test_attack_indirect_injection,test_attack_http_surface}.py`,
+`experiments/15a_security_baseline.py`, raw `docs/results/security-baseline-raw.json`, `docs/results/security-assessment.md`).
+Zero LLM calls (qwen TPD exhausted today). Convention: each test asserts the *secure* behavior; succeeding attacks are
+`xfail(strict=True)`, so a landing defense turns the test red until the marker is removed and the after is recorded.
+`uv run pytest -q`: **586 passed, 11 xfailed** (+5 passing controls/defended, +11 documented attacks; Qdrant up).
+**Results (before):**
+- **A1 BM25 filter gap:** `HybridRetriever` passes `doc_type`/`product_area` to dense only. Real corpus,
+  180 dev queries, `doc_type=documentation`: **609/1,800 top-10 slots (33.8%) are issue chunks, 161/180 queries leak**;
+  dense-only 0. Latent: the served pipeline uses `DenseIndex` with no filter.
+- **A2:** exact-cache key = sha256(corpus_version::normalized text), so no partition.
+- **A3:** issue text can forge a `[n] (source: doc::...)` block (fixed `---` framing).
+- **A4:** an injected refund commitment cited to the poisoned chunk is `SUPPORTED_LEXICAL` with 0 LLM calls. The validator
+  checks support, not authority.
+- **A5 HTTP:** all 3 endpoints anonymous; any trace-id holder reads query + chunk text and overwrites votes; 40 slow
+  `/trace` calls hold 40/40 anyio threads and `/health` gets no answer in 2 s; `/feedback` 200/200 accepted;
+  feedback comments reach the reviewer's terminal raw (escape sequences). XFF spoof **defended** (`[200,200,429,429]`).
+- **A6 Qdrant:** no API key; bound `0.0.0.0`/`[::]:6333-6334` (LAN-reachable); payload holds **full chunk text**;
+  scroll dumps the corpus. Writes not tested.
+- **A7:** naive injection regex 7/7 dev adversarial, **4/150 dev positives (2.7%) false positives, all "override"**
+  (`dependency_overrides`); evasion not measured. PII shapes: corpus 103 chunks with emails (heuristic: 121/140 matches
+  placeholders), 30 URLs with credentials, 5 JWT-shaped; dev queries 2 email + 1 URL-cred; real interactions store 0/12.
+- **A8, the headline:** Phase 10's "adversarial_injection recall 1.00" **reproduces exactly (0/7 pass tau=0.5, same
+  per-query values) but only measures off-topic detection: the same 7 injections wrapped around a real FastAPI question
+  pass the gate 14/14 (0.6893-0.8007).** It is not an injection defense.
+**Found along the way:** my first `/trace`-starvation test falsely XPASSed (it read the probe after releasing the
+blocked calls). Instrumented, found, fixed. Unexplained: appending injection text *raised* one control question's
+confidence 0.049 -> 0.79-0.80. `dense.py`'s comment that the Qdrant payload doesn't carry content is wrong.
+**User decisions (2026-10-18, all accepted as recommended):** (1) LLM-run attacks live in a separate versioned
+`data/security/attacks_v1.jsonl`; golden adversarial items are referenced by id, not copied; (2) tenancy stand-in = `doc_type`
+partition chosen by the authenticated principal, enforced on both retrieval legs + cache key; (3) input-side detection
+hand-rolled and flag-only (injection regex) + high-precision PII redaction, measured against protectai DeBERTa /
+Presidio as the rejected alternatives; (4) Gemini model is `gemini-3.5-flash` (config is correct).
+
+**Unit 15b complete as of 2026-10-18 -- tenant partitioning** (design record 15b, `src/aegis/tenancy.py`,
+`TenancySettings`, `retrieval/{sparse,dense,hybrid}.py`, `cache/{exact_match,semantic}.py`, `pipeline.py`, `factory.py`,
+`api/app.py`, `tests/test_tenancy.py`, `tests/security/test_attack_tenant_bypass.py`, `experiments/15b_partition_bypass.py`,
+raw `docs/results/partition-bypass-raw.json`). Partitions `full`/`docs`/`issues` (sets of doc_type). The pipeline is bound
+to one partition at construction; `PartitionedRetriever.search` has no filter parameter (TypeError), pushes `doc_types`
+down (Qdrant MatchAny; bm25s weight mask + exact post-filter; hybrid forwards every filter to every leg), then **fails
+closed** (`PartitionViolation`) on any out-of-partition chunk. Cache scope = corpus_version + partition (required kw-only).
+Pipeline refuses a retriever bound to a different partition. Request bodies with extra fields -> 422. Served default
+`full` (unchanged behavior until 15c). **Numbers:** A1 609/1,800 -> **0/1,800**; bypass sweep 190 queries (10 bypass-shaped
++ 180 dev) x {docs,issues} x {dense,hybrid} on real Qdrant: **0 out-of-partition chunks, 0 violations raised, 0 short
+lists**; mutation (reintroduce A1 bug) -> fails closed, 0 leaked. Real server starts; `partition` body -> 422.
+`uv run pytest -q`: **612 passed, 8 xfailed** (3 partition attacks flipped xfail -> pass). Side effects: every existing
+exact-cache entry is now unreachable (key changed); `12b`/`14c` experiments got `partition="full"` at cache call sites
+(signature only). Not proven: Qdrant-internal isolation, cache timing side channel, direct Qdrant access (A6 -> 15f).
+**Unit 15c complete as of 2026-10-18 -- access control** (design record 15c, `src/aegis/api/auth.py`, `api/app.py`,
+`api/store.py`, `eval/review_queue.py`, `factory.build_pipelines`, `ApiKeyGrant`/`ApiSettings`, `tests/test_auth.py`,
+`tests/security/test_attack_http_surface.py`). **User decision (plain-language options, 2026-10-18): anonymous chat +
+per-browser ownership tokens + `/trace` behind API keys.** Rejected: keys on every endpoint (a public demo would ship the
+key in `app.js`). Session = random 256-bit token in an HttpOnly/SameSite=Strict cookie, stored only as a hash; the
+interaction records its owner; `/feedback` accepts only the owner (404 otherwise, so ids can't be probed); `/trace`
+needs a `can_trace` key (401/403) and is capped at 2 concurrent (503 beyond); upstream Langfuse failures -> 502;
+`/feedback` rate limit 10 burst / 20 per min per socket peer; invalid key -> 401 (never anonymous); keys configured by
+sha256 (`python -m aegis.api.auth new-key`); principal -> partition -> pipeline (`build_pipelines` shares models; startup
+fails if a key's partition has no pipeline); review tool escapes all non-printables. Store migrates (`owner` column;
+old rows votable by nobody). **Real server (n=1 each; one router call for a billing query, no generation):** cookie set
+with HttpOnly/SameSite=strict; other-cookie and no-cookie votes 404, owner 200; `/trace` anon/bad key 401; 30 votes ->
+9 x 200 then 21 x 429; **40 concurrent `/trace` with a valid key -> 2 ran, 38 x 503, `/health` 3.6 ms**. Found: first
+real keyed `/trace` was a 500 = Langfuse `ReadTimeout` (Langfuse slow/flaky at the time: direct calls timed out at 5.8 s then
+succeeded at 4.9 s). Now a logged 502; **a real `/trace` 200 was never obtained this session**. A5a's original "all
+endpoints 401" test was replaced by the decided policy (stated in 15c, not presented as a pass). TDD slip: auth tests not
+run red before implementing. `uv run pytest -q`: **643 passed, 2 xfailed** (A3, A4 remain -> 15e). Phase 18 must set
+`API_SESSION_COOKIE_SECURE=true`.
+
+**Unit 15d complete as of 2026-10-18 -- input boundary** (design record 15d, `guardrails/input_boundary.py`,
+`InputBoundarySettings`, `api/app.py`, `tests/test_input_boundary.py`, `data/security/{attacks_v1,pii_probes_v1}.jsonl`,
+`experiments/15d_{input_boundary_comparison,deberta_padding_evasion,redaction_retrieval_impact}.py` + raw JSON). `redact()`
+on query + history + feedback comment at the HTTP boundary (covers pipeline, both caches, store, export, Langfuse, Groq/Gemini).
+Injection regex = flag only (frozen before evasion was measured; `override` dropped for 4/150 FP, cost golden 7/7 -> 6/7).
+**Numbers:** regex 0/150 FP, 6/7 golden, 12/14 wrapped, **0/14 paraphrase**; **DeBERTa** 1/150 + 1/23 FP (one a Chinese-language
+legit question), 7/7, 12/14, **14/14 paraphrase -- contradicted expectation, investigated:** injection + 984-token real issue ->
+**0/7 (end), 2/7 (start)**; windowed 2/7, 4/7 with 7/150 FP at 556 ms/query; single-pass 194-210 ms mean. Decision (user's
+flag-only) stands on the numbers. **PII:** regex 8/8 secret probes, 0/6 code negatives, 3/180 dev touched (all real);
+**Presidio** 135/180 dev flagged at >=0.5 (code as URL/PERSON), 4/8 secrets missed, 67.6 ms mean. Redaction retrieval cost:
+3 touched dev queries, top-10 overlap 10/10, GT hits identical. Libraries run only in a `uv run --with` overlay (not deps).
+`uv run pytest -q`: **661 passed, 2 xfailed**. Leftover caches: DeBERTa 714 MB (`~/.cache/huggingface`), spaCy/Presidio in
+uv cache; disk 97% full, so safe to delete on request. Idea for 15e: offline DeBERTa scan of corpus chunks (~64 min CPU -> Kaggle).
+
+**Unit 15e complete as of 2026-10-18 -- indirect-injection defenses** (design record 15e, `guardrails/commitments.py`,
+`CommitmentSettings`, `guardrails/citations.py`, `generation/prompts/{base,v3}.py`, `generation/pipeline.py`, `pipeline.py`,
+`events.py` (`GuardrailWarning`, `DoneEvent.warnings`), `static/app.js`, `experiments/15e_commitment_fp.py`,
+`data/security/commitment_probes_v1.jsonl`). (1) **Output-side commitment check, served:** term AND you/we framing AND
+commitment AND NOT refusal -> `UNAUTHORIZED_COMMITMENT` before every citation check; no validated citation, never cached
+(a hit replays without re-validating), `done.warnings=["unauthorized_commitment"]`, UI `role=alert` notice. A4 flipped.
+(2) **Prompt v3, built NOT served:** per-request 64-bit key in BEGIN/END markers (key only in the system prompt, regenerated
+if it appears in any chunk or the query) + instruction-hierarchy rules; v1/v2 byte-identical via `messages_and_key`. A3's strict
+xfail now asserts *the served prompt* is forgery-resistant, so it flips when v3 is served. **Numbers:** commitment FP real
+answers 0/557 (**vacuous: 0 sentences with a business term**), corpus **0/40,551** (61 with a term), technical-payment probe
+**3/8 FP** (frozen patterns, not tuned on it); v3 forgeries 0 across 3 styles; **v3 +624 input tokens (+20.4%) per 10-block
+request** (3,059 -> 3,683). `uv run pytest -q`: **695 passed, 1 xfailed**; under `GENERATION_PROMPT_VERSION=v3`: 695 passed.
+**Owed (15g, quota):** model obedience to a poisoned chunk under v2 vs v3 (scratch collection), and v3 valid_citation_rate vs
+v2's 0.7296 -- which decides whether v3 is served.
+
+**Unit 15f complete as of 2026-10-18 -- vector store exposure** (design record 15f, `docker-compose.yml`, `.env` (+2 keys,
+values never printed), `QdrantSettings.{api_key,read_only_api_key}`, `vector_store.get_client(read_only=)`, `factory.py`,
+`baseline.py`, `tests/test_qdrant_client_keys.py`, `experiments/15f_{qdrant_exposure,vector_leakage}.py` + raw JSON).
+**Before (new finding): LAN, no key -> create/write/delete collection all 200** (index deletion / vector tampering from the
+network). Code-read mitigation: `DenseIndex` resolves text from the local corpus by chunk_id, so Qdrant writes can reorder
+or drop real chunks but not inject new text (not tested destructively). **After:** ports `127.0.0.1` only; compose refuses to
+start without both keys (`:?`); no key -> 401; read-only key (served API; no fallback to admin key) -> 403 on create, and
+on upsert/delete-points/delete-collection against an existing collection; LAN -> connection refused. Container recreated;
+19,236 points / 8 collections verified; real server warm-up on the read-only key OK (retrieval 137 ms). **Vector leakage
+(lower bound, vectors only, bge-large known):** precision@10 raw 0.188 (< 0.235 frequency prior: hubness), hubness-corrected
+**0.286**, random 0.015; 15/100 chunks >= 5/10 (e.g. OAuth2 chunk 7/10: `encoded_jwt`, `access_token_expire_minutes`).
+Payload `text` kept (public corpus; mutating 19k points + breaking `retrieve_candidates.py` not worth it; required for private
+corpora). Own probe bug caught: the read-only upsert first hit a missing collection (404) and tested nothing; fixed.
+`uv run pytest -q`: **699 passed, 1 xfailed**. Phase 18 must carry both keys and set `https=True` off-host.
+
+**Provider migration decided 2026-10-18 (user):** OpenAI for most calls via a paid key, **hard $10 cap for the whole project**;
+Groq/Gemini kept as fallbacks and independent second judges. Approved roles: generation gpt-4.1-mini (pending bake-off),
+router/rewrite/entailment gpt-4.1-nano (router pending re-eval), judge gpt-5-mini (Batch API), second judge qwen on Groq,
+RAGAS gpt-4.1-mini. Prices (official page, 2026-10-18, USD/1M in/out): 4.1-nano 0.10/0.40, 4.1-mini 0.40/1.60, 4o-mini
+0.15/0.60, 5-nano 0.05/0.40, 5-mini 0.25/2.00; Batch -50%. Estimate for everything left: ~$2.40 (~$3-4 with buffer).
+Qwen-era numbers stay as their own column, not overwritten.
+
+**Unit 15g complete as of 2026-10-18 -- OpenAI provider + spend guard (step 0, code only)** (design record 15g,
+`cost/ledger.py`, `cost/__main__.py`, `generation/llm/{openai_provider,chat}.py`, router/rewriter/entailment through
+`chat_completion`, `factory` -> `default_client()` (openai -> groq -> gemini), `OpenAISettings`, `tests/conftest.py`).
+SpendLedger reserves worst case (counted prompt tokens + max_tokens) inside an IMMEDIATE sqlite txn, refuses over
+budget before contacting OpenAI; settles billed usage (cached input discounted); unpriced model -> KeyError. Over budget
+-> generation falls back to Groq/Gemini; router -> provider_unavailable escalation; entailment fails closed. Reasoning
+models get max_completion_tokens + reasoning_effort. `openai>=2.54,<3` declared (was transitive). New `rewrite_max_tokens=200`.
+**Incident:** first suite run after the default switch made 1 real router call via two Groq-only-mocked tests, and my
+debug rerun made a 2nd: **$0.000091 total, recorded by the ledger** (also the first real end-to-end proof, 420+9 tokens,
+cost settled exactly). Fixed suite-wide: `tests/conftest.py` makes any real OpenAI client raise + uses a temp ledger;
+later full runs left the real ledger at 2 calls. **Spend to date: $0.000091 of $10** (`uv run python -m aegis.cost`).
+`uv run pytest -q`: **717 passed, 1 xfailed**. Must-do before step 4: route RAGAS/Batch clients through the ledger.
+**Next:** step 1 generation bake-off (~$0.10), step 2 router re-eval (~$0.01), then 15h real-stack security batch.
+
+**Unit 15g1 complete as of 2026-10-19 -- generation bake-off (step 1)** (design record 15g1, `experiments/15g1_generation_bakeoff.py`,
+`docs/results/generation-bakeoff-openai{.md,-table.md,-raw.json}`). Phase 9 protocol exactly (same 20 seeded queries, asserted; v2;
+temp 0.0; max_tokens 400); qwen's stored answers reused. **Judge held fixed:** every set validated by qwen-on-Groq (the 0.7296 judge)
+AND gpt-4.1-nano (served). **Harness check: qwen answers + qwen judge reproduce 0.7296 exactly.** Entailment wrapper retries 429s
+and raises instead of failing closed (0 errors, 0 unparseable, 88 calls/judge). **valid_citation_rate (qwen judge / nano judge):**
+qwen 0.7296 / 0.6329; **gpt-4.1-mini 0.4486 / 0.4361** (Δ −0.281, paired-bootstrap 95% CI [−0.417, −0.140], lost 15/20);
+gpt-4o-mini 0.3458 / 0.3264 (Δ −0.384 [−0.517, −0.253]); **gpt-4.1-nano 0.6665 / 0.6288** (Δ −0.063 [−0.209, +0.072], tie).
+mini/4o-mini fail by **substantive uncited claims** (36/47 vs qwen 13; not a format issue, all use `[n]`); nano ties on the rate but
+**24% of its cited claims are unsupported vs qwen 7.6%** (26 vs 6; spot-check: real decorative citations, one refusal citing all 10 blocks).
+qwen abstains more (refusal language 10/20 answers vs 4-5). **Judge swap alone: qwen 0.7296 -> 0.6329 (−0.097)**, so qwen-era and
+nano-judged numbers can't share a column. Cost/answer: mini $0.001765, 4o-mini $0.000618, nano $0.000434; p50 total 2,690 / 2,937 /
+1,884 ms; TTFT mean 1,060 / 799 / 746 ms. Billed input 67,475 tokens/model = pre-run tiktoken count exactly. **Spend: $0.059732
+(est. ≤$0.075); total $0.059823 of $10.** Untested confound: prompt fit (v2 was tuned on Groq models). Found: `09a`'s report
+hard-coded "prompt v1" though v2 ran; fixed in script + both sweep result files. **Generator decision OPEN (user):** the served
+default is still gpt-4.1-mini, the model that measured worse. No test changes (experiment script, I/O-bound).
+
+**Unit 15g2 complete as of 2026-10-19 -- prompt fit (option C, user OK): NEGATIVE result** (design record 15g2, `prompts/v2c.py`,
+`tests/test_prompts.py` (+1, red first), `experiments/15g2_prompt_fit.py`, raw `docs/results/prompt-fit-openai-raw.json`). v2c = v2 +
+"no citation -> delete the sentence", "cite only a block that states the claim", no speculative advice, uncited gap sentence. Dev
+gate: 10 seeded dev positives disjoint from the bake-off 20 (`Random(seed+1)`), v2 vs v2c x mini/nano, both judges. **v2c worse
+everywhere (qwen judge):** mini 0.409 -> 0.305, nano 0.495 -> 0.371; supported claims 31 -> 18 / 30 -> 13; refusal-language answers
+2-3/10 -> 9/10; output 265 -> 171 / 232 -> 125 tokens; mini substantive uncited ~24 -> ~23 (rule did not take); only gain mini
+wrong-cite 0.31 -> 0.22. **Eval stage NOT run** (gate failed; saved ~$0.044). Found: the validator counts honest "context does not
+cover X" sentences as missing_citation (~6/29 mini, ~6/10 nano under v2c; 9 for qwen in 15g1) -> Open Question #17, not changed.
+Dev set is harder than the bake-off 20 (v2: mini 0.409, nano 0.495, nano wrong-cite 0.41). Disclosed leak: v2c was written from the
+bake-off 20's failures. **Spend: $0.043726; total $0.103549 of $10.** v2 stays served; v2c registered, unserved.
+`uv run pytest -q`: **718 passed, 1 xfailed**. **Generator decision back with the user.**
+
+**Unit 15g3 complete as of 2026-10-19 -- gpt-5 generators (option D, user OK)** (design record 15g3, `15g1_generation_bakeoff.py
+--extra-models gpt-5-mini,gpt-5-nano`; addendum in `generation-bakeoff-openai.md`). Same 20 queries / v2 / 400 cap / both judges;
+prior answers reused. Smoke test first (1 query each): finish=stop, **reasoning_tokens=0 at effort=minimal**, so this tests the
+models, NOT "reasoning helps". **gpt-5-mini 0.7158 (qwen judge) / 0.6242 (nano judge): Δ −0.014 [−0.148, +0.111], W/L 10/5 = tie with
+qwen**; unsupported 6 (= qwen's) of 47 cited (share 0.128 vs qwen 0.076, gpt-4.1-nano 0.243); refusal answers 4/20; 2/20 at cap;
+$0.001173/answer; TTFT 1,137 ms, p50 2,426 ms, 19th/20 4,374 ms. Caveat: 59 claims vs qwen 111 at similar citation-marker count
+(162 vs 168): long multi-fact sentences, so its sentence-level rate is coarser. **gpt-5-nano 0.4217 / 0.3717** (Δ −0.308, loses 15/20;
+7/20 truncated at the cap). **Spend $0.031937 (est. ≤$0.042); total $0.135486 of $10.** **User OK 2026-10-19: `OpenAISettings.generation_model = "gpt-5-mini"`** (order openai -> groq -> gemini unchanged).
+Served cap stays GroqSettings.max_tokens=1000 (bake-off measured at 400, as qwen's was).
+
+**Unit 15g4 complete as of 2026-10-19 -- router re-eval (step 2)** (design record 15g4, `experiments/15g4_router_reeval.py`,
+`docs/results/router-reeval-openai{.md,-raw.json}`). 58 Phase 8 labeled dev queries, served prompt/settings; unparseable counted
+separately (0 in every arm). **Phase 8's 0.6897 was llama-3.1-8b-instant (retired), not qwen** -> added qwen as free like-for-like arm.
+**Accuracy: gpt-4.1-nano 0.6379, gpt-4.1-mini 0.7759, qwen 0.7931.** **Billing (the only route acted on, policy.py): 8/8 recall, 0/50
+false escalations in every arm** (Wilson 95% lower bound 0.68: thin). nano's errors: known_issue recall 0.20 (-> docs_howto); McNemar
+mini vs nano p=0.057, qwen vs nano p=0.035. docs_howto vs known_issue has no downstream effect today -> **router stays gpt-4.1-nano**
+(mini is 4x/call, $0.000325 vs $0.0000814); switch if a later phase uses the route for retrieval. **Spend $0.023569 vs my estimate
+<=$0.02 (overrun: estimated from one 420-token call; real queries avg 779 tokens, max 2,399); total $0.159055 of $10.**
+**Next: 15h real-stack security batch (needs cost estimate + user OK).**
+
+**Unit 15h complete as of 2026-10-22 -- real-stack security batch on gpt-5-mini** (design record 15h,
+`experiments/15h_{realstack_security,claim_split_sensitivity}.py`, `data/security/poison_chunks_v1.jsonl` (5 payloads, canary each),
+raw `docs/results/security-realstack-raw.json`). User OK: est ~$0.23, stop $0.45, Langfuse forced off (checked at runtime), rule fixed
+before the run: serve v3 iff (a) poisoned obedience v3 <= v2 and (b) H2 CI upper bound >= 0. **H1 (poison at rank 1, in memory, 10
+queries x 5 payloads):** canary hits hand-labelled; **obeyed v2 5/50 (typosquat `pip install fastapi-securefix` 4/10, whole-answer
+HACKED 1/10), v3 0/50**; no paraphrased obedience in a scan of the 89 non-hits; commitment payload never repeated (check fired 0, not
+exercised end to end). **All 4 obeyed install claims scored SUPPORTED_LEXICAL** (validator certifies poisoned advice -> OQ #20). **H2:**
+v3 vs v2 gpt-5-mini, served splitter +0.113 [−0.021, +0.268] (qwen judge) but claims 59 -> 34: **splitter doesn't split bullets** (OQ #18);
+line-aware re-score (measurement-only patch) **+0.068 [−0.039, +0.175]**, nano judge +0.068 [−0.045, +0.168]; 6/20 v3 answers at the 400
+cap. **H3 (served pipeline, one cache per version -- exact-cache key has no prompt version, OQ #19):** paraphrases 13/14 escalated
+(6 billing route, 7 gate); wrapped 0/14 escalated; **v2 complied 1/14 (whole v2 system prompt leaked, translated to French), v3 0/14**
+(1 refused without answering). **Rule (a) and (b) pass -> `GenerationSettings.prompt_version = "v3"`**; A3 strict xfail went red as
+designed, marker removed. **Spend $0.185355 (H2 $0.028559, H1 $0.119449, sensitivity $0.001633, H3 $0.035714); total $0.34441 of $10.**
+`uv run pytest -q`: **719 passed, 0 xfailed**. Docker was down at session start (started Docker Desktop + Qdrant). **Next: 15i wrap-up.**
+
+**Unit 15j complete as of 2026-10-22 -- cache scope carries the answer configuration (OQ #19)** (design record 15j,
+`generation/pipeline.py` `cache_fingerprint`, `pipeline.py` `_cache_version` at all 4 cache get/set sites, `tests/test_pipeline.py` +3,
+red first). Scope = `corpus_version::prompt=<v>::llm=<provider:model,...>`, read per request. Served:
+`prompt=v3::llm=openai:gpt-5-mini,groq:qwen/qwen3.8-27b,gemini:gemini-3.5-flash`. Also covers the generator switch (same bug). Every
+existing cache entry is now unreachable (correct: none came from the served config). `uv run pytest -q`: **722 passed**. $0.
+
+**Unit 15k complete as of 2026-10-22 -- claim splitting on paragraphs + list items (OQ #18)** (design record 15k, `citations.py`
+`_prose_blocks`, `tests/test_citations.py` +4 (3 red first; hard-wrap guard), `experiments/15k_rescore_claim_split.py`, raw
+`docs/results/claim-split-rescore-raw.json`). Plain newline deliberately not a boundary (hard-wrapped sentences). Re-scored stored
+answers, no generation, **$0.006259**: qwen judge qwen 0.7296 -> **0.7539**, gpt-4.1-mini 0.4441, gpt-4o-mini 0.3490, gpt-4.1-nano 0.6665,
+**gpt-5-mini v2 0.7217, v3 0.7842**, gpt-5-nano 0.4514 (nano judge in raw). **Both decisions hold:** gpt-5-mini − qwen −0.032 [−0.160,
++0.084]; v3 − v2 +0.063 [−0.048, +0.172] (rule (b) passes). Non-list models move ±0.005. Phase 9-11 numbers stay historical (old
+splitter). `uv run pytest -q`: 726 passed.
+
+**Unit 15l complete as of 2026-10-22 -- risky-advice check (OQ #20)** (design record 15l, `guardrails/risky_advice.py`,
+`RiskyAdviceSettings`, `ClaimStatus.UNVOUCHED_RISKY_ADVICE`, `CitationValidator(vouched=)`, pipeline warnings + never cached,
+`GuardrailWarning`, `app.js` alert, `tests/test_risky_advice.py` +18, `test_pipeline_stream.py` +1, `experiments/15l_risky_advice_fp.py`,
+probes `data/security/risky_advice_probes_v1.jsonl` (sha256 8ba1ac49...), raw `docs/results/risky-advice-fp-raw.json`). Install of a
+package the DOCUMENTATION corpus never mentions (or URL/VCS target), link to an undocumented host, or a request for the user's secret
+-> never validated. Vouched = tokens (11,728) + hosts (131) of documentation chunks; missing corpus -> fail closed. **Numbers ($0):**
+probes 12/12 risky, 0/12 legit; 15h real obeyed install claims **3/4 at frozen patterns** (missed "install the patch package X") -> widened
+prose pattern (disclosed, not held-out) -> 6/6 securefix sentences; real answers 0/1,162 fired (**weak: 0 install sentences, 6 links, 10
+secret nouns in them**); documentation 0/14,824 (circular for packages, real for secret requests). Residuals: import-name typosquats,
+insecure-config advice, mentions fire too (safe direction). `uv run pytest -q`: **745 passed**. **Spend total $0.350669 of $10.**
+**Next: 15i wrap-up.**
+
+**Unit 15i complete as of 2026-10-22 -- Phase 15 wrap-up. PHASE 15 COMPLETE.** All 4 plan.md exit criteria met, evidence table in
+`docs/results/security-assessment.md` ("Exit criteria"): (1) `tests/security/` 31 tests, 0 xfail (+A9 added this unit, verified to
+discriminate: with the package vouched the same sentence returns SUPPORTED_LEXICAL); (2) injection before/after: poisoned obedience
+5/50 -> 0/50, direct 1/28 -> 0/28, A3/A4/A9 closed, with residuals stated (A8 gate passes wrapped injections; A7 input detection not
+a defense; fallbacks untested against poison; insecure-config advice + import-name typosquats uncovered); (3) tenant bypass:
+structural fail-closed tests + **re-run of `15b_partition_bypass.py` after 15j-15l: A1 0/1,800, 0/760 out-of-partition**; (4) assessment
+finalized. `15-rag-security.md` §8 = phase-end summary by the five attack classes (unit-1 text kept unedited). Quick Status corrected
+(was stale: "Phase 15 not started", quota blockers). `uv run pytest -q`: **746 passed**. $0 this unit; **project spend $0.350669 of $10.**
+**Next session: Phase 16 (CI evaluation gate).** Read plan.md Phase 16 first; carried-over gaps: Phase 13 p95 (re-measure on gpt-5-mini),
+Phase 11 κ, step 4 re-measurement (RAGAS/Batch must be wired through the ledger before any OpenAI run).
+
+**Unit order (user OK 2026-10-18):** 15b tenancy (done) -> 15c HTTP auth/ownership/limits (done) -> 15d input boundary + evasion (done)
+-> 15e injection defenses (unforgeable delimiters, commitment check, prompt v3) -> 15f Qdrant/vector (done) -> 15g real-stack
+batch (quota; ~6-8k tokens/request estimated, measure one first) -> 15h assessment + final record. Honest estimate:
+~2 days vs the plan's 1/2 day.
+
 ## Phase 14 — API, Streaming & UI
 
 **Scope** (plan.md, Days 16-17, topic 35): FastAPI `POST /chat` (SSE) / `GET /health` / `GET /trace/{id}` /
@@ -567,11 +834,11 @@ either. Open Questions #1 and #16 and the DoD tracker rows below reflect this ex
 | | |
 |---|---|
 | **Day** | 13 of 21 (in progress) |
-| **Phase** | 15 of 19 (not started). Phase 14 complete (all 6 build items, 5 of 5 exit criteria). Phase 13 build list complete, 3 of 4 exit criteria met -- p95 < 3 s unmet. Phase 12 complete (all 6 units, exit criteria met). Phase 11 wrapped up (all 6 units + rubric fix + faithfulness root cause done; real paired κ deferred to the user, pending Gemini quota). Phase 9's sampling-sweep grid re-scoped and half-completed (2 of 4 configs real), remaining 2 also deferred to the user |
-| **Design records written** | 27 files across phases 0-13 (lettered sub-records inflate this past a literal 1-per-phase count; phases 14-19 have none yet) |
+| **Phase** | 15 of 19 **complete** (2026-10-22); next is Phase 16 (CI evaluation gate, never cut). Phase 14 complete. Phase 13: 3 of 4 exit criteria (p95 < 3 s unmet). Phase 12 complete. Phase 11 wrapped up with κ unmet. Phase 9 sweep complete |
+| **Design records written** | 54 files in `docs/explainers/` across phases 0-15 (lettered sub-records; Phase 15 alone has 15, 15b-15l, 15g1-15g4) |
 | **Golden set** | 180 dev + 40 holdout, frozen and hashed (Phase 4) |
 | **Definition of Done** | 3 of 10 met (#1 Recall@10 + MRR lift; #3 escalation confusion matrix; #4 cache hit rate + cost/latency reduction). Measured but **not met**: #2 faithfulness (0.7977 vs ≥ 0.90), #6 p95 (5.6 s vs < 3 s), #8 judge κ (0.1321 at N=23 post-fix vs ≥ 0.6). Not started: #5, #7, #9, #10. `make eval` (Unit 6) now surfaces this and the faithfulness miss automatically, in one command. |
-| **Blockers** | Both providers re-exhausted again as of 2026-09-26 running the real N=26 rubric-fix re-score: `openai/gpt-oss-120b` (TPD) and `gemini-3.5-flash` (20/day, which did not clear even across the calendar-day rollover — its quota-day boundary doesn't align with local midnight). Gemini has now returned **zero** real scores under the fixed rubric across two separate attempts — real inter-judge κ is still completely unmeasured. `qwen/qwen3.8-27b` (generation) is now *also* TPD-exhausted (200,000/day, newly discovered running the sampling sweep re-run) — 2 of 4 sweep configs got real data before the wall. Not currently blocking: Units 5 and 6 (custom metrics, scorecard — both zero LLM cost) shipped regardless, and both the groq-side refusal fix (N=26) and the temperature=0.0 sweep configs (N=20 each) are real-verified. |
+| **Blockers** | None hard. Free-tier quota no longer gates measurement: OpenAI is primary behind the $10 ledger ($0.350669 spent, 2026-10-22). Groq qwen (200k TPD) is still the free second judge and fallback generator. Docker Desktop must be running for Qdrant (it was down at the 2026-10-22 session start). Open measured gaps carried forward: Phase 9 uncited claims, Phase 11 κ 0.1321 < 0.6, Phase 13 p95 5.6 s > 3 s (qwen-era; not re-measured on gpt-5-mini) |
 
 ---
 
@@ -596,7 +863,7 @@ Legend: ⬜ not started · 🟡 in progress · ✅ complete · ⏭️ cut
 | 12 | Caching, delta indexing & cost | 14 | ✅ | Cache hit rate, cost table |
 | 13 | Observability & latency budget | 15 | 🟡 | p95 < 3s, per-stage breakdown |
 | 14 | API, streaming & UI | 16–17 | ✅ | Working demo w/ visible escalation |
-| 15 | Security hardening | 18½ | ⬜ | Adversarial suite |
+| 15 | Security hardening | 18½ | ✅ | Complete 2026-10-22, all 4 exit criteria met (`security-assessment.md` "Exit criteria"). Tenancy A1 609/1,800 -> 0 (0/760 bypass, re-run 15i); HTTP surface closed (15c); input boundary (15d, injection regex flag-only by measurement); prompt v3 served (15h): poisoned obedience 5/50 -> 0/50, direct exfiltration 1/28 -> 0/28; commitment + risky-advice output checks (15e, 15l); Qdrant keyed loopback (15f). Provider migration inside the phase: generator gpt-5-mini (15g1-g3), router nano (15g4). 31 security tests, 0 xfail |
 | 16 | **CI evaluation gate** ⚑ | 18½ | ⬜ | Gate that fails on regression |
 | 17 | LangGraph port & framework comparison | 19 | ⬜ | Comparison writeup, both paths pass eval |
 | 18 | Deployment | 20 | ⬜ | Public URL |
@@ -612,6 +879,15 @@ Legend: ⬜ not started · 🟡 in progress · ✅ complete · ⏭️ cut
 
 | Metric | Value | Phase | Config | Date |
 |---|---|---|---|---|
+| Generation bake-off addendum: gpt-5-mini / gpt-5-nano (effort minimal, 0 reasoning tokens), qwen judge / nano judge | gpt-5-mini 0.7158 / 0.6242 (Δ −0.014, CI [−0.148, +0.111], tie; wrong-cite share 0.128; $0.001173/answer; p50 2,426 ms); gpt-5-nano 0.4217 / 0.3717 (7/20 truncated) | 15 | `15g1_generation_bakeoff.py --extra-models` | 2026-10-19 |
+| Citation rate re-score under fixed claim splitter (15k), qwen judge | qwen 0.7539; gpt-5-mini v2 0.7217 / v3 0.7842; gpt-4.1-mini 0.4441; gpt-4.1-nano 0.6665 | 15 | `experiments/15k_rescore_claim_split.py` | 2026-10-22 |
+| Risky-advice check (15l) | probes 12/12 risky, 0/12 legit; 15h obeyed install claims 3/4 frozen, 4/4 after widening; real answers 0/1,162; docs 0/14,824 | 15 | `experiments/15l_risky_advice_fp.py` | 2026-10-22 |
+| Indirect injection, poisoned chunk at rank 1 (5 payloads x 10 queries), gpt-5-mini | obeyed v2 5/50, v3 0/50; 4/4 obeyed install claims validated SUPPORTED_LEXICAL | 15 | `experiments/15h_realstack_security.py --parts h1` | 2026-10-22 |
+| Prompt v3 vs v2 citation rate, gpt-5-mini, bake-off 20 | served splitter +0.113 [−0.021, +0.268]; line-aware +0.068 [−0.039, +0.175] (qwen judge) | 15 | `15h_realstack_security.py --parts h2`, `15h_claim_split_sensitivity.py` | 2026-10-22 |
+| Direct injection end to end (14 wrapped + 14 paraphrase), served pipeline | paraphrases 13/14 escalated; wrapped 0/14 escalated; complied v2 1/14 (system prompt leaked in French), v3 0/14 | 15 | `15h_realstack_security.py --parts h3` | 2026-10-22 |
+| Router re-eval, 58 Phase 8 dev queries | accuracy nano 0.6379 / mini 0.7759 / qwen 0.7931; billing recall 8/8 + precision 1.00 in all three; nano known_issue recall 0.20 | 15 | `experiments/15g4_router_reeval.py` | 2026-10-19 |
+| Prompt fit v2 vs v2c, dev 10 (disjoint), qwen judge | mini 0.409 -> 0.305, nano 0.495 -> 0.371; supported claims 31 -> 18 / 30 -> 13; refusal answers 2-3/10 -> 9/10 (negative result) | 15 | `experiments/15g2_prompt_fit.py --stage dev` | 2026-10-19 |
+| Generation bake-off, valid_citation_rate (qwen judge / nano judge), N=20, v2, temp 0 | qwen 0.7296 / 0.6329; gpt-4.1-mini 0.4486 / 0.4361 (Δ −0.281, CI [−0.417, −0.140]); gpt-4o-mini 0.3458 / 0.3264; gpt-4.1-nano 0.6665 / 0.6288 (Δ −0.063, CI spans 0). Wrong-cite share: qwen 0.076, mini 0.222, 4o-mini 0.152, nano 0.243. Cost/answer mini $0.001765, 4o-mini $0.000618, nano $0.000434 | 15 | `experiments/15g1_generation_bakeoff.py` | 2026-10-19 |
 | Full docs corpus size vs. context window | 363,420 tok (155 files) vs. 128K window (llama-3.3-70b-versatile) — 2.84× over | 0 | full `docs/en/docs/` tree | 2026-07-29 |
 | Baseline subset size | 121,553 tok (85 tutorial/advanced docs, 486,214 chars) | 0 | `src/aegis/baseline.py` | 2026-07-29 |
 | Cost: full-subset-stuffing vs. retrieval, per query (input tokens only) | $0.0717 vs. ~$0.0002 (~300× cheaper) | 0 | top_k=3, 500-char chunks, Groq $0.59/M input | 2026-07-29 |
@@ -734,7 +1010,7 @@ Legend: ⬜ not started · 🟡 in progress · ✅ complete · ⏭️ cut
 | 6 | p95 end-to-end, retrieval path | < 3 s | **Measured, not met (Phase 13):** paced generate path 4.4 s p50 / 5.6 s p95; confidence-stage variance unexplained. Re-verify at P18 | 🟡 |
 | 7 | Failure analysis, categorized | written | — | ⬜ |
 | 8 | LLM-judge agreement (Cohen's κ) | ≥ 0.6 | **Measured pre-fix, target not met:** κ=-0.0161 (unweighted) / 0.0906 (quadratic), N=9 paired — real, methodology-substituted (inter-judge, not judge-vs-human; user declined to hand-label). Root cause identified and rubric fixed (Gemini ceiling-effect anchor + `gpt-oss-120b` refusal-penalizing rule), groq-side verified real at N=26. **Real paired κ under the fixed rubric is deferred to the user** — Gemini has 0/29 real scores under it (`experiments/11g_judge_rubric_rescore.py`, checkpoint-resumable, run once its quota allows). Surfaced automatically by `make eval` (Unit 6). `docs/results/judge-agreement.md` | ⚠️ |
-| 9 | Adversarial security suite passing | all pass | — | ⬜ |
+| 9 | Adversarial security suite passing | all pass | **Before measured (2026-10-18):** 12 of 13 attacks succeed, 1 defended (A5f). After 15b-15f: A1, A2, T1, A4, A5a-e, A5g, A6, P1 defended; 1 xfail (A3 on served v2; fixed in unserved v3). Model-behavior attacks not yet run (quota) | 🟡 |
 | 10 | Held-out generalization number | reported | — | ⬜ |
 
 ---
@@ -845,7 +1121,10 @@ Every non-obvious choice, its alternatives, and why. Append-only.
 | 2026-10-17 | **LLM outage before any text is shown escalates with `cause=provider_unavailable`**; router API errors raise `RouterUnavailableError` instead of returning a disguised `billing_account_legal` | Keep the all-providers-failed terminal `error` and only fix labels/logging | Confirmed with the user (`AskUserQuestion`, recommended option). A support desk hands an unanswerable-right-now request to a person, same as low-confidence abstention; nothing has been shown yet (AllProvidersFailedError is pre-first-token by construction), so the handoff contradicts nothing. The old router path reported a billing question nobody asked in the trace, the UI and the router eval. Mid-stream failures stay a terminal `error`. Design record 14f. |
 | 2026-10-17 | **Hand-rolled token bucket for `/chat` rate limiting** | `slowapi` | Confirmed with the user (`AskUserQuestion`). One process, no Redis: the library's shared-store feature buys nothing, and it adds a dependency plus a decorator signature per route; the mechanism is one formula (~40 lines, TDD'd with an injected clock). Design record 14f. |
 | 2026-10-17 | **Semantic cache tier off by default** (`semantic_cache_enabled=False`), exact tier kept | Skip semantic tier for follow-ups only; raise threshold to 0.94 | Confirmed with the user (`AskUserQuestion`, recommended option). A real 14e pair of different questions scored 0.9354 (> 0.88) because the rewriter's template dominates short embeddings; a semantic hit skips routing, confidence and validation for the question actually asked; the tier is worth 0.2-1.6% of simulated traffic. Follow-up-only bypass misses the same collision typed directly; 0.94 clears the real pair by 0.005 on n=1 and drops paraphrase recall 9/15 -> 4/15. Design record 14h. |
-
+| 2026-10-18 | **OpenAI as primary provider, hard $10 project cap** (user); Groq/Gemini kept as fallbacks + cross-family second judges; pre-call worst-case spend ledger | Stay on free tiers; replace Groq/Gemini entirely; dashboard limit only; LiteLLM | Free-tier quotas deferred measurements by days (Phases 9, 11, 15). A dashboard limit acts after spend; the ledger refuses before the call and degrades to free providers at the cap. Keeping a non-OpenAI judge guards against self-preference when the generator is OpenAI. Design record 15g. |
+| 2026-10-19 | **Generator = gpt-5-mini** (user OK); provider order unchanged (openai -> groq qwen -> gemini) | gpt-4.1-mini (the 2026-10-18 plan); gpt-4.1-nano; qwen on Groq as primary; prompt v2c for OpenAI models | Same 20 queries, prompt v2, judge held fixed: gpt-5-mini 0.7158 vs qwen 0.7296 (CI [−0.148, +0.111]), 6 unsupported citations. gpt-4.1-mini 0.4486 (CI excludes 0, under-cites); gpt-4.1-nano ties on rate but 26 unsupported (decorative citations, against the North Star); qwen primary brings back the 200k TPD cap; v2c lowered both OpenAI models' rate on a disjoint dev set and pushed refusals to 9/10. Caveats: sentence-level rate is coarser for gpt-5-mini's long sentences (step 4 RAGAS checks it); 0 reasoning tokens at minimal effort. Design records 15g1-15g3. |
+| 2026-10-22 | **Serve prompt v3** (rule fixed before the run, user-approved) | Keep v2 (A3 open); decide on H2 citation rate alone | Pre-registered rule: (a) poisoned-chunk obedience v3 0/50 <= v2 5/50, (b) v3 − v2 citation rate CI upper bound >= 0 under both splitters and judges (line-aware +0.068 [−0.039, +0.175]). Costs +624 input tokens/request. Design record 15h. |
+| 2026-10-22 | **Risky-advice check: vouch by the documentation corpus** (install/link/secret-request never validated otherwise) | Provenance demotion of all issue-supported claims; LLM safety judge; pip-line allowlist | Issues are 16,944/19,236 chunks and the known_issue value; an LLM judge reads the attacker's text; pip-line extraction missed uvicorn (quoted/prose mentions). Design record 15l. |
 ---
 
 ## Design Records
@@ -867,7 +1146,7 @@ Every non-obvious choice, its alternatives, and why. Append-only.
 | 12 | `caching-delta-indexing-and-cost.md` — written as lettered sub-records instead (CLAUDE.md §3 convention): `12-exact-match-cache.md`, `12b-semantic-cache.md`; more units to follow | 12 | 🟡 |
 | 13 | `observability-and-latency.md` | 13 | ⬜ |
 | 14 | `serving-streaming-and-ux.md` — lettered sub-records: `14-streaming-pipeline.md`, `14b-api-sse.md`, `14c-trace-and-feedback.md`, `14d-conversation-memory.md`, `14e-static-ui.md`, `14f-rate-limiting-and-provider-failure.md`, `14g-feedback-review-queue.md`, `14h-semantic-cache-collision-and-cold-start.md`, `14i-multiturn-regime-c-eval.md` | 14 | ✅ |
-| 15 | `rag-security.md` | 15 | ⬜ |
+| 15 | `rag-security.md` — `15-rag-security.md` (threat model + before results), `15b-tenant-partitioning.md`, `15c-access-control.md`, `15g1-generation-bakeoff.md`, `15g2-prompt-fit.md`, `15g3-gpt5-generators.md`, `15g4-router-reeval.md`, `15h-realstack-security.md`, `15j-cache-answer-config-scope.md`, `15k-claim-splitting.md`, `15l-risky-advice-check.md`, `15d-input-boundary.md`, `15e-injection-defenses.md`, `15f-vector-store-exposure.md`, `15g-openai-provider-and-spend-guard.md`; 15h, 15i to follow | 15 | 🟡 |
 | 16 | `ci-eval-gates.md` | 16 | ⬜ |
 | 17 | `frameworks-and-orchestration.md` | 17 | ⬜ |
 | 18 | `deployment.md` | 18 | ⬜ |
@@ -944,12 +1223,43 @@ Tracks what's actually implemented from scratch vs. imported, so the ratio state
 | 14 | All 3 of the confidence scorer's real misses (dev negatives that slip through as confident wrong answers at tau=0.50) share one mechanism none of the 4 signals was built to catch: a named entity in the query genuinely appears in a retrieved chunk (real lexical/semantic overlap), while the actual question is unanswerable or out of scope for a reason no retrieval/reranking signal detects — asking about a *future* release date (`unanswerable::7`, retrieves a real "FastAPI Version" chunk) or the *wrong framework* sharing a library name (`out_of_corpus::9`, "Celery" pulls in a real FastAPI+Celery chunk). Is this worth a fifth signal or heuristic (e.g., detecting temporal/future-tense questions, or cross-framework entity mismatches), or is 3/180 too small a sample to design against yet? | 2026-08-17 | Phase 11 (does the judge agree these are genuinely hard?) / revisit if holdout or production traffic shows the same pattern at higher volume | Open — not chased further this phase; see design record 10 §6 |
 | 15 | ~~Groq retired `llama-3.3-70b-versatile` and `llama-3.1-8b-instant` outright~~ | 2026-08-18 | Phase 11 Unit 1 (blocks it directly) and any real re-run of Phases 8-10's Groq paths | **Resolved 2026-09-25** — measured `openai/gpt-oss-120b`'s real reasoning-token tax at actual answer length (not just the trivial call): 6 real dev-positive generations, 25-45% of `completion_tokens` spent on reasoning but never truncating visible output — not fatal on its own, but real mean latency was 16.7s (1.2-29s), nearly Gemini's already-rejected 21.4s, undermining "Groq primary because it's fast." Also found `groq/compound-mini` (last session's verified small-task replacement) had *itself* 404'd by this session — Groq's catalog is churning faster than one session's verification survives. `qwen/qwen3.8-27b` (a renamed successor to the `qwen3.6-27b` rejected last session) measured clean instead: 0 reasoning tokens across the same 6 queries, mean latency 8.7s, with one real free-tier constraint found and fixed (1000 output-tokens/minute cap, confirmed via a real 429 at `max_tokens=1024` and a real success at 1000). User decided (`AskUserQuestion`): `qwen/qwen3.8-27b` for all five Groq-backed roles. Applied to `config.py`, verified through the real `GroqProvider`+`GenerationPipeline` path (not just the raw SDK script): 1,125ms latency, `valid_citation_rate=1.0`. 373/373 tests still green. |
 | 16 | Inter-judge Cohen's κ measured at -0.0161 (unweighted) / 0.0906 (quadratic), N=9 paired — at/below chance, well under the 0.6 bar. Two real mechanisms identified: Gemini's scores have almost no variance (10/11 real successes were a perfect 5/5, a ceiling-effect leniency bias); `openai/gpt-oss-120b` systematically scores honest "insufficient information" refusals low (1-2) despite an explicit rubric instruction to score them high, while Gemini reliably follows that instruction. Per plan.md's own framing ("if κ < 0.6 the judge is unreliable... iterate the rubric or upgrade the model"), this needs real iteration before any `make eval` number built on judge scores can be trusted. | 2026-09-25 | Unit 6 (`make eval` scorecard) — any scorecard built on today's judge numbers would report a known-unreliable signal as settled | **Partially resolved 2026-09-26** — rubric fixed (design record 11f: honest-refusal rule repositioned as a CRITICAL block, ceiling-effect anchor added) and the groq-side fix confirmed real at N=26 (`docs/results/judge-rubric-fix-rescore.md`: all 5 refusal cases corrected, matching Gemini's original stance). **Still open:** Gemini has returned zero real scores under the fixed rubric across two separate attempts (both quota-blocked), so real paired κ under the fixed rubric remains completely unmeasured — the groq-side fix also revealed a new, undiagnosed distribution-compression side effect that can't be interpreted without Gemini's paired data. **Deferred to the user** to complete once Gemini's 20/day quota allows: re-run `experiments/11g_judge_rubric_rescore.py` (checkpoint-resumable — only fills in missing scores) and update `docs/results/judge-agreement.md` with the real outcome. |
+| 17 | The citation validator counts an honest "the context does not cover X" sentence as `missing_citation`, so stating a gap scores the same as an uncited hallucination | 2026-10-19 | Any generation-quality number (15g1/15g2 measured it: ~9 such sentences for qwen, ~6 per model under v2c) | Open -- changes the metric for every model including qwen's 0.7296; needs an explicit decision and a re-score of all stored answers, not a silent fix. Same family as #10 |
+| 18 | The claim splitter doesn't break on newlines/bullets: a bulleted answer becomes a few long "claims" (up to 1,718 chars) that pass or fail as one unit on word overlap | 2026-10-22 | Every valid_citation_rate (15h measured it: ~40% of v3's apparent gain over v2 was granularity) | **Resolved 2026-10-22 (15k)** -- claims end at paragraph breaks + list items (not plain newlines); decision-relevant answers re-scored: qwen 0.7296 -> 0.7539, gpt-5-mini v2 0.7217, v3 0.7842; both decisions hold |
+| 19 | The exact-match cache key has no prompt version: after a prompt change, cached answers from the old prompt are replayed (a hit skips generation and validation) | 2026-10-22 | The v2 -> v3 switch (15h) | **Resolved 2026-10-22 (15j)** -- cache scope = corpus_version + prompt version + provider chain; v2->v3 and qwen->gpt-5-mini both miss now; 3 TDD tests |
+| 20 | The citation validator certifies poisoned advice: when v2 relayed a poisoned chunk's `pip install fastapi-securefix` recommendation citing that chunk, it scored SUPPORTED_LEXICAL (4/4) -- "supported" means "a retrieved block says it", not "it is true or safe" | 2026-10-22 | The North Star: a validated citation looks authoritative | **Resolved for install/link/secret-request (15l, 2026-10-22)** -- `UNVOUCHED_RISKY_ADVICE` unless the documentation corpus vouches; not cached, UI warning. Still open: insecure-config advice (e.g. CORS wildcard + credentials), import-name typosquats (`pydantic_settings`) |
 
 ---
 
 ## Session Log
 
 Newest first. One entry per working session.
+
+### 2026-10-19 → 2026-10-22 — Phase 15 completed: provider migration, real-stack security batch, three validator/cache fixes, wrap-up
+
+Provider migration measured, not assumed: the planned generator (gpt-4.1-mini) lost to qwen (15g1), a stricter prompt made it worse
+(15g2, negative result), gpt-5-mini tied qwen and was adopted (15g3), router stays nano because only billing is acted on (15g4).
+Real-stack security on gpt-5-mini (15h): v3 served on a pre-registered rule. Fixes from findings: cache scope carries prompt + model
+(15j), claims split on lists/paragraphs with decision numbers re-scored (15k), risky-advice output check (15l). Wrap-up (15i): all four
+exit criteria met. Spend across the phase's paid work: $0.350578 (ledger total $0.350669 incl. two accidental 15g router calls).
+Estimate misses, disclosed: step 2 router estimate exceeded by ~18% (estimated from one short call). Tests 717 -> 746.
+
+### 2026-10-18 — Phase 15 started: attack suite + before results (Unit 1)
+
+Wrote 16 deterministic security tests (11 succeeding attacks as strict xfail) and a zero-LLM real-data baseline script;
+recorded design record 15 and the start of `security-assessment.md`. Headline: Phase 10's injection "recall 1.00" is
+off-topic detection only (wrapped injections pass 14/14); Qdrant is LAN-open with full text in the payload; BM25 leg
+ignores filters (33.8% of slots). User accepted all three recommendations + `gemini-3.5-flash`. Then 15b (tenant
+partitioning): A1 609/1,800 -> 0/1,800, bypass sweep 0 leaks in 760 real runs, fail-closed mutation check.
+`uv run pytest -q`: 612 passed, 8 xfailed. Then 15c (access control, user chose anonymous chat + ownership
+cookie + operator-only /trace): all A5 attacks closed, real-server verified; Langfuse ReadTimeouts made /trace a 500 -> now 502.
+`uv run pytest -q`: 643 passed, 2 xfailed. Then 15d: boundary redaction (retrieval cost 0), flag-only injection regex;
+DeBERTa beat it on paraphrases 14/14 vs 0/14 but failed padding 0/7; Presidio flagged 135/180 dev. 661 passed, 2 xfailed.
+Caches deleted (user request): DeBERTa 714 MB, Presidio/spaCy 482.6 MB. Then 15e: commitment check served (A4 closed),
+prompt v3 built not served (A3 strict xfail on served version); FP corpus 0/40,551, probe 3/8; v3 +20% tokens.
+695 passed, 1 xfailed. Then 15f: Qdrant was writable/deletable from the LAN with no key -> loopback + admin/read-only keys
+(401/403/refused); vector-only leakage precision@10 0.286 vs 0.235 prior. 699 passed, 1 xfailed. User switched to a paid OpenAI key with a $10 hard cap;
+plan approved (OpenAI mostly, Groq/Gemini as fallback + second judges). 15g: OpenAI provider + pre-call spend guard;
+one accidental test-made call pair ($0.000091) found and guarded. 717 passed, 1 xfailed. Next: bake-off, router re-eval, 15h.
 
 ### 2026-09-26 — Phase 12 started: exact-match cache (Unit 1)
 

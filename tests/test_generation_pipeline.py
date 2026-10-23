@@ -113,4 +113,6 @@ def test_answer_uses_the_configured_default_prompt_version_when_none_is_passed()
     pipeline.answer(Query(id="q1", text="a question"), retrieved)
 
     expected = get_prompt(settings.generation.prompt_version)
-    assert llm.calls[0]["messages"][0]["content"] == expected.system_prompt
+    # v3+ fills a per-request key into the system prompt (design record 15e), so
+    # compare the fixed text before the first placeholder.
+    assert llm.calls[0]["messages"][0]["content"].startswith(expected.system_prompt.split("{key}")[0])

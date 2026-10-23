@@ -9,8 +9,6 @@ reaches generation.
 
 from contextlib import contextmanager
 
-import pytest
-
 from aegis.cache.exact_match import CachedAnswer
 from aegis.chunking.tokens import count_tokens
 from aegis.generation.pipeline import GenerationPipeline
@@ -18,7 +16,7 @@ from aegis.generation.prompts.v1 import TEMPLATE as V1
 from aegis.guardrails.citations import CitationValidator
 from aegis.guardrails.confidence import ConfidenceScorer, SignalBounds
 from aegis.pipeline import AnswerPipeline, CacheStatus
-from aegis.router.classifier import Route, RouterClassifier
+from aegis.router.classifier import Route
 from aegis.types import Chunk, DocType, Query
 
 
@@ -66,11 +64,11 @@ class _FakeCache:
         self.get_calls: list[tuple[str, str]] = []
         self.set_calls: list[tuple[str, str, CachedAnswer]] = []
 
-    def get(self, query_text: str, corpus_version: str) -> CachedAnswer | None:
+    def get(self, query_text: str, corpus_version: str, *, partition: str = "full") -> CachedAnswer | None:
         self.get_calls.append((query_text, corpus_version))
         return self.hit
 
-    def set(self, query_text: str, corpus_version: str, answer: CachedAnswer) -> None:
+    def set(self, query_text: str, corpus_version: str, answer: CachedAnswer, *, partition: str = "full") -> None:
         self.set_calls.append((query_text, corpus_version, answer))
 
 
@@ -338,7 +336,10 @@ def test_warm_up_exercises_retrieval_and_confidence_but_never_router_llm_or_cach
 
 
 def _log_capture():
-    import io, json, logging
+    import io
+    import json
+    import logging
+
     from aegis.observability.logging import JsonFormatter
 
     stream = io.StringIO()
@@ -348,7 +349,7 @@ def _log_capture():
     logger.handlers = [handler]
     logger.setLevel(logging.DEBUG)
     logger.propagate = False
-    return lambda: [json.loads(l) for l in stream.getvalue().splitlines() if l.strip()]
+    return lambda: [json.loads(line) for line in stream.getvalue().splitlines() if line.strip()]
 
 
 def test_every_log_line_of_a_request_carries_the_results_trace_id():
@@ -450,3 +451,55 @@ def test_semantic_tier_is_off_by_default():
     from aegis.config import CacheSettings
 
     assert CacheSettings().semantic_cache_enabled is False
+
+
+class _Provider:
+    def __init__(self, name: str, model: str):
+        self.name, self.model = name, model
+
+
+class _FakeChainLLM(_FakeLLM):
+    """A fake with a provider chain, like FallbackLLMClient."""
+
+    def __init__(self, text: str, models: list[tuple[str, str]]):
+        super().__init__(text)
+        self.providers = [_Provider(n, m) for n, m in models]
+
+
+def _cached_pipeline(tmp_path, llm, prompt=V1) -> AnswerPipeline:
+    from aegis.cache.exact_match import ExactMatchCache
+
+    pipeline, _ = _pipeline(confidence=1.0, tau=0.1, llm=llm, exact_cache=ExactMatchCache(tmp_path / "exact.sqlite"))
+    pipeline.semantic_cache = None
+    pipeline.generation.prompt = prompt
+    return pipeline
+
+
+def test_answer_cached_under_one_prompt_version_is_not_served_under_another(tmp_path):
+    """Open Question #19 (design record 15j): the cache scope must carry the prompt
+    version, or a prompt switch (v2 -> v3, a security fix) keeps replaying old
+    answers without generation or validation."""
+    from aegis.generation.prompts import get_prompt
+
+    q = Query(id="q", text="how do I make a query parameter required in FastAPI?")
+    first = _cached_pipeline(tmp_path, _FakeLLM("old prompt answer [1]."), prompt=get_prompt("v2")).answer(q)
+    second = _cached_pipeline(tmp_path, _FakeLLM("new prompt answer [1]."), prompt=get_prompt("v3")).answer(q)
+
+    assert first.cache_status == CacheStatus.MISS
+    assert second.cache_status == CacheStatus.MISS and second.text == "new prompt answer [1]."
+
+
+def test_answer_cached_under_one_generator_is_not_served_under_another(tmp_path):
+    q = Query(id="q", text="how do I make a query parameter required in FastAPI?")
+    _cached_pipeline(tmp_path, _FakeChainLLM("qwen answer [1].", [("groq", "qwen/qwen3.8-27b")])).answer(q)
+    second = _cached_pipeline(tmp_path, _FakeChainLLM("gpt answer [1].", [("openai", "gpt-5-mini")])).answer(q)
+
+    assert second.cache_status == CacheStatus.MISS and second.text == "gpt answer [1]."
+
+
+def test_same_answer_configuration_still_hits(tmp_path):
+    q = Query(id="q", text="how do I make a query parameter required in FastAPI?")
+    llm = _FakeChainLLM("answer [1].", [("openai", "gpt-5-mini")])
+    _cached_pipeline(tmp_path, llm).answer(q)
+
+    assert _cached_pipeline(tmp_path, llm).answer(q).cache_status == CacheStatus.EXACT_HIT

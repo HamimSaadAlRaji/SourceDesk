@@ -6,7 +6,6 @@ citation validator and confidence scorer for, now the top-level consumer
 of both.
 """
 
-import json
 
 import pytest
 

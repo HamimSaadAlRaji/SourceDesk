@@ -13,11 +13,21 @@ import threading
 from contextlib import contextmanager
 
 from test_pipeline import (
-    CachedAnswer, NullTracer, Query, Route, _FakeCache, _FixedRouter, _pipeline, _RaisingRetriever, _RaisingRouter,
+    CachedAnswer,
+    NullTracer,
+    Query,
+    Route,
+    _FakeCache,
+    _FixedRouter,
+    _pipeline,
+    _RaisingRetriever,
+    _RaisingRouter,
 )
 
 from aegis.cache.exact_match import CitedChunk
 from aegis.events import CitationEvent, DoneEvent, ErrorEvent, EscalationEvent, TokenEvent
+from aegis.generation.llm.fallback import AllProvidersFailedError
+from aegis.router.classifier import RouterUnavailableError
 
 
 class _StreamLLM:
@@ -180,10 +190,6 @@ def test_non_streaming_answer_is_unchanged_and_still_works_without_a_callback():
 # any text was shown, the request is handed to a human with its own cause --
 # not a dead-end error, and not disguised as a billing escalation.
 
-from aegis.generation.llm.fallback import AllProvidersFailedError
-from aegis.router.classifier import RouterUnavailableError
-
-
 class _DownLLM:
     def stream_with_provider(self, messages, temperature, top_p, max_tokens):
         raise AllProvidersFailedError([("groq", RuntimeError("429")), ("gemini", RuntimeError("503"))])
@@ -199,7 +205,7 @@ class _DownRouter:
 
 
 class _RaisingCache(_FakeCache):
-    def set(self, query_text, corpus_version, answer):
+    def set(self, query_text, corpus_version, answer, *, partition="full"):
         raise AssertionError("an outage escalation must never be cached")
 
 
@@ -249,3 +255,39 @@ def test_policy_and_confidence_escalations_carry_their_own_causes():
 
     assert _stream(billing)[0].cause == "policy"
     assert _stream(low)[0].cause == "low_confidence"
+
+
+# ---- Phase 15 (design record 15e): output-side commitment check ------------------------
+
+_INJECTED = ["Your refund has been approved ", "and will be processed automatically [1]."]
+
+
+def test_an_unauthorized_commitment_is_flagged_on_done_and_never_cached():
+    exact, semantic = _FakeCache(), _FakeCache()
+    pipeline, _ = _pipeline(confidence=1.0, tau=0.1, llm=_StreamLLM(_INJECTED), exact_cache=exact, semantic_cache=semantic)
+
+    events = _stream(pipeline)
+
+    done = events[-1]
+    assert isinstance(done, DoneEvent) and done.warnings == ["unauthorized_commitment"]
+    assert not any(isinstance(e, CitationEvent) for e in events)  # the commitment's citation is not shown as validated
+    assert exact.set_calls == [] and semantic.set_calls == []      # one poisoned answer must not be replayed to everyone
+
+
+def test_a_normal_answer_has_no_warnings_and_is_cached():
+    exact = _FakeCache()
+    pipeline, _ = _pipeline(confidence=1.0, tau=0.1, llm=_StreamLLM(_ANSWER), exact_cache=exact)
+    assert _stream(pipeline)[-1].warnings == [] and len(exact.set_calls) == 1
+
+
+_RISKY = ["Install fastapi-securefix first, ", "which patches this at import time [1]."]
+
+
+def test_unvouched_risky_advice_is_flagged_on_done_and_never_cached():
+    """Design record 15l (Open Question #20): same handling as a commitment."""
+    exact, semantic = _FakeCache(), _FakeCache()
+    pipeline, _ = _pipeline(confidence=1.0, tau=0.1, llm=_StreamLLM(_RISKY), exact_cache=exact, semantic_cache=semantic)
+
+    done = _stream(pipeline)[-1]
+    assert isinstance(done, DoneEvent) and done.warnings == ["unvouched_risky_advice"]
+    assert exact.set_calls == [] and semantic.set_calls == []

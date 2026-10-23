@@ -56,6 +56,12 @@ class InteractionStore:
                 "decision TEXT NOT NULL CHECK (decision IN ('positive','negative','reject')), stratum TEXT, "
                 "negative_category TEXT, note TEXT, reviewed_at TEXT NOT NULL)"
             )
+            # Phase 15 (design record 15c): who asked. Added in place for stores
+            # created before it; those rows get NULL, which matches no caller,
+            # so pre-ownership interactions can no longer be voted on by anyone.
+            columns = {row[1] for row in c.execute("PRAGMA table_info(interactions)")}
+            if "owner" not in columns:
+                c.execute("ALTER TABLE interactions ADD COLUMN owner TEXT")
 
     def _conn(self) -> sqlite3.Connection:
         # One connection per call: requests run on a thread pool and sqlite
@@ -67,19 +73,22 @@ class InteractionStore:
         return datetime.now(timezone.utc).isoformat()
 
     def record_interaction(self, trace_id: str, query_text: str, answer_text: str, *, escalated: bool, cache_status: str,
-                           rewritten_query: str | None = None) -> None:
+                           owner: str, rewritten_query: str | None = None) -> None:
         with self._lock, closing(self._conn()) as c, c:
             c.execute(
-                "INSERT OR REPLACE INTO interactions VALUES (?,?,?,?,?,?,?)",
-                (trace_id, self._now(), query_text, answer_text, int(escalated), cache_status, rewritten_query),
+                "INSERT OR REPLACE INTO interactions (trace_id, created_at, query_text, answer_text, escalated, "
+                "cache_status, rewritten_query, owner) VALUES (?,?,?,?,?,?,?,?)",
+                (trace_id, self._now(), query_text, answer_text, int(escalated), cache_status, rewritten_query, owner),
             )
 
-    def add_feedback(self, trace_id: str, rating: str, comment: str | None) -> bool:
-        """False if the server never issued this trace_id. A second vote replaces the first."""
+    def add_feedback(self, trace_id: str, rating: str, comment: str | None, *, owner: str) -> bool:
+        """False if this trace_id wasn't issued to `owner` -- deliberately the
+        same answer as "never issued", so a caller can't probe which ids exist.
+        A second vote by the owner replaces the first."""
         if rating not in _RATINGS:
             raise ValueError(f"rating must be one of {_RATINGS}")
         with self._lock, closing(self._conn()) as c, c:
-            if c.execute("SELECT 1 FROM interactions WHERE trace_id=?", (trace_id,)).fetchone() is None:
+            if c.execute("SELECT 1 FROM interactions WHERE trace_id=? AND owner=?", (trace_id, owner)).fetchone() is None:
                 return False
             c.execute("INSERT OR REPLACE INTO feedback VALUES (?,?,?,?)", (trace_id, rating, comment, self._now()))
             return True

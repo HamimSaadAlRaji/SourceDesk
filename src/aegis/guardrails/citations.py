@@ -48,6 +48,8 @@ from aegis.chunking.segments import split_code_segments
 from aegis.chunking.semantic import split_sentences
 from aegis.config import settings
 from aegis.generation.budgeter import PackedContext
+from aegis.guardrails.commitments import is_unauthorized_commitment
+from aegis.guardrails.risky_advice import Vouched, risky_reasons
 from aegis.observability.logging import get_logger, log_event
 
 _log = get_logger("citations")
@@ -70,6 +72,15 @@ class ClaimStatus(StrEnum):
     MISSING_CITATION = "missing_citation"
     INVALID_CITATION = "invalid_citation"
     EXEMPT = "exempt"
+    # A company-voiced money/account commitment (aegis.guardrails.commitments):
+    # never passing, whatever it cites -- a citation shows the sentence came from
+    # context, not that the company said it (design record 15e).
+    UNAUTHORIZED_COMMITMENT = "unauthorized_commitment"
+    # Install / link / secret-request advice the documentation corpus doesn't vouch
+    # for (aegis.guardrails.risky_advice): never passing, whatever it cites -- an
+    # issue comment saying "pip install x" is support only in the lexical sense
+    # (design record 15l, Open Question #20).
+    UNVOUCHED_RISKY_ADVICE = "unvouched_risky_advice"
 
 
 _PASSING = {ClaimStatus.SUPPORTED_LEXICAL, ClaimStatus.SUPPORTED_ENTAILMENT, ClaimStatus.EXEMPT}
@@ -98,12 +109,44 @@ class ValidationResult(BaseModel):
         passing = sum(1 for c in checked if c.status in _PASSING)
         return passing / len(checked)
 
+    @property
+    def has_unauthorized_commitment(self) -> bool:
+        return any(c.status == ClaimStatus.UNAUTHORIZED_COMMITMENT for c in self.claims)
+
+    @property
+    def has_unvouched_risky_advice(self) -> bool:
+        return any(c.status == ClaimStatus.UNVOUCHED_RISKY_ADVICE for c in self.claims)
+
+
+# A list item starts a line: "-", "*", "+", "•", "1.", "1)" then whitespace.
+_LIST_ITEM_RE = re.compile(r"^\s*(?:[-*+•]|\d+[.)])\s+")
+_PARAGRAPH_BREAK_RE = re.compile(r"\n\s*\n")
+
+
+def _prose_blocks(text: str) -> Iterator[str]:
+    """Paragraphs and list items, each a claim boundary (Open Question #18,
+    design record 15k). A plain newline is NOT a boundary: a hard-wrapped
+    sentence must stay one claim, or its first half becomes an uncited
+    fragment. Before this, a bulleted answer was a few very long "claims"
+    that passed or failed as one unit on word overlap."""
+    for paragraph in _PARAGRAPH_BREAK_RE.split(text):
+        item: list[str] = []
+        for line in paragraph.splitlines():
+            marker = _LIST_ITEM_RE.match(line)
+            if marker and item:
+                yield " ".join(item)
+                item = []
+            item.append(line[marker.end():] if marker else line.strip())
+        if item:
+            yield " ".join(item)
+
 
 def _iter_claim_sentences(answer_text: str) -> Iterator[str]:
     for segment in split_code_segments(answer_text):
         if segment.kind == "code":
             continue  # not prose; any citation for it lives in the surrounding text
-        yield from split_sentences(segment.content)
+        for block in _prose_blocks(segment.content):
+            yield from split_sentences(block)
 
 
 def _requires_citation(sentence: str) -> bool:
@@ -132,32 +175,26 @@ def _lexical_overlap(claim: str, chunk_text: str) -> float:
     return len(claim_tokens & chunk_tokens) / len(claim_tokens)
 
 
-def _default_entailment_fn(model: str, temperature: float) -> EntailmentFn:
-    from groq import APIError, Groq
-
-    client = Groq(api_key=settings.groq.api_key)
+def _default_entailment_fn(provider: str, model: str, temperature: float) -> EntailmentFn:
+    from aegis.generation.llm.chat import LLMCallError, chat_completion
 
     def entails(claim: str, chunk_text: str) -> bool:
         try:
-            completion = client.chat.completions.create(
-                model=model,
-                temperature=temperature,
-                max_tokens=10,
-                response_format={"type": "json_object"},
-                messages=[
-                    {"role": "system", "content": ENTAILMENT_SYSTEM_PROMPT},
-                    {"role": "user", "content": f"Context:\n{chunk_text}\n\nClaim:\n{claim}"},
-                ],
+            raw = chat_completion(
+                provider, model,
+                [{"role": "system", "content": ENTAILMENT_SYSTEM_PROMPT},
+                 {"role": "user", "content": f"Context:\n{chunk_text}\n\nClaim:\n{claim}"}],
+                temperature=temperature, max_tokens=10, purpose="entailment", json_mode=True,
             )
-        except APIError as exc:
+        except LLMCallError as exc:
             # Logged: otherwise a quota outage is indistinguishable from "every
             # claim unsupported" (same lesson as the router, design record 14f).
+            cause = exc.__cause__
             log_event(
-                _log, logging.WARNING, "citation.entailment_api_error",
-                error_type=type(exc).__name__, status_code=getattr(exc, "status_code", None), detail=str(exc)[:300],
+                _log, logging.WARNING, "citation.entailment_api_error", provider=provider,
+                error_type=type(cause).__name__, status_code=exc.status_code, detail=str(cause)[:300],
             )
             return False  # fail closed: an unverifiable citation counts as unsupported, not passed
-        raw = completion.choices[0].message.content or ""
         try:
             return bool(json.loads(raw)["supported"])
         except (json.JSONDecodeError, KeyError, TypeError):
@@ -171,11 +208,20 @@ class CitationValidator:
         self,
         entailment_fn: EntailmentFn | None = None,
         lexical_overlap_threshold: float = settings.citation.lexical_overlap_threshold,
-        model: str = settings.citation.entailment_model,
+        model: str | None = None,
         temperature: float = settings.citation.entailment_temperature,
+        provider: str = settings.citation.entailment_provider,
+        vouched: Vouched | None = None,  # None: the documentation corpus (risky_advice.documentation_vouched)
     ) -> None:
-        self._entailment_fn = entailment_fn or _default_entailment_fn(model, temperature)
+        if entailment_fn is None:
+            from aegis.generation.llm.chat import resolve_role
+
+            provider, model = resolve_role(provider, model, settings.openai.entailment_model,
+                                           settings.citation.entailment_model)
+            entailment_fn = _default_entailment_fn(provider, model, temperature)
+        self._entailment_fn = entailment_fn
         self._threshold = lexical_overlap_threshold
+        self._vouched = vouched
 
     def validate(self, answer_text: str, context: PackedContext) -> ValidationResult:
         chunk_text_by_citation = {pc.citation_id: pc.chunk.text for pc in context.chunks}
@@ -185,6 +231,21 @@ class CitationValidator:
 
         for sentence in _iter_claim_sentences(answer_text):
             citation_ids = [int(n) for n in _CITATION_RE.findall(sentence)]
+
+            # Before every citation check, and before the short-sentence
+            # exemption: "Refund approved [1]." is short but is exactly the case.
+            if is_unauthorized_commitment(sentence):
+                log_event(_log, logging.WARNING, "citation.unauthorized_commitment", sentence=sentence[:200])
+                claims.append(ClaimResult(sentence=sentence, citation_ids=citation_ids,
+                                          status=ClaimStatus.UNAUTHORIZED_COMMITMENT))
+                continue
+
+            if reasons := risky_reasons(sentence, self._vouched):
+                log_event(_log, logging.WARNING, "citation.unvouched_risky_advice", reasons=reasons,
+                          sentence=sentence[:200])
+                claims.append(ClaimResult(sentence=sentence, citation_ids=citation_ids,
+                                          status=ClaimStatus.UNVOUCHED_RISKY_ADVICE))
+                continue
 
             if not _requires_citation(sentence):
                 claims.append(ClaimResult(sentence=sentence, citation_ids=citation_ids, status=ClaimStatus.EXEMPT))

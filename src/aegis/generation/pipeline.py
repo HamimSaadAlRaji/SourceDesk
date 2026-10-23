@@ -16,7 +16,7 @@ from typing import Protocol
 from pydantic import BaseModel
 
 from aegis.config import settings
-from aegis.generation.budgeter import PackedContext, format_context, pack_context
+from aegis.generation.budgeter import PackedContext, pack_context
 from aegis.generation.prompts import PromptTemplate, get_prompt
 from aegis.guardrails.citations import CitationValidator, ClaimStatus, ValidationResult
 from aegis.types import Query, Retrieved
@@ -71,6 +71,18 @@ class GenerationPipeline:
         self.top_p = top_p
         self.max_tokens = max_tokens
 
+    @property
+    def cache_fingerprint(self) -> str:
+        """What a cached answer depends on besides the query and corpus: the
+        prompt version and the provider chain (Open Question #19, design record
+        15j). Without it a prompt or model switch -- v2 -> v3 was a security
+        fix -- keeps replaying answers neither generated nor validated under the
+        new configuration."""
+        providers = getattr(self.llm, "providers", None)
+        chain = ",".join(f"{getattr(p, 'name', type(p).__name__)}:{getattr(p, 'model', '?')}" for p in providers) \
+            if providers else type(self.llm).__name__
+        return f"prompt={self.prompt.version}::llm={chain}"
+
     def generate(
         self, query: Query, retrieved: list[Retrieved], on_token: Callable[[str], None] | None = None
     ) -> DraftAnswer:
@@ -78,8 +90,7 @@ class GenerationPipeline:
         produces them (Phase 14 streaming); the returned draft is identical
         either way, since `generate_with_provider` is itself a join of this stream."""
         context = pack_context(retrieved, self.budget_tokens)
-        context_block = format_context(context)
-        messages = self.prompt.build_messages(query.text, context_block)
+        messages, _ = self.prompt.messages_and_key(query.text, context)  # v3: per-request block key (15e)
 
         if on_token is None:
             text, provider = self.llm.generate_with_provider(

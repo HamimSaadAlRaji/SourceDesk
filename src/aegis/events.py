@@ -37,6 +37,8 @@ class CitationEvent(BaseModel):
 
 
 EscalationCause = Literal["policy", "low_confidence", "provider_unavailable"]
+# Closed set, like EscalationCause: the UI must have text for every member.
+GuardrailWarning = Literal["unauthorized_commitment", "unvouched_risky_advice"]
 
 
 class EscalationEvent(BaseModel):
@@ -63,6 +65,9 @@ class DoneEvent(BaseModel):
     # What the question was resolved to when it was a follow-up (None otherwise),
     # so the UI can show the user what was actually searched for.
     rewritten_query: str | None = None
+    # Guardrail outcomes the user must see even though the text has already
+    # streamed (design records 15e, 15l). Closed set: GuardrailWarning.
+    warnings: list[GuardrailWarning] = []
 
 
 class ErrorEvent(BaseModel):

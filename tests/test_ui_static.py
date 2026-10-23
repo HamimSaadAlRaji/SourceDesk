@@ -8,9 +8,9 @@ import subprocess
 
 import pytest
 from fastapi.testclient import TestClient
+from test_api import _FakePipeline
 
 from aegis.api.app import create_app
-from test_api import _FakePipeline
 
 
 def test_index_and_assets_are_served():
@@ -51,12 +51,24 @@ def test_sse_parser_handles_frames_split_across_chunks():
 def test_ui_explains_every_escalation_cause():
     # The cause set is closed (aegis.events.EscalationCause); a new cause
     # without UI text would fall through to a generic sentence.
+    from pathlib import Path
     from typing import get_args
 
     from aegis.events import EscalationCause
 
-    from pathlib import Path
-
     js = (Path(__file__).parent.parent / "src/aegis/api/static/app.js").read_text()
     for cause in get_args(EscalationCause):
         assert f"{cause}:" in js, cause
+
+
+def test_ui_has_text_for_every_guardrail_warning():
+    # Closed set (aegis.events.GuardrailWarning), same rule as escalation causes.
+    from pathlib import Path
+    from typing import get_args
+
+    from aegis.events import GuardrailWarning
+
+    js = (Path(__file__).parent.parent / "src/aegis/api/static/app.js").read_text()
+    for warning in get_args(GuardrailWarning):
+        assert f"{warning}:" in js, warning
+    assert 'setAttribute("role", "alert")' in js

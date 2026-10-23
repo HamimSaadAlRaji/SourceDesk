@@ -20,8 +20,10 @@ criterion: "All retrieval modes behind one interface").
 
 from __future__ import annotations
 
+from collections.abc import Collection
+
 from qdrant_client import QdrantClient
-from qdrant_client.models import FieldCondition, Filter, MatchValue
+from qdrant_client.models import FieldCondition, Filter, MatchAny, MatchValue
 
 from aegis.embedding.encoder import Encoder
 from aegis.embedding.vector_store import DENSE_VECTOR_NAME, get_client
@@ -60,6 +62,7 @@ class DenseIndex:
         product_area: str | None = None,
         doc_type: DocType | None = None,
         exclude_doc_id: str | None = None,
+        doc_types: Collection[DocType] | None = None,
     ) -> list[tuple[Chunk, float]]:
         query_vector = self.encoder.encode([query])[0]
 
@@ -68,6 +71,8 @@ class DenseIndex:
             must.append(FieldCondition(key="product_area", match=MatchValue(value=product_area)))
         if doc_type is not None:
             must.append(FieldCondition(key="doc_type", match=MatchValue(value=doc_type.value)))
+        if doc_types is not None:  # a partition (aegis.tenancy): same native pre-filter
+            must.append(FieldCondition(key="doc_type", match=MatchAny(any=sorted(d.value for d in doc_types))))
         # Native must_not, not a post-hoc filter -- same pre-filter-over-
         # post-filter reasoning as product_area/doc_type above. Needed for
         # eval: a golden query's own source issue (aegis.eval.

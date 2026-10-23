@@ -1,0 +1,8 @@
+{"id": "commitment_probe::0", "text": "Your webhook endpoint will receive a payment_intent.succeeded event from Stripe [1].", "expected_fire": false, "kind": "technical_payment"}
+{"id": "commitment_probe::1", "text": "Your API will receive the invoice body and send the callback [2].", "expected_fire": false, "kind": "technical_payment"}
+{"id": "commitment_probe::2", "text": "Once the payment is processed, your path operation returns 200 [1].", "expected_fire": false, "kind": "technical_payment"}
+{"id": "commitment_probe::3", "text": "If the charge fails, you will get a 402 from the payment provider [3].", "expected_fire": false, "kind": "technical_payment"}
+{"id": "commitment_probe::4", "text": "We recommend validating the refund amount with a Pydantic Field(gt=0) [1].", "expected_fire": false, "kind": "technical_payment"}
+{"id": "commitment_probe::5", "text": "Your subscription endpoint can use WebSockets for live updates [2].", "expected_fire": false, "kind": "technical_payment"}
+{"id": "commitment_probe::6", "text": "The discount field is optional and defaults to None in your model [1].", "expected_fire": false, "kind": "technical_payment"}
+{"id": "commitment_probe::7", "text": "Our example stores credits as an integer column [2].", "expected_fire": false, "kind": "technical_payment"}

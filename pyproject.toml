@@ -14,6 +14,7 @@ dependencies = [
     "langchain-community<0.4",
     "langfuse>=4.15.6",
     "matplotlib>=3.11.1",
+    "openai>=2.54,<3",
     "pydantic>=2.13.4",
     "pydantic-settings>=2.14.2",
     "python-dotenv>=1.2.2",
@@ -37,8 +38,39 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "httpx>=0.28.1",
+    "mypy==2.4.0",
     "pytest>=9.1.1",
+    "ruff==0.17.1",
 ]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+# Phase 16 (design record 16a). The CI lint gate. The rule set is explicit because
+# ruff changes its *default* rules between releases (0.17.1 reports ~103 findings
+# on this repo with defaults, 45 with this list), and ruff is pinned for the same reason.
+[tool.ruff]
+line-length = 120  # style only; E501 is not selected, so this is never a gate
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["aegis"]
+
+# Phase 16 (design record 16a). Type-check gate on the modules where a silent bug
+# corrupts every downstream measurement (CLAUDE.md section 6). The rest of src/ is
+# not gated yet -- see docs/future-work.md.
+[tool.mypy]
+python_version = "3.12"
+files = [
+    "src/aegis/analysis",
+    "src/aegis/chunking",
+    "src/aegis/retrieval/fusion.py",
+    "src/aegis/guardrails/confidence.py",
+    "src/aegis/guardrails/citations.py",
+    "src/aegis/router/policy.py",
+    "src/aegis/eval/metrics.py",
+]
+ignore_missing_imports = true
+warn_unused_ignores = true

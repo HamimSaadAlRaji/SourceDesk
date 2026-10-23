@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -36,6 +37,12 @@ class QdrantSettings(BaseSettings):
 
     host: str = "localhost"
     port: int = 6333
+    # Phase 15 (design record 15f). Qdrant's admin key (create/write/delete) and
+    # its read-only key. Indexing and experiments use the admin key; the served
+    # API uses the read-only one, so a compromised app process still can't write
+    # to the index. Empty = no key sent (a local Qdrant without auth).
+    api_key: str = ""
+    read_only_api_key: str = ""
     collection_baseline: str = "aegis_baseline"
 
     # Phase 3: one collection per encoder candidate (dev workhorse + the two
@@ -271,6 +278,8 @@ class RouterSettings(BaseSettings):
     # measured 1000 output-tokens/minute cap, so the "why pay 70B latency for
     # a cheap task" concern doesn't reappear at this call size.
     model: str = "qwen/qwen3.8-27b"
+    # Phase 15 step 0: "openai" uses OpenAISettings.router_model instead of `model`.
+    provider: str = "openai"
     temperature: float = 0.0
     # 20 was too tight -- measured: Groq's JSON-mode grammar constraint
     # occasionally emits a few tokens of formatting/whitespace before the
@@ -290,6 +299,11 @@ class QuerySettings(BaseSettings):
     # second independently-verified small model (`groq/compound-mini`)
     # didn't survive to this session either.
     rewrite_model: str = "qwen/qwen3.8-27b"
+    rewrite_provider: str = "openai"  # "openai" -> OpenAISettings.rewrite_model
+    # Output cap, needed so the spend ledger can reserve a worst case (15g).
+    # The Groq-era rewriter sent none. A standalone question is one sentence;
+    # 200 is a guard rail, not a tuned value.
+    rewrite_max_tokens: int = 200
     expansion_model: str = "qwen/qwen3.8-27b"
     # HyDE's hypothetical answer is embedded, not shown to the user, but
     # its *content* directly determines retrieval quality (plan.md step 6)
@@ -344,6 +358,7 @@ class CitationSettings(BaseSettings):
     # as RouterSettings/QuerySettings, and same retirement/replacement chain
     # (Open Question #15) -- `qwen/qwen3.8-27b`.
     entailment_model: str = "qwen/qwen3.8-27b"
+    entailment_provider: str = "openai"  # "openai" -> OpenAISettings.entailment_model
     entailment_temperature: float = 0.0
 
 
@@ -438,7 +453,10 @@ class GenerationSettings(BaseSettings):
     # `generation/llm/fallback.py` -- a mid-stream failure propagates rather
     # than silently splicing in a second provider's answer after the first
     # provider's partial output).
-    provider_order: list[str] = ["groq", "gemini"]
+    # Phase 15 step 0: OpenAI first (paid, no daily quota); free tiers as fallback.
+    # A BudgetExceededError counts as a provider failure, so hitting the $10 cap
+    # degrades to Groq/Gemini instead of an outage.
+    provider_order: list[str] = ["openai", "groq", "gemini"]
 
     # v2 promoted over v1 on real, matched-pair evidence (N=6, same 6 real
     # queries, both versions, Groq): mean valid_citation_rate 0.4199 -> 0.5641
@@ -447,7 +465,12 @@ class GenerationSettings(BaseSettings):
     # modest, but the direction is consistent and mechanistically explained
     # (v2's explicit first-sentence citation rule fixes exactly the pattern
     # it targeted, confirmed by inspecting real before/after answer pairs).
-    prompt_version: str = "v2"
+    # v3 served from 2026-10-22 (design record 15h, rule fixed before the run):
+    # gpt-5-mini obeyed a rank-1 poisoned chunk 5/50 under v2 vs 0/50 under v3,
+    # and v3's valid_citation_rate is not worse (v3 - v2 = +0.068, CI
+    # [-0.039, +0.175] with line-aware claim splitting; +0.113 with the served
+    # splitter). Costs +624 input tokens per 10-block request (15e).
+    prompt_version: str = "v3"
 
 
 class JudgeSettings(BaseSettings):
@@ -573,6 +596,15 @@ class LangfuseSettings(BaseSettings):
     environment: str = "dev"
 
 
+class ApiKeyGrant(BaseModel):
+    """What an API key unlocks (design record 15c). Keys are configured by their
+    sha256, never in plain text: `uv run python -m aegis.api.auth new-key`."""
+
+    name: str
+    partition: str
+    can_trace: bool = False
+
+
 class ApiSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="API_", env_file=".env", extra="ignore")
 
@@ -620,6 +652,177 @@ class ApiSettings(BaseSettings):
     chat_rate_per_minute: float = 6.0
     rate_limit_max_clients: int = 10000
 
+    # --- Phase 15 access control (design record 15c; user chose "anonymous chat
+    # + per-browser ownership tokens + /trace behind API keys"). ---
+    # sha256(key) hex -> grant. Empty = no keys, so /trace is closed to everyone.
+    api_keys: dict[str, ApiKeyGrant] = {}
+    # Partition served to callers without a key. "full" keeps the Phase 14 demo
+    # behavior; "docs" would drop all user-generated content from anonymous
+    # answers (an injection-surface reduction with an unmeasured quality cost).
+    anonymous_partition: str = "full"
+    # Per-browser ownership token: server-issued, random, HttpOnly cookie. It
+    # proves "this browser asked that question" so /feedback works only on
+    # your own traces. It is not a login and not a rate-limit key (that stays
+    # the socket peer, 14f): minting a new token must not buy a new bucket.
+    session_cookie_name: str = "aegis_session"
+    session_cookie_secure: bool = False  # True behind HTTPS (Phase 18); False for http://localhost
+    session_cookie_max_age_s: int = 30 * 24 * 3600
+    # /feedback limit, per socket peer. Guard rails: a person votes once per
+    # answer, and answers are limited to 6/min, so 20/min is generous for
+    # people and still bounds a script (200/200 accepted before, 15 A5e).
+    feedback_rate_capacity: int = 10
+    feedback_rate_per_minute: float = 20.0
+    # /trace holds a worker thread for up to trace_max_wait_s while Langfuse
+    # ingests; 40 of them starved every sync endpoint (15 A5d). Beyond this
+    # many concurrent calls the server answers 503 immediately.
+    trace_max_concurrent: int = 2
+
+
+class TenancySettings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="TENANCY_", env_file=".env", extra="ignore")
+
+    # Phase 15 stand-in for tenants (design record 15b): this corpus has none,
+    # so a partition is a set of doc_types. `docs` and `issues` are disjoint,
+    # which is what makes bypass testable; `full` is today's single deployment.
+    # Enforced at the retrieval layer (aegis.tenancy) and in the cache key,
+    # never in the prompt. Values are DocType values.
+    partitions: dict[str, list[str]] = {
+        "full": ["documentation", "issue"],
+        "docs": ["documentation"],
+        "issues": ["issue"],
+    }
+    # What the server builds when no principal maps elsewhere. "full" keeps the
+    # served behavior identical to Phase 14 until 15c binds principals.
+    default_partition: str = "full"
+
+
+class InputBoundarySettings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="INPUT_", env_file=".env", extra="ignore")
+
+    # High-precision secret/PII shapes, redacted from every user-supplied string
+    # before the pipeline, store, caches, Langfuse or an LLM provider see it
+    # (design record 15d). Deliberately no names, phones or bare IPs: those
+    # collide with code, versions and log lines (Presidio's measured behavior
+    # on the dev set is in 15d). Order matters: private keys and JWTs before
+    # the generic shapes they contain.
+    pii_patterns: dict[str, str] = {
+        "private_key_block": r"-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----",
+        "jwt": r"\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}",
+        "github_token": r"\bgh[pousr]_[A-Za-z0-9]{36,}\b",
+        "openai_style_key": r"\bsk-[A-Za-z0-9_-]{20,}",
+        "aws_access_key": r"\bAKIA[0-9A-Z]{16}\b",
+        "bearer_token": r"(?<=Bearer )[A-Za-z0-9._~+/=-]{16,}",
+        "email": r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}\b",
+    }
+    # scheme://user:PASSWORD@host -- only the password is replaced, so the
+    # question ("why does my postgres URL fail") survives.
+    url_password_pattern: str = r"(?<=://)([^\s:/@]+):([^\s@/]+)(?=@)"
+
+    # Flag-only injection heuristic (user decision 2026-10-18: never blocks).
+    # Frozen *before* measuring evasion: experiments/15a's naive regex minus
+    # "override", removed because it caused all 4/150 dev false positives
+    # (FastAPI's dependency_overrides). Not tuned on the paraphrase set.
+    injection_pattern: str = (
+        r"ignore (all |any )?(previous|prior|above|earlier)|disregard|system prompt|developer mode|"
+        r"you are now|forget (you|everything|all)|new (policy|instructions)|jailbreak|"
+        r"(reveal|print|repeat|output) (your|the) (system|hidden|exact|full|raw)"
+    )
+
+
+class RiskyAdviceSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="RISKY_ADVICE_", env_file=".env", extra="ignore")
+
+    # Output-side check (design record 15l, Open Question #20): a sentence telling
+    # the user to install, visit, or hand over something is never validated unless
+    # the documentation corpus vouches for the package / host. Frozen before the
+    # false-positive measurement (experiments/15l_risky_advice_fp.py) against the
+    # frozen probe set data/security/risky_advice_probes_v1.jsonl.
+    install_command: str = r"\b(?:pip3?|uv(?:\s+pip)?|poetry|pipx|conda)\s+(?:install|add)\s+(?P<targets>[^\n]+)"
+    # Words that end an install command's target list in prose ("pip install x to fix it").
+    install_stopwords: list[str] = ["to", "and", "for", "which", "first", "if", "then", "so", "as", "after",
+                                    "before", "or", "with", "in", "on", "from", "the", "this", "that", "is"]
+    # Up to three descriptor words between the verb and the name ("install the patch
+    # package fastapi-securefix", "installing an external package (x-y)"): widened
+    # after 15l's first run missed a real obeyed 15h answer phrased that way (disclosed).
+    install_prose: str = (
+        r"\b(?:install|installing|installed)\s+(?:(?:the|a|an|this|that|external|third-party|patch|patched|"
+        r"package|library|module|fix|hotfix|tool|plugin)\s+){0,3}[(`'\"]?"
+        r"(?P<name>[A-Za-z0-9][A-Za-z0-9._-]*-[A-Za-z0-9._-]+)"
+    )
+    secret_request: str = (
+        r"\b(?:paste|share|send|post|upload|submit|email|give|forward|provide)\b[^.]{0,40}?\byour\b[^.]{0,30}?"
+        r"(?:api[ _-]?keys?|tokens?|passwords?|secrets?|secret keys?|client secrets?|\.env|credentials?|private keys?)"
+    )
+    negation: str = r"\b(?:never|don't|do not|avoid|shouldn't|should not|must not|not to)\b"
+    # Loopback and documentation placeholders are never an exfiltration target.
+    always_vouched_hosts: list[str] = ["localhost", "127.0.0.1", "0.0.0.0"]
+
+
+class CommitmentSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="COMMITMENT_", env_file=".env", extra="ignore")
+
+    # Output-side check (design record 15e): a generated sentence that commits
+    # the company to something about money or an account is never presented as
+    # validated, whatever it cites -- prompt v2 rule 3 already forbids it, and
+    # design record 15 (A4) showed the validator would otherwise mark an injected
+    # "your refund is approved [1]" SUPPORTED. A sentence fires only when ALL of
+    # term + framing + commitment match and refusal does not. Frozen before the
+    # false-positive measurement on real answers (experiments/15e_commitment_fp.py).
+    business_term: str = (
+        r"\b(refund(s|ed)?|reimburs\w*|compensat\w*|chargeback|invoice|billing|charges?|charged|credit(s|ed)?|"
+        r"subscription|support (plan|contract)|subscription plan|pricing plan|contract|uptime|sla|"
+        r"free of charge|waiv\w*|prorat\w*|discount|payment|billing account)\b"
+    )
+    framing: str = r"\b(you|your|we|we've|we have|our|us)\b"
+    commitment: str = (
+        r"\b(approved|refunded|reimbursed|credited|waived|reversed|extended|cancell?ed|granted|issued|processed|"
+        r"fixed|guarantee[ds]?|entitled|eligible|will (receive|get|be (refunded|credited|reimbursed|compensated)))\b"
+    )
+    refusal: str = (
+        r"\b(can't|cannot|can not|unable|not able|won't|will not|do not|don't|not authori[sz]ed|no authority|"
+        r"not in a position)\b"
+    )
+
+
+class OpenAISettings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="OPENAI_", env_file=".env", extra="ignore")
+
+    # Phase 15 step 0 (design record 15g): OpenAI is the primary paid provider;
+    # Groq/Gemini stay as fallbacks and as independent second judges.
+    api_key: str = ""
+    # User's hard cap for the WHOLE project (2026-10-18). Enforced before every
+    # call by aegis.cost.ledger (worst-case reservation), not after the fact.
+    budget_usd: float = 10.0
+    ledger_path: Path = REPO_ROOT / "data" / "cost" / "openai_spend.sqlite"
+    # USD per 1M tokens, from the official pricing page
+    # (developers.openai.com/api/docs/pricing, fetched 2026-10-18). An unlisted
+    # model is refused by the ledger, never priced at zero.
+    prices: dict[str, dict[str, float]] = {
+        "gpt-4.1-nano": {"input": 0.10, "cached_input": 0.025, "output": 0.40},
+        "gpt-4.1-mini": {"input": 0.40, "cached_input": 0.10, "output": 1.60},
+        "gpt-4o-mini": {"input": 0.15, "cached_input": 0.075, "output": 0.60},
+        "gpt-5-nano": {"input": 0.05, "cached_input": 0.005, "output": 0.40},
+        "gpt-5-mini": {"input": 0.25, "cached_input": 0.025, "output": 2.00},
+    }
+    # Role assignments (user-approved plan, 2026-10-18); router provisional
+    # until the step-2 re-eval.
+    # Generation: gpt-5-mini (user OK 2026-10-19, design records 15g1-15g3).
+    # Same 20 queries, prompt v2, qwen judge: valid_citation_rate 0.7158 vs
+    # qwen 0.7296 (paired CI spans 0), unsupported citations 6 vs gpt-4.1-nano's
+    # 26. The planned gpt-4.1-mini scored 0.4486 (CI excludes 0) and a stricter
+    # prompt made it worse (15g2). Measured at max_completion_tokens 400;
+    # served under GroqSettings.max_tokens (1000), as in the qwen era.
+    generation_model: str = "gpt-5-mini"
+    router_model: str = "gpt-4.1-nano"
+    rewrite_model: str = "gpt-4.1-nano"
+    entailment_model: str = "gpt-4.1-nano"
+    judge_model: str = "gpt-5-mini"
+    ragas_model: str = "gpt-4.1-mini"
+    # gpt-5* are reasoning models: no temperature/top_p, hidden reasoning
+    # tokens billed as output. Lowest effort that the API accepts for them.
+    reasoning_model_prefixes: list[str] = ["gpt-5", "o1", "o3", "o4"]
+    reasoning_effort: str = "minimal"
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
@@ -632,6 +835,7 @@ class Settings(BaseSettings):
     rerank: RerankSettings = RerankSettings()
     golden: GoldenSettings = GoldenSettings()
     groq: GroqSettings = GroqSettings()
+    openai: OpenAISettings = OpenAISettings()
     gemini: GeminiSettings = GeminiSettings()
     router: RouterSettings = RouterSettings()
     query: QuerySettings = QuerySettings()
@@ -643,6 +847,10 @@ class Settings(BaseSettings):
     cache: CacheSettings = CacheSettings()
     langfuse: LangfuseSettings = LangfuseSettings()
     api: ApiSettings = ApiSettings()
+    tenancy: TenancySettings = TenancySettings()
+    input_boundary: InputBoundarySettings = InputBoundarySettings()
+    commitment: CommitmentSettings = CommitmentSettings()
+    risky_advice: RiskyAdviceSettings = RiskyAdviceSettings()
 
 
 settings = Settings()

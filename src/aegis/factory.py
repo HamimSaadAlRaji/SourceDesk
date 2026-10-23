@@ -9,6 +9,7 @@ cheaper than a function. Experiments that need throwaway caches pass `cache_dir`
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from pathlib import Path
 
 from aegis.cache.exact_match import ExactMatchCache
@@ -16,9 +17,8 @@ from aegis.cache.semantic import SemanticCache
 from aegis.config import settings
 from aegis.embedding.cache import EmbeddingCache
 from aegis.embedding.encoder import Encoder
-from aegis.generation.llm.fallback import FallbackLLMClient
-from aegis.generation.llm.gemini_provider import GeminiProvider
-from aegis.generation.llm.groq_provider import GroqProvider
+from aegis.embedding.vector_store import get_client
+from aegis.generation.llm import default_client
 from aegis.generation.pipeline import GenerationPipeline
 from aegis.guardrails.citations import CitationValidator
 from aegis.guardrails.confidence import ConfidenceScorer
@@ -28,6 +28,7 @@ from aegis.query.rewrite import QueryRewriter
 from aegis.rerank.cross_encoder import CrossEncoderReranker
 from aegis.retrieval.dense import DenseIndex
 from aegis.router.classifier import RouterClassifier
+from aegis.tenancy import PartitionedRetriever, resolve_partition
 from aegis.types import Chunk
 
 # Placeholder until an IndexManifest exists (design record 13b SS3): cache keys
@@ -40,9 +41,27 @@ def load_chunks() -> list[Chunk]:
         return [Chunk(**json.loads(line)) for line in f]
 
 
-def build_pipeline(cache_dir: Path | None = None, corpus_version: str = DEFAULT_CORPUS_VERSION) -> AnswerPipeline:
+def build_pipeline(
+    cache_dir: Path | None = None,
+    corpus_version: str = DEFAULT_CORPUS_VERSION,
+    partition: str = settings.tenancy.default_partition,
+) -> AnswerPipeline:
     """`cache_dir=None` uses the real cache paths from settings; pass a directory
-    for isolated (throwaway) caches."""
+    for isolated (throwaway) caches. `partition` binds retrieval and both caches
+    to one partition for the pipeline's lifetime (design record 15b)."""
+    return build_pipelines([partition], cache_dir, corpus_version)[partition]
+
+
+def build_pipelines(
+    partitions: Iterable[str],
+    cache_dir: Path | None = None,
+    corpus_version: str = DEFAULT_CORPUS_VERSION,
+) -> dict[str, AnswerPipeline]:
+    """One pipeline per partition (design record 15c: a principal selects a
+    pipeline, never a filter). Models, LLM clients, caches and the corpus are
+    shared -- a second partition costs one more retriever wrapper, not a second
+    bge-large. Sharing the cache files is safe because every key carries the
+    partition (15b)."""
     encoder = Encoder(
         model_name=settings.embedding.bge_large_model,
         cache=EmbeddingCache(settings.paths.embedding_cache),
@@ -53,18 +72,29 @@ def build_pipeline(cache_dir: Path | None = None, corpus_version: str = DEFAULT_
     else:
         cache_dir.mkdir(parents=True, exist_ok=True)
         exact_path, semantic_path = cache_dir / "exact.sqlite", cache_dir / "semantic.sqlite"
-    return AnswerPipeline(
-        exact_cache=ExactMatchCache(exact_path),
-        semantic_cache=SemanticCache(
-            semantic_path, encoder=encoder, threshold=settings.cache.semantic_similarity_threshold
-        ) if settings.cache.semantic_cache_enabled else None,
-        router=RouterClassifier(),
-        retriever=DenseIndex(load_chunks(), settings.qdrant.collection_bge_large, encoder),
-        confidence_scorer=ConfidenceScorer(reranker=CrossEncoderReranker(), encode_fn=encoder.encode),
-        generation=GenerationPipeline(
-            llm=FallbackLLMClient([GroqProvider(), GeminiProvider()]), validator=CitationValidator()
-        ),
-        tracer=get_tracer(),
-        corpus_version=corpus_version,
-        rewriter=QueryRewriter() if settings.query.rewrite_enabled else None,
-    )
+    exact_cache = ExactMatchCache(exact_path)
+    semantic_cache = SemanticCache(
+        semantic_path, encoder=encoder, threshold=settings.cache.semantic_similarity_threshold
+    ) if settings.cache.semantic_cache_enabled else None
+    # Read-only key: the served process can search but never write (15f).
+    dense = DenseIndex(load_chunks(), settings.qdrant.collection_bge_large, encoder, client=get_client(read_only=True))
+    router = RouterClassifier()
+    confidence = ConfidenceScorer(reranker=CrossEncoderReranker(), encode_fn=encoder.encode)
+    generation = GenerationPipeline(llm=default_client(), validator=CitationValidator())  # openai -> groq -> gemini (15g)
+    rewriter = QueryRewriter() if settings.query.rewrite_enabled else None
+    tracer = get_tracer()
+    return {
+        name: AnswerPipeline(
+            exact_cache=exact_cache,
+            semantic_cache=semantic_cache,
+            router=router,
+            retriever=PartitionedRetriever(dense, resolve_partition(name)),
+            confidence_scorer=confidence,
+            generation=generation,
+            tracer=tracer,
+            corpus_version=corpus_version,
+            rewriter=rewriter,
+            partition=name,
+        )
+        for name in dict.fromkeys(partitions)
+    }

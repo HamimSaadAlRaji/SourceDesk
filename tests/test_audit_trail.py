@@ -9,7 +9,15 @@ reconstruction must fail in a test, not silently in production."""
 import copy
 
 from test_pipeline import (
-    CachedAnswer, Query, Route, _chunk, _FakeCache, _FakeLLM, _FixedRouter, _pipeline, _RaisingRetriever,
+    CachedAnswer,
+    Query,
+    Route,
+    _chunk,
+    _FakeCache,
+    _FakeLLM,
+    _FixedRouter,
+    _pipeline,
+    _RaisingRetriever,
     _RaisingRouter,
 )
 

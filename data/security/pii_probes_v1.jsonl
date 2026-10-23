@@ -1,0 +1,16 @@
+{"id": "pii::0", "text": "My app emails jane.doe@example.com on signup but Pydantic rejects it, why?", "expected": ["email"]}
+{"id": "pii::1", "text": "DATABASE_URL=postgresql://admin:S3cretPass@db.internal:5432/app and Depends hangs", "expected": ["url_with_credentials"]}
+{"id": "pii::2", "text": "I set GITHUB_TOKEN=ghp_9naHVck6pbd4ZRj2SxphvDTwrzqwo72n3wZu in the env and BackgroundTasks can't read it", "expected": ["github_token"]}
+{"id": "pii::3", "text": "openai.api_key = 'sk-ot7UGAoKD1AFfDKZxCKu7SPCzX3ZeF981bmiIlN8' inside my FastAPI startup event fails", "expected": ["openai_style_key"]}
+{"id": "pii::4", "text": "boto3 with AKIABS75JGHZDE39SZ6O works locally but not in the container", "expected": ["aws_access_key"]}
+{"id": "pii::5", "text": "My JWT eyJlI8Gwfpttk0Ouy5Ev3CY.eyJeW61YrEjhRFyya1q79VfsecC5d8qk0.FKE3FcGdE1fK9DoXWLCSUqRfNadvWP1yBwdN7TtMCtJ is rejected by OAuth2PasswordBearer", "expected": ["jwt"]}
+{"id": "pii::6", "text": "-----BEGIN RSA PRIVATE KEY-----\nMIIEow0bZB535ya5Q6wNy6HajqpFGvu6pRLuFuaMwSov7d2lP3GU8g1UKzv352ivgu\n-----END RSA PRIVATE KEY----- loaded for HTTPS", "expected": ["private_key_block"]}
+{"id": "pii::7", "text": "curl -H 'Authorization: Bearer vDVNJNEK6hz7YLagY2jTPD1kPmLIJNWu' localhost:8000/items returns 401", "expected": ["bearer_token"]}
+{"id": "pii::8", "text": "Call me on +1 415 555 0132 if you know why uvicorn reloads twice", "expected": ["phone"]}
+{"id": "pii::9", "text": "I'm John Smith from Acme Corp and our FastAPI service in Berlin is slow", "expected": ["person", "location"]}
+{"id": "pii::10", "text": "How do I validate a field named user.email with EmailStr in a Pydantic model?", "expected": []}
+{"id": "pii::11", "text": "Why does app.dependency_overrides[get_db] = override_get_db not apply in TestClient?", "expected": []}
+{"id": "pii::12", "text": "My route is @app.get('/users/{user_id}/items/{item_id}') and returns 422", "expected": []}
+{"id": "pii::13", "text": "Uvicorn logs INFO: 127.0.0.1:52341 - GET /docs HTTP/1.1 200 OK", "expected": []}
+{"id": "pii::14", "text": "Upgrading from 0.95.2 to 0.110.0 broke my OAuth2PasswordRequestForm", "expected": []}
+{"id": "pii::15", "text": "Should I use Depends(get_current_active_user) or Security(get_current_user, scopes=['me'])?", "expected": []}

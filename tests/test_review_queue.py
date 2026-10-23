@@ -20,8 +20,8 @@ def _store(tmp_path) -> InteractionStore:
 def _voted(store, trace_id, rating, query="how do I declare a query parameter", *, escalated=False,
            rewritten=None, comment=None):
     store.record_interaction(trace_id, query, f"answer for {trace_id}", escalated=escalated,
-                             cache_status="miss", rewritten_query=rewritten)
-    store.add_feedback(trace_id, rating, comment)
+                             cache_status="miss", owner="o", rewritten_query=rewritten)
+    store.add_feedback(trace_id, rating, comment, owner="o")
 
 
 # --- the queue ---
@@ -31,7 +31,7 @@ def test_queue_holds_only_voted_unreviewed_interactions_downvotes_first(tmp_path
     store = _store(tmp_path)
     _voted(store, "t-up", "up")
     _voted(store, "t-down", "down")
-    store.record_interaction("t-novote", "q", "a", escalated=False, cache_status="miss")
+    store.record_interaction("t-novote", "q", "a", escalated=False, cache_status="miss", owner="o")
 
     assert [r.trace_id for r in store.pending_review()] == ["t-down", "t-up"]
 

@@ -1,0 +1,69 @@
+# Phase 16, unit 16a (design record docs/explainers/16a-test-workflow.md).
+# Runs on every push and PR. Zero LLM calls, zero spend: the unit tests are all
+# fakes, so this job is allowed to run as often as GitHub will schedule it.
+# The evaluation gate (retrieval metrics, router, generation) is eval.yml.
+name: test
+
+on:
+  push:
+  pull_request:
+
+# A newer push to the same ref makes the older run's result irrelevant.
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+
+    # tests/test_delta_indexing.py is a real-Qdrant integration test (the "deleted
+    # document becomes unretrievable" regression). Same image tag as docker-compose.yml.
+    services:
+      qdrant:
+        image: qdrant/qdrant:v1.18.3
+        ports:
+          - 6333:6333
+
+    env:
+      QDRANT_HOST: localhost
+      # Test code must never reach a paid provider from this workflow: no key is
+      # exposed here, so a test that forgot to fake the client fails loudly.
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+          python-version: "3.12"
+
+      # --frozen: install exactly uv.lock. A lockfile out of sync with pyproject
+      # is a CI failure here, not a silent re-resolve.
+      - name: Install
+        run: uv sync --frozen
+
+      # Cheapest checks first, so a lint error doesn't wait behind the test run.
+      - name: Lint (ruff)
+        run: uv run --frozen ruff check src tests
+
+      - name: Type-check (mypy, core modules listed in pyproject.toml)
+        run: uv run --frozen mypy
+
+      - name: Wait for Qdrant
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:6333/healthz && exit 0
+            sleep 2
+          done
+          echo "Qdrant did not become healthy" >&2
+          exit 1
+
+      # -rs prints every skip with its reason, so a check that quietly stopped
+      # running is visible in the log.
+      - name: Tests
+        run: uv run --frozen pytest -q -rs

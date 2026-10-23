@@ -221,7 +221,7 @@ def write_report(config_summaries: list[dict], n_queries: int) -> None:
         "# Sampling Sweep — Temperature x top_p vs. Faithfulness Proxy",
         "",
         f"Phase 9, step 5. {n_queries} sampled dev-positive golden queries, Phase 6's winning retrieval config "
-        f"(dense, heading-aware, bge-large, no enrichment), prompt v1, Groq `{settings.groq.model}` only "
+        f"(dense, heading-aware, bge-large, no enrichment), prompt {settings.generation.prompt_version}, Groq `{settings.groq.model}` only "
         "(single-provider, to isolate the sampling-parameter effect from provider choice — that's step 6).",
         "",
         "Faithfulness proxy: `CitationValidator.valid_citation_rate` — fraction of citation-requiring claims "

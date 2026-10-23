@@ -11,13 +11,12 @@ Usage: `uv run python -m aegis.eval.freeze_golden_set`
 from __future__ import annotations
 
 import hashlib
-import json
 from collections import defaultdict
 from pathlib import Path
 
 from aegis.config import settings
-from aegis.eval.retrieve_candidates import load_jsonl
 from aegis.eval.negatives import build_negative_queries
+from aegis.eval.retrieve_candidates import load_jsonl
 from aegis.types import GoldenQuery, Stratum
 
 
@@ -98,7 +97,7 @@ def main() -> None:
     holdout_hash = _hash_file(holdout_path)
     print(f"Froze {len(dev_split)} dev split queries, SHA256: {dev_hash[:16]}...")
     print(f"Sealed {len(holdout_split)} holdout queries, SHA256: {holdout_hash[:16]}...")
-    print(f"\nFull hashes for progress.md:")
+    print("\nFull hashes for progress.md:")
     print(f"dev:     {dev_hash}")
     print(f"holdout: {holdout_hash}")
 

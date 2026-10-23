@@ -7,7 +7,6 @@ to a real model's incidental behavior.
 """
 
 import numpy as np
-import pytest
 
 from aegis.cache.exact_match import CachedAnswer
 from aegis.cache.semantic import SemanticCache
@@ -34,14 +33,14 @@ def _answer(text: str = "answer text") -> CachedAnswer:
 
 def test_get_on_empty_cache_returns_none(tmp_path):
     cache = SemanticCache(tmp_path / "cache.sqlite", encoder=_FakeEncoder(), threshold=0.88)
-    assert cache.get("how do i use depends?", corpus_version="v1") is None
+    assert cache.get("how do i use depends?", corpus_version="v1", partition="full") is None
 
 
 def test_identical_query_is_always_a_hit(tmp_path):
     cache = SemanticCache(tmp_path / "cache.sqlite", encoder=_FakeEncoder(), threshold=0.88)
-    cache.set("how do i use depends?", corpus_version="v1", answer=_answer("depends answer"))
+    cache.set("how do i use depends?", corpus_version="v1", answer=_answer("depends answer"), partition="full")
 
-    hit = cache.get("how do i use depends?", corpus_version="v1")
+    hit = cache.get("how do i use depends?", corpus_version="v1", partition="full")
 
     assert hit is not None
     assert hit.text == "depends answer"
@@ -49,10 +48,10 @@ def test_identical_query_is_always_a_hit(tmp_path):
 
 def test_a_query_above_threshold_similarity_hits(tmp_path):
     cache = SemanticCache(tmp_path / "cache.sqlite", encoder=_FakeEncoder(), threshold=0.88)
-    cache.set("how do i use depends?", corpus_version="v1", answer=_answer("depends answer"))
+    cache.set("how do i use depends?", corpus_version="v1", answer=_answer("depends answer"), partition="full")
 
     # cos("how can i use depends in fastapi?", "how do i use depends?") ~= 0.99 >= 0.88
-    hit = cache.get("how can i use depends in fastapi?", corpus_version="v1")
+    hit = cache.get("how can i use depends in fastapi?", corpus_version="v1", partition="full")
 
     assert hit is not None
     assert hit.text == "depends answer"
@@ -60,35 +59,35 @@ def test_a_query_above_threshold_similarity_hits(tmp_path):
 
 def test_a_query_below_threshold_similarity_misses(tmp_path):
     cache = SemanticCache(tmp_path / "cache.sqlite", encoder=_FakeEncoder(), threshold=0.88)
-    cache.set("how do i use depends?", corpus_version="v1", answer=_answer("depends answer"))
+    cache.set("how do i use depends?", corpus_version="v1", answer=_answer("depends answer"), partition="full")
 
     # cos("how do i stream a file response?", "how do i use depends?") ~= 0.85 < 0.88
     # -- the whole point of the threshold: a related-but-different question must NOT hit.
-    assert cache.get("how do i stream a file response?", corpus_version="v1") is None
+    assert cache.get("how do i stream a file response?", corpus_version="v1", partition="full") is None
 
 
 def test_a_completely_unrelated_query_misses(tmp_path):
     cache = SemanticCache(tmp_path / "cache.sqlite", encoder=_FakeEncoder(), threshold=0.88)
-    cache.set("how do i use depends?", corpus_version="v1", answer=_answer("depends answer"))
+    cache.set("how do i use depends?", corpus_version="v1", answer=_answer("depends answer"), partition="full")
 
-    assert cache.get("what is the weather today?", corpus_version="v1") is None
+    assert cache.get("what is the weather today?", corpus_version="v1", partition="full") is None
 
 
 def test_same_query_different_corpus_version_is_a_miss(tmp_path):
     cache = SemanticCache(tmp_path / "cache.sqlite", encoder=_FakeEncoder(), threshold=0.88)
-    cache.set("how do i use depends?", corpus_version="v1", answer=_answer("depends answer"))
+    cache.set("how do i use depends?", corpus_version="v1", answer=_answer("depends answer"), partition="full")
 
-    assert cache.get("how do i use depends?", corpus_version="v2") is None
+    assert cache.get("how do i use depends?", corpus_version="v2", partition="full") is None
 
 
 def test_returns_the_best_match_among_multiple_entries(tmp_path):
     cache = SemanticCache(tmp_path / "cache.sqlite", encoder=_FakeEncoder(), threshold=0.88)
-    cache.set("how do i use depends?", corpus_version="v1", answer=_answer("depends answer"))
-    cache.set("how can i use depends in fastapi?", corpus_version="v1", answer=_answer("closer answer"))
+    cache.set("how do i use depends?", corpus_version="v1", answer=_answer("depends answer"), partition="full")
+    cache.set("how can i use depends in fastapi?", corpus_version="v1", answer=_answer("closer answer"), partition="full")
 
     # Querying with the exact second entry's text should match itself (cos=1.0),
     # not fall back to the first (cos ~= 0.99) -- best match wins.
-    hit = cache.get("how can i use depends in fastapi?", corpus_version="v1")
+    hit = cache.get("how can i use depends in fastapi?", corpus_version="v1", partition="full")
 
     assert hit.text == "closer answer"
 
@@ -96,21 +95,21 @@ def test_returns_the_best_match_among_multiple_entries(tmp_path):
 def test_persists_across_instances_reopening_the_same_path(tmp_path):
     path = tmp_path / "cache.sqlite"
     SemanticCache(path, encoder=_FakeEncoder(), threshold=0.88).set(
-        "how do i use depends?", corpus_version="v1", answer=_answer("persisted")
+        "how do i use depends?", corpus_version="v1", answer=_answer("persisted"), partition="full"
     )
 
     reopened = SemanticCache(path, encoder=_FakeEncoder(), threshold=0.88)
 
-    assert reopened.get("how do i use depends?", corpus_version="v1").text == "persisted"
+    assert reopened.get("how do i use depends?", corpus_version="v1", partition="full").text == "persisted"
 
 
 def test_threshold_is_configurable_per_instance(tmp_path):
     strict_cache = SemanticCache(tmp_path / "cache.sqlite", encoder=_FakeEncoder(), threshold=0.999)
-    strict_cache.set("how do i use depends?", corpus_version="v1", answer=_answer())
+    strict_cache.set("how do i use depends?", corpus_version="v1", answer=_answer(), partition="full")
 
     # cos ~= 0.99 < 0.999 -- a stricter threshold should reject what the
     # default (0.88) test above accepted.
-    assert strict_cache.get("how can i use depends in fastapi?", corpus_version="v1") is None
+    assert strict_cache.get("how can i use depends in fastapi?", corpus_version="v1", partition="full") is None
 
 
 def test_shipped_default_threshold_does_not_serve_the_real_hardest_near_miss(tmp_path):
@@ -134,8 +133,8 @@ def test_shipped_default_threshold_does_not_serve_the_real_hardest_near_miss(tmp
         tmp_path / "cache.sqlite", encoder=encoder, threshold=settings.cache.semantic_similarity_threshold
     )
 
-    cache.set(query_a, corpus_version="v1", answer=_answer("answer about pydantic dynamic models"))
+    cache.set(query_a, corpus_version="v1", answer=_answer("answer about pydantic dynamic models"), partition="full")
 
     # A genuinely different real question, real-measured at 0.8694 similarity
     # -- below the shipped 0.88 threshold. Must NOT serve query_a's answer.
-    assert cache.get(query_b, corpus_version="v1") is None
+    assert cache.get(query_b, corpus_version="v1", partition="full") is None

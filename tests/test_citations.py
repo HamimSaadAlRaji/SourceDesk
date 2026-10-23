@@ -8,7 +8,7 @@ catches deliberately corrupted citations"
 
 from aegis.chunking.tokens import count_tokens
 from aegis.generation.budgeter import PackedChunk, PackedContext
-from aegis.guardrails.citations import ClaimStatus, CitationValidator
+from aegis.guardrails.citations import CitationValidator, ClaimStatus
 from aegis.types import Chunk, DocType
 
 
@@ -186,3 +186,52 @@ def test_fenced_code_block_does_not_get_glued_to_surrounding_prose():
 
     cited_claim = next(c for c in result.claims if c.citation_ids == [1])
     assert cited_claim.status == ClaimStatus.SUPPORTED_LEXICAL
+
+
+# Open Question #18 (design record 15k): list items and paragraphs are claims of
+# their own. Before, a bulleted answer became a few very long "claims" (up to
+# 1,718 chars in 15h) that passed or failed as one unit on word overlap.
+
+_PYDANTIC_DOC = "FastAPI uses Pydantic models for request body validation."
+
+
+def _no_entailment(claim: str, chunk_text: str) -> bool:
+    return False
+
+
+def test_each_bullet_is_its_own_claim_so_an_unsupported_bullet_is_not_masked():
+    answer = (
+        "Details from the context:\n"
+        "- FastAPI validates request bodies with Pydantic models [1].\n"
+        "- FastAPI automatically encrypts every outgoing database connection [1]."
+    )
+    result = _validator(entailment_fn=_no_entailment).validate(answer, _context({1: _PYDANTIC_DOC}))
+
+    statuses = {c.sentence: c.status for c in result.claims}
+    assert statuses["FastAPI validates request bodies with Pydantic models [1]."] == ClaimStatus.SUPPORTED_LEXICAL
+    assert statuses["FastAPI automatically encrypts every outgoing database connection [1]."] == ClaimStatus.UNSUPPORTED
+
+
+def test_numbered_list_items_are_separate_claims():
+    answer = "1. FastAPI validates request bodies with Pydantic models [1]\n2. Pydantic models validate request bodies in FastAPI [1]"
+    result = _validator(entailment_fn=_no_entailment).validate(answer, _context({1: _PYDANTIC_DOC}))
+
+    assert [c.sentence for c in result.claims] == [
+        "FastAPI validates request bodies with Pydantic models [1]",
+        "Pydantic models validate request bodies in FastAPI [1]",
+    ]
+
+
+def test_paragraph_break_ends_a_claim_even_without_a_period():
+    answer = "FastAPI validates request bodies with Pydantic models [1]\n\nYou should also pin your Pydantic version"
+    result = _validator(entailment_fn=_no_entailment).validate(answer, _context({1: _PYDANTIC_DOC}))
+
+    assert [c.status for c in result.claims] == [ClaimStatus.SUPPORTED_LEXICAL, ClaimStatus.MISSING_CITATION]
+
+
+def test_hard_wrapped_sentence_stays_one_claim():
+    answer = "FastAPI validates request bodies\nwith Pydantic models [1]."
+    result = _validator(entailment_fn=_no_entailment).validate(answer, _context({1: _PYDANTIC_DOC}))
+
+    [claim] = result.claims
+    assert claim.status == ClaimStatus.SUPPORTED_LEXICAL

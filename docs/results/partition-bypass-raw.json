@@ -1,0 +1,39 @@
+{
+  "A1_after": {
+    "n_queries": 180,
+    "issue_slots": 0,
+    "slots": 1800,
+    "before": "609/1800"
+  },
+  "bypass_sweep": {
+    "docs/dense": {
+      "n_queries": 190,
+      "n_bypass_queries": 10,
+      "out_of_partition_chunks": 0,
+      "partition_violations_raised": 0,
+      "short_result_lists": 0
+    },
+    "docs/hybrid": {
+      "n_queries": 190,
+      "n_bypass_queries": 10,
+      "out_of_partition_chunks": 0,
+      "partition_violations_raised": 0,
+      "short_result_lists": 0
+    },
+    "issues/dense": {
+      "n_queries": 190,
+      "n_bypass_queries": 10,
+      "out_of_partition_chunks": 0,
+      "partition_violations_raised": 0,
+      "short_result_lists": 0
+    },
+    "issues/hybrid": {
+      "n_queries": 190,
+      "n_bypass_queries": 10,
+      "out_of_partition_chunks": 0,
+      "partition_violations_raised": 0,
+      "short_result_lists": 0
+    }
+  },
+  "elapsed_s": 10.6
+}

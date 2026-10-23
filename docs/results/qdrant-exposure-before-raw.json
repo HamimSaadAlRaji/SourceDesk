@@ -1,0 +1,29 @@
+{
+  "label": "before",
+  "ports": [
+    "6333/tcp -> 0.0.0.0:6333",
+    "6333/tcp -> [::]:6333",
+    "6334/tcp -> 0.0.0.0:6334",
+    "6334/tcp -> [::]:6334"
+  ],
+  "keys_configured": {
+    "read_only_key": false,
+    "admin_key": false
+  },
+  "probes": {
+    "localhost/no_key": {
+      "list_collections": 200,
+      "scroll_served_collection": 200,
+      "create_probe_collection": 200,
+      "upsert_probe_point": 200,
+      "delete_probe_collection": 200
+    },
+    "lan/no_key": {
+      "list_collections": 200,
+      "scroll_served_collection": 200,
+      "create_probe_collection": 200,
+      "upsert_probe_point": 200,
+      "delete_probe_collection": 200
+    }
+  }
+}

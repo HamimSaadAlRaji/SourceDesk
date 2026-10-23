@@ -35,31 +35,27 @@ standalone, return it unchanged.
 Respond with the rewritten question only. No preamble, no quotes."""
 
 
-def _default_rewrite_fn(model: str, temperature: float) -> RewriteFn:
-    from groq import APIError, Groq
-
-    client = Groq(api_key=settings.groq.api_key)
+def _default_rewrite_fn(provider: str, model: str, temperature: float) -> RewriteFn:
+    from aegis.generation.llm.chat import LLMCallError, chat_completion
 
     def rewrite(history: History, query: str) -> str:
         history_text = "\n".join(f"{role}: {text}" for role, text in history)
         try:
-            completion = client.chat.completions.create(
-                model=model,
-                temperature=temperature,
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": f"Conversation so far:\n{history_text}\n\nFollow-up: {query}"},
-                ],
+            return chat_completion(
+                provider, model,
+                [{"role": "system", "content": SYSTEM_PROMPT},
+                 {"role": "user", "content": f"Conversation so far:\n{history_text}\n\nFollow-up: {query}"}],
+                temperature=temperature, max_tokens=settings.query.rewrite_max_tokens, purpose="rewrite",
             )
-        except APIError as exc:
+        except LLMCallError as exc:
             # Falling back to the raw query is the right fail-safe, but it must
             # not be silent: the router once hid a quota outage the same way.
+            cause = exc.__cause__
             log_event(
-                _log, logging.WARNING, "rewrite.api_error",
-                error_type=type(exc).__name__, status_code=getattr(exc, "status_code", None), detail=str(exc)[:300],
+                _log, logging.WARNING, "rewrite.api_error", provider=provider,
+                error_type=type(cause).__name__, status_code=exc.status_code, detail=str(cause)[:300],
             )
             return ""
-        return completion.choices[0].message.content or ""
 
     return rewrite
 
@@ -68,10 +64,16 @@ class QueryRewriter:
     def __init__(
         self,
         rewrite_fn: RewriteFn | None = None,
-        model: str = settings.query.rewrite_model,
+        model: str | None = None,
         temperature: float = settings.query.temperature,
+        provider: str = settings.query.rewrite_provider,
     ) -> None:
-        self._rewrite_fn = rewrite_fn or _default_rewrite_fn(model, temperature)
+        if rewrite_fn is None:
+            from aegis.generation.llm.chat import resolve_role
+
+            provider, model = resolve_role(provider, model, settings.openai.rewrite_model, settings.query.rewrite_model)
+            rewrite_fn = _default_rewrite_fn(provider, model, temperature)
+        self._rewrite_fn = rewrite_fn
 
     def rewrite(self, history: History, query: str) -> str:
         """No history means nothing to resolve against -- skip the LLM call

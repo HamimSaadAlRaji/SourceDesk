@@ -1,0 +1,39 @@
+{
+  "n_dev": 180,
+  "n_touched": 3,
+  "rows": [
+    {
+      "query_id": "golden::issue::1719",
+      "kinds": {
+        "url_with_credentials": 1
+      },
+      "chars": 3657,
+      "top10_overlap": 10,
+      "top1_same": true,
+      "gt_hits_before": 8,
+      "gt_hits_after": 8
+    },
+    {
+      "query_id": "golden::issue::9780",
+      "kinds": {
+        "email": 1
+      },
+      "chars": 16755,
+      "top10_overlap": 10,
+      "top1_same": true,
+      "gt_hits_before": 6,
+      "gt_hits_after": 6
+    },
+    {
+      "query_id": "golden::issue::12240",
+      "kinds": {
+        "email": 1
+      },
+      "chars": 6597,
+      "top10_overlap": 10,
+      "top1_same": true,
+      "gt_hits_before": 8,
+      "gt_hits_after": 8
+    }
+  ]
+}

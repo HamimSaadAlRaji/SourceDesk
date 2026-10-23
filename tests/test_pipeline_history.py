@@ -3,8 +3,7 @@ standalone query BEFORE the cache, router and retriever see it. Doing it any
 later would let "what about the free tier?" hit another conversation's cache
 entry, or be routed on a pronoun."""
 
-import pytest
-from test_pipeline import _FakeCache, _FixedRetriever, _chunk, _pipeline, Query, Route, _FixedRouter, _RaisingRetriever
+from test_pipeline import Query, Route, _chunk, _FakeCache, _FixedRetriever, _FixedRouter, _pipeline
 from test_pipeline_stream import _StreamLLM
 
 from aegis.events import DoneEvent

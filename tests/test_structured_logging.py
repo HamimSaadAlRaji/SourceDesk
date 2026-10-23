@@ -87,7 +87,7 @@ def test_get_logger_is_namespaced_under_aegis():
 def test_router_api_failure_is_logged_not_silently_swallowed(monkeypatch):
     import groq
 
-    from aegis.router.classifier import RouterClassifier, Route
+    from aegis.router.classifier import RouterClassifier
 
     class _FakeCompletions:
         def create(self, **kwargs):
@@ -103,7 +103,7 @@ def test_router_api_failure_is_logged_not_silently_swallowed(monkeypatch):
     from aegis.router.classifier import RouterUnavailableError
 
     with bind_trace_id("trace-router"), pytest.raises(RouterUnavailableError):
-        RouterClassifier().classify("how do I declare a query parameter")
+        RouterClassifier(provider="groq").classify("how do I declare a query parameter")
 
     # An outage is no longer folded into the billing fail-safe (design record
     # 14f): it raises, and AnswerPipeline escalates it with its own cause.
@@ -157,6 +157,32 @@ def test_citation_entailment_api_failure_is_logged_and_still_fails_closed(monkey
     monkeypatch.setattr(groq, "Groq", _FakeGroq)
     logger, stream = _capture("aegis.citations")
 
-    assert _default_entailment_fn("m", 0.0)("a claim", "a chunk") is False
+    assert _default_entailment_fn("groq", "m", 0.0)("a claim", "a chunk") is False
     (rec,) = [r for r in _records(stream) if r["event"] == "citation.entailment_api_error"]
     assert rec["level"] == "WARNING" and rec["error_type"] == "APIError"
+
+
+def test_openai_router_and_entailment_failures_take_the_same_fail_safe_paths(monkeypatch):
+    """Same contracts on the OpenAI path (Phase 15 step 0): an OpenAI API error
+    is a RouterUnavailableError and a fail-closed entailment, both logged."""
+    import openai
+
+    from aegis.generation.llm import openai_provider
+    from aegis.guardrails.citations import _default_entailment_fn
+    from aegis.router.classifier import RouterClassifier, RouterUnavailableError
+
+    class _Down:
+        def __init__(self):
+            def create(**kw):
+                raise openai.APIConnectionError(request=httpx.Request("POST", "http://x"))
+            self.chat = type("C", (), {"completions": type("X", (), {"create": staticmethod(create)})()})()
+
+    monkeypatch.setattr(openai_provider, "_default_client", _Down)
+    _, router_stream = _capture("aegis.router")
+    with pytest.raises(RouterUnavailableError):
+        RouterClassifier(provider="openai").classify("how do I declare a query parameter")
+    assert [r["provider"] for r in _records(router_stream) if r["event"] == "router.api_error"] == ["openai"]
+
+    _, cit_stream = _capture("aegis.citations")
+    assert _default_entailment_fn("openai", "gpt-4.1-nano", 0.0)("a claim", "a chunk") is False
+    assert any(r["event"] == "citation.entailment_api_error" for r in _records(cit_stream))

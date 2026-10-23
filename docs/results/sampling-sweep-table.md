@@ -1,6 +1,6 @@
 # Sampling Sweep — Temperature x top_p vs. Faithfulness Proxy
 
-Phase 9, step 5. 20 sampled dev-positive golden queries, Phase 6's winning retrieval config (dense, heading-aware, bge-large, no enrichment), prompt v1, Groq `qwen/qwen3.8-27b` only (single-provider, to isolate the sampling-parameter effect from provider choice — that's step 6).
+Phase 9, step 5. 20 sampled dev-positive golden queries, Phase 6's winning retrieval config (dense, heading-aware, bge-large, no enrichment), prompt v2 (corrected 2026-10-19: the generator hard-coded "v1"; v2 was already the default), Groq `qwen/qwen3.8-27b` only (single-provider, to isolate the sampling-parameter effect from provider choice — that's step 6).
 
 Faithfulness proxy: `CitationValidator.valid_citation_rate` — fraction of citation-requiring claims that end up supported (lexically or via entailment). Not RAGAS faithfulness (Phase 11); named as a proxy deliberately.
 

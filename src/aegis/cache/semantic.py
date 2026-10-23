@@ -28,7 +28,7 @@ from typing import Protocol
 
 import numpy as np
 
-from aegis.cache.exact_match import CachedAnswer
+from aegis.cache.exact_match import CachedAnswer, cache_scope
 
 
 class _Encoder(Protocol):
@@ -57,12 +57,15 @@ class SemanticCache:
             )
             self._conn.commit()
 
-    def get(self, query_text: str, corpus_version: str) -> CachedAnswer | None:
+    def get(self, query_text: str, corpus_version: str, *, partition: str) -> CachedAnswer | None:
         query_vector = self.encoder.encode([query_text])[0]
         with self._lock:
+            # The `corpus_version` column holds the full scope (version +
+            # partition, design record 15b); rows written before that hold a
+            # bare version and are simply never matched again.
             rows = self._conn.execute(
                 "SELECT dim, vector, payload FROM semantic_cache WHERE corpus_version = ?",
-                (corpus_version,),
+                (cache_scope(corpus_version, partition),),
             ).fetchall()
 
         best_answer: CachedAnswer | None = None
@@ -78,11 +81,11 @@ class SemanticCache:
             return best_answer
         return None
 
-    def set(self, query_text: str, corpus_version: str, answer: CachedAnswer) -> None:
+    def set(self, query_text: str, corpus_version: str, answer: CachedAnswer, *, partition: str) -> None:
         vector = np.asarray(self.encoder.encode([query_text])[0], dtype=np.float32)
         with self._lock:
             self._conn.execute(
                 "INSERT INTO semantic_cache (corpus_version, dim, vector, payload) VALUES (?, ?, ?, ?)",
-                (corpus_version, vector.shape[0], vector.tobytes(), answer.model_dump_json()),
+                (cache_scope(corpus_version, partition), vector.shape[0], vector.tobytes(), answer.model_dump_json()),
             )
             self._conn.commit()

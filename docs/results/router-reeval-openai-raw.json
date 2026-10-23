@@ -1,0 +1,1356 @@
+{
+  "rows": {
+    "gpt-4.1-nano": [
+      {
+        "query_id": "golden::issue::604",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 2673.909457982518
+      },
+      {
+        "query_id": "golden::issue::257",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 1434.6515419892967
+      },
+      {
+        "query_id": "golden::issue::882",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 1212.1870419941843
+      },
+      {
+        "query_id": "golden::issue::1781",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 983.7530420627445
+      },
+      {
+        "query_id": "golden::issue::2467",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 971.9234999502078
+      },
+      {
+        "query_id": "golden::issue::1996",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 654.8058339394629
+      },
+      {
+        "query_id": "golden::issue::3212",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 1077.1957079414278
+      },
+      {
+        "query_id": "golden::issue::5532",
+        "true": "docs_howto",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 1082.2735419496894
+      },
+      {
+        "query_id": "golden::issue::959",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 752.7832919731736
+      },
+      {
+        "query_id": "golden::issue::4860",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 1144.0062079345807
+      },
+      {
+        "query_id": "golden::issue::78",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 692.0498749241233
+      },
+      {
+        "query_id": "golden::issue::58",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 840.2427090331912
+      },
+      {
+        "query_id": "golden::issue::5045",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 753.0375000787899
+      },
+      {
+        "query_id": "golden::issue::3563",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 651.9115410046652
+      },
+      {
+        "query_id": "golden::issue::923",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 749.0782079985365
+      },
+      {
+        "query_id": "golden::issue::129",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 742.9789589950815
+      },
+      {
+        "query_id": "golden::issue::758",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 849.1181660210714
+      },
+      {
+        "query_id": "golden::issue::4478",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 679.671416990459
+      },
+      {
+        "query_id": "golden::issue::1491",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 673.7596669699997
+      },
+      {
+        "query_id": "golden::issue::602",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 694.2370419856161
+      },
+      {
+        "query_id": "golden::issue::1005",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 717.627290985547
+      },
+      {
+        "query_id": "golden::issue::527",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 727.2198749706149
+      },
+      {
+        "query_id": "golden::issue::3",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 673.9355419995263
+      },
+      {
+        "query_id": "golden::issue::2300",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 641.5441670687869
+      },
+      {
+        "query_id": "golden::issue::3947",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 706.6616250667721
+      },
+      {
+        "query_id": "golden::issue::2934",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 867.6347089931369
+      },
+      {
+        "query_id": "golden::issue::12965",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 620.5464579397812
+      },
+      {
+        "query_id": "golden::issue::1125",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 710.1580830058083
+      },
+      {
+        "query_id": "golden::issue::2618",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 719.3969578947872
+      },
+      {
+        "query_id": "golden::issue::4236",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 739.6265829447657
+      },
+      {
+        "query_id": "golden::issue::5387",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 638.015458942391
+      },
+      {
+        "query_id": "golden::issue::744",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 716.6276249336079
+      },
+      {
+        "query_id": "golden::issue::12402",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 760.8322500018403
+      },
+      {
+        "query_id": "golden::issue::1779",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 655.0312920007855
+      },
+      {
+        "query_id": "golden::issue::4391",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 699.8490000842139
+      },
+      {
+        "query_id": "golden::issue::1490",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 715.247500105761
+      },
+      {
+        "query_id": "golden::issue::1719",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 626.1545839952305
+      },
+      {
+        "query_id": "golden::issue::23",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 1006.6503749694675
+      },
+      {
+        "query_id": "golden::issue::763",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 704.7210420714691
+      },
+      {
+        "query_id": "golden::issue::950",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 667.8247500676662
+      },
+      {
+        "query_id": "golden::issue::1195",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 806.2390419654548
+      },
+      {
+        "query_id": "golden::issue::1732",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 851.811834028922
+      },
+      {
+        "query_id": "golden::issue::2657",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 634.9402500782162
+      },
+      {
+        "query_id": "golden::issue::4816",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 650.52495803684
+      },
+      {
+        "query_id": "golden::issue::1264",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 697.0209589926526
+      },
+      {
+        "query_id": "golden::issue::1320",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 700.5226250039414
+      },
+      {
+        "query_id": "golden::issue::1743",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 716.1477090558037
+      },
+      {
+        "query_id": "golden::issue::3021",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 656.7702090833336
+      },
+      {
+        "query_id": "golden::issue::2735",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 666.7022090405226
+      },
+      {
+        "query_id": "golden::issue::1631",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 715.4491670662537
+      },
+      {
+        "query_id": "negative::billing_legal::6",
+        "true": "billing_account_legal",
+        "pred": "billing_account_legal",
+        "raw": "{\"route\": \"billing_account_legal\"}",
+        "latency_ms": 704.7536669997498
+      },
+      {
+        "query_id": "negative::billing_legal::9",
+        "true": "billing_account_legal",
+        "pred": "billing_account_legal",
+        "raw": "{\"route\": \"billing_account_legal\"}",
+        "latency_ms": 746.6479580616578
+      },
+      {
+        "query_id": "negative::billing_legal::2",
+        "true": "billing_account_legal",
+        "pred": "billing_account_legal",
+        "raw": "{\"route\": \"billing_account_legal\"}",
+        "latency_ms": 1025.0722919590771
+      },
+      {
+        "query_id": "negative::billing_legal::7",
+        "true": "billing_account_legal",
+        "pred": "billing_account_legal",
+        "raw": "{\"route\": \"billing_account_legal\"}",
+        "latency_ms": 656.7372080171481
+      },
+      {
+        "query_id": "negative::billing_legal::1",
+        "true": "billing_account_legal",
+        "pred": "billing_account_legal",
+        "raw": "{\"route\": \"billing_account_legal\"}",
+        "latency_ms": 671.2006669258699
+      },
+      {
+        "query_id": "negative::billing_legal::8",
+        "true": "billing_account_legal",
+        "pred": "billing_account_legal",
+        "raw": "{\"route\": \"billing_account_legal\"}",
+        "latency_ms": 723.5074170166627
+      },
+      {
+        "query_id": "negative::billing_legal::3",
+        "true": "billing_account_legal",
+        "pred": "billing_account_legal",
+        "raw": "{\"route\": \"billing_account_legal\"}",
+        "latency_ms": 655.0837500253692
+      },
+      {
+        "query_id": "negative::billing_legal::4",
+        "true": "billing_account_legal",
+        "pred": "billing_account_legal",
+        "raw": "{\"route\": \"billing_account_legal\"}",
+        "latency_ms": 700.2484170952812
+      }
+    ],
+    "gpt-4.1-mini": [
+      {
+        "query_id": "golden::issue::604",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 790.5870419926941
+      },
+      {
+        "query_id": "golden::issue::257",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 727.8051660396159
+      },
+      {
+        "query_id": "golden::issue::882",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 876.6489169793203
+      },
+      {
+        "query_id": "golden::issue::1781",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 838.7014579493552
+      },
+      {
+        "query_id": "golden::issue::2467",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 811.2438749521971
+      },
+      {
+        "query_id": "golden::issue::1996",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 765.06641600281
+      },
+      {
+        "query_id": "golden::issue::3212",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 829.1845840867609
+      },
+      {
+        "query_id": "golden::issue::5532",
+        "true": "docs_howto",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 783.6917500244454
+      },
+      {
+        "query_id": "golden::issue::959",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 776.8769999966025
+      },
+      {
+        "query_id": "golden::issue::4860",
+        "true": "docs_howto",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 805.8977079344913
+      },
+      {
+        "query_id": "golden::issue::78",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 750.4455000162125
+      },
+      {
+        "query_id": "golden::issue::58",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 791.0959580913186
+      },
+      {
+        "query_id": "golden::issue::5045",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 764.9507090682164
+      },
+      {
+        "query_id": "golden::issue::3563",
+        "true": "docs_howto",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 706.0097079956904
+      },
+      {
+        "query_id": "golden::issue::923",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 780.3044999018312
+      },
+      {
+        "query_id": "golden::issue::129",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 805.4900000570342
+      },
+      {
+        "query_id": "golden::issue::758",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 850.9421669878066
+      },
+      {
+        "query_id": "golden::issue::4478",
+        "true": "docs_howto",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 738.402958959341
+      },
+      {
+        "query_id": "golden::issue::1491",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 800.5841668928042
+      },
+      {
+        "query_id": "golden::issue::602",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 1786.850166041404
+      },
+      {
+        "query_id": "golden::issue::1005",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 760.116665973328
+      },
+      {
+        "query_id": "golden::issue::527",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 850.0194159569219
+      },
+      {
+        "query_id": "golden::issue::3",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 784.1811659745872
+      },
+      {
+        "query_id": "golden::issue::2300",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 819.3823749898002
+      },
+      {
+        "query_id": "golden::issue::3947",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 791.6029159678146
+      },
+      {
+        "query_id": "golden::issue::2934",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 943.7156659550965
+      },
+      {
+        "query_id": "golden::issue::12965",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 861.6189591120929
+      },
+      {
+        "query_id": "golden::issue::1125",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 775.3631670493633
+      },
+      {
+        "query_id": "golden::issue::2618",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 832.0202080067247
+      },
+      {
+        "query_id": "golden::issue::4236",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 754.8722079955041
+      },
+      {
+        "query_id": "golden::issue::5387",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 773.9693330368027
+      },
+      {
+        "query_id": "golden::issue::744",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 904.716584016569
+      },
+      {
+        "query_id": "golden::issue::12402",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 726.3316670432687
+      },
+      {
+        "query_id": "golden::issue::1779",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 753.5288329236209
+      },
+      {
+        "query_id": "golden::issue::4391",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 740.140457986854
+      },
+      {
+        "query_id": "golden::issue::1490",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 733.0783749930561
+      },
+      {
+        "query_id": "golden::issue::1719",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 765.4125828994438
+      },
+      {
+        "query_id": "golden::issue::23",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 836.4820830756798
+      },
+      {
+        "query_id": "golden::issue::763",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 739.7205829620361
+      },
+      {
+        "query_id": "golden::issue::950",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 888.6421249480918
+      },
+      {
+        "query_id": "golden::issue::1195",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 756.8934169830754
+      },
+      {
+        "query_id": "golden::issue::1732",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 809.6539579564705
+      },
+      {
+        "query_id": "golden::issue::2657",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 943.3367500314489
+      },
+      {
+        "query_id": "golden::issue::4816",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 721.2064580526203
+      },
+      {
+        "query_id": "golden::issue::1264",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 714.1346249263734
+      },
+      {
+        "query_id": "golden::issue::1320",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 742.3189170658588
+      },
+      {
+        "query_id": "golden::issue::1743",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 860.6353750219569
+      },
+      {
+        "query_id": "golden::issue::3021",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 742.0806249137968
+      },
+      {
+        "query_id": "golden::issue::2735",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 684.6548749599606
+      },
+      {
+        "query_id": "golden::issue::1631",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 789.989750017412
+      },
+      {
+        "query_id": "negative::billing_legal::6",
+        "true": "billing_account_legal",
+        "pred": "billing_account_legal",
+        "raw": "{\"route\": \"billing_account_legal\"}",
+        "latency_ms": 940.0045829825103
+      },
+      {
+        "query_id": "negative::billing_legal::9",
+        "true": "billing_account_legal",
+        "pred": "billing_account_legal",
+        "raw": "{\"route\": \"billing_account_legal\"}",
+        "latency_ms": 739.3884579651058
+      },
+      {
+        "query_id": "negative::billing_legal::2",
+        "true": "billing_account_legal",
+        "pred": "billing_account_legal",
+        "raw": "{\"route\": \"billing_account_legal\"}",
+        "latency_ms": 783.871041960083
+      },
+      {
+        "query_id": "negative::billing_legal::7",
+        "true": "billing_account_legal",
+        "pred": "billing_account_legal",
+        "raw": "{\"route\": \"billing_account_legal\"}",
+        "latency_ms": 829.0021670982242
+      },
+      {
+        "query_id": "negative::billing_legal::1",
+        "true": "billing_account_legal",
+        "pred": "billing_account_legal",
+        "raw": "{\"route\": \"billing_account_legal\"}",
+        "latency_ms": 1034.0832499787211
+      },
+      {
+        "query_id": "negative::billing_legal::8",
+        "true": "billing_account_legal",
+        "pred": "billing_account_legal",
+        "raw": "{\"route\": \"billing_account_legal\"}",
+        "latency_ms": 744.184207986109
+      },
+      {
+        "query_id": "negative::billing_legal::3",
+        "true": "billing_account_legal",
+        "pred": "billing_account_legal",
+        "raw": "{\"route\": \"billing_account_legal\"}",
+        "latency_ms": 869.2992079304531
+      },
+      {
+        "query_id": "negative::billing_legal::4",
+        "true": "billing_account_legal",
+        "pred": "billing_account_legal",
+        "raw": "{\"route\": \"billing_account_legal\"}",
+        "latency_ms": 750.61916699633
+      }
+    ],
+    "qwen/qwen3.8-27b": [
+      {
+        "query_id": "golden::issue::604",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 2941.3065830012783
+      },
+      {
+        "query_id": "golden::issue::257",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 2844.726916984655
+      },
+      {
+        "query_id": "golden::issue::882",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 3021.245874930173
+      },
+      {
+        "query_id": "golden::issue::1781",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 2868.1047910358757
+      },
+      {
+        "query_id": "golden::issue::2467",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 2913.305791094899
+      },
+      {
+        "query_id": "golden::issue::1996",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 2928.2264169305563
+      },
+      {
+        "query_id": "golden::issue::3212",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 2877.190125058405
+      },
+      {
+        "query_id": "golden::issue::5532",
+        "true": "docs_howto",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 3045.2996670501307
+      },
+      {
+        "query_id": "golden::issue::959",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 2965.608207974583
+      },
+      {
+        "query_id": "golden::issue::4860",
+        "true": "docs_howto",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 2971.8248340068385
+      },
+      {
+        "query_id": "golden::issue::78",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 3028.133249958046
+      },
+      {
+        "query_id": "golden::issue::58",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 2921.969374991022
+      },
+      {
+        "query_id": "golden::issue::5045",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 2918.796499958262
+      },
+      {
+        "query_id": "golden::issue::3563",
+        "true": "docs_howto",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 2878.024167031981
+      },
+      {
+        "query_id": "golden::issue::923",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 2958.6809589527547
+      },
+      {
+        "query_id": "golden::issue::129",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 2864.4878329942003
+      },
+      {
+        "query_id": "golden::issue::758",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 2945.4384580021724
+      },
+      {
+        "query_id": "golden::issue::4478",
+        "true": "docs_howto",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 4127.112208050676
+      },
+      {
+        "query_id": "golden::issue::1491",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 6114.719667006284
+      },
+      {
+        "query_id": "golden::issue::602",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 4075.613958062604
+      },
+      {
+        "query_id": "golden::issue::1005",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 5167.88937500678
+      },
+      {
+        "query_id": "golden::issue::527",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 5108.109875000082
+      },
+      {
+        "query_id": "golden::issue::3",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 5217.077792040072
+      },
+      {
+        "query_id": "golden::issue::2300",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 5382.474582991563
+      },
+      {
+        "query_id": "golden::issue::3947",
+        "true": "docs_howto",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 9172.42850002367
+      },
+      {
+        "query_id": "golden::issue::2934",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 10398.082167026587
+      },
+      {
+        "query_id": "golden::issue::12965",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 15288.777750101872
+      },
+      {
+        "query_id": "golden::issue::1125",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 7105.570166953839
+      },
+      {
+        "query_id": "golden::issue::2618",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 7097.655625082552
+      },
+      {
+        "query_id": "golden::issue::4236",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 22283.755666925572
+      },
+      {
+        "query_id": "golden::issue::5387",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 8137.507125036791
+      },
+      {
+        "query_id": "golden::issue::744",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 12464.579417021014
+      },
+      {
+        "query_id": "golden::issue::12402",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 7187.488583032973
+      },
+      {
+        "query_id": "golden::issue::1779",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 6197.998207993805
+      },
+      {
+        "query_id": "golden::issue::4391",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 10183.424540911801
+      },
+      {
+        "query_id": "golden::issue::1490",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 5771.358084050007
+      },
+      {
+        "query_id": "golden::issue::1719",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 12235.939041012898
+      },
+      {
+        "query_id": "golden::issue::23",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 4100.274999975227
+      },
+      {
+        "query_id": "golden::issue::763",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 6188.833125052042
+      },
+      {
+        "query_id": "golden::issue::950",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 4070.771040976979
+      },
+      {
+        "query_id": "golden::issue::1195",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 16224.670042051002
+      },
+      {
+        "query_id": "golden::issue::1732",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\n\"route\": \"docs_howto\"\n}",
+        "latency_ms": 8422.168499906547
+      },
+      {
+        "query_id": "golden::issue::2657",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 5098.950000014156
+      },
+      {
+        "query_id": "golden::issue::4816",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\"route\": \"docs_howto\"}",
+        "latency_ms": 12197.981207980774
+      },
+      {
+        "query_id": "golden::issue::1264",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 5170.2976250089705
+      },
+      {
+        "query_id": "golden::issue::1320",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 12282.935625058599
+      },
+      {
+        "query_id": "golden::issue::1743",
+        "true": "known_issue",
+        "pred": "docs_howto",
+        "raw": "{\n\"route\": \"docs_howto\"\n}",
+        "latency_ms": 10696.18674996309
+      },
+      {
+        "query_id": "golden::issue::3021",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 7416.787708061747
+      },
+      {
+        "query_id": "golden::issue::2735",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 4857.480000006035
+      },
+      {
+        "query_id": "golden::issue::1631",
+        "true": "known_issue",
+        "pred": "known_issue",
+        "raw": "{\"route\": \"known_issue\"}",
+        "latency_ms": 10253.837542026304
+      },
+      {
+        "query_id": "negative::billing_legal::6",
+        "true": "billing_account_legal",
+        "pred": "billing_account_legal",
+        "raw": "{\"route\": \"billing_account_legal\"}",
+        "latency_ms": 4088.880665949546
+      },
+      {
+        "query_id": "negative::billing_legal::9",
+        "true": "billing_account_legal",
+        "pred": "billing_account_legal",
+        "raw": "{\"route\": \"billing_account_legal\"}",
+        "latency_ms": 4064.1446249792352
+      },
+      {
+        "query_id": "negative::billing_legal::2",
+        "true": "billing_account_legal",
+        "pred": "billing_account_legal",
+        "raw": "{\"route\": \"billing_account_legal\"}",
+        "latency_ms": 3052.970750024542
+      },
+      {
+        "query_id": "negative::billing_legal::7",
+        "true": "billing_account_legal",
+        "pred": "billing_account_legal",
+        "raw": "{\"route\": \"billing_account_legal\"}",
+        "latency_ms": 4038.494833977893
+      },
+      {
+        "query_id": "negative::billing_legal::1",
+        "true": "billing_account_legal",
+        "pred": "billing_account_legal",
+        "raw": "{\"route\": \"billing_account_legal\"}",
+        "latency_ms": 4092.563832993619
+      },
+      {
+        "query_id": "negative::billing_legal::8",
+        "true": "billing_account_legal",
+        "pred": "billing_account_legal",
+        "raw": "{\"route\": \"billing_account_legal\"}",
+        "latency_ms": 4061.938332975842
+      },
+      {
+        "query_id": "negative::billing_legal::3",
+        "true": "billing_account_legal",
+        "pred": "billing_account_legal",
+        "raw": "{\"route\": \"billing_account_legal\"}",
+        "latency_ms": 4280.251458985731
+      },
+      {
+        "query_id": "negative::billing_legal::4",
+        "true": "billing_account_legal",
+        "pred": "billing_account_legal",
+        "raw": "{\"route\": \"billing_account_legal\"}",
+        "latency_ms": 2913.4692499646917
+      }
+    ]
+  },
+  "scores": {
+    "gpt-4.1-nano": {
+      "accuracy": 0.6379310344827587,
+      "correct": 37,
+      "n": 58,
+      "unparseable": 0,
+      "confusion": {
+        "docs_howto": {
+          "docs_howto": 24,
+          "known_issue": 1
+        },
+        "known_issue": {
+          "docs_howto": 20,
+          "known_issue": 5
+        },
+        "billing_account_legal": {
+          "billing_account_legal": 8
+        }
+      },
+      "per_class": {
+        "docs_howto": {
+          "tp": 24,
+          "support": 25,
+          "predicted": 44,
+          "recall": 0.96,
+          "precision": 0.5454545454545454
+        },
+        "known_issue": {
+          "tp": 5,
+          "support": 25,
+          "predicted": 6,
+          "recall": 0.2,
+          "precision": 0.8333333333333334
+        },
+        "billing_account_legal": {
+          "tp": 8,
+          "support": 8,
+          "predicted": 8,
+          "recall": 1.0,
+          "precision": 1.0
+        }
+      }
+    },
+    "gpt-4.1-mini": {
+      "accuracy": 0.7758620689655172,
+      "correct": 45,
+      "n": 58,
+      "unparseable": 0,
+      "confusion": {
+        "docs_howto": {
+          "docs_howto": 21,
+          "known_issue": 4
+        },
+        "known_issue": {
+          "known_issue": 16,
+          "docs_howto": 9
+        },
+        "billing_account_legal": {
+          "billing_account_legal": 8
+        }
+      },
+      "per_class": {
+        "docs_howto": {
+          "tp": 21,
+          "support": 25,
+          "predicted": 30,
+          "recall": 0.84,
+          "precision": 0.7
+        },
+        "known_issue": {
+          "tp": 16,
+          "support": 25,
+          "predicted": 20,
+          "recall": 0.64,
+          "precision": 0.8
+        },
+        "billing_account_legal": {
+          "tp": 8,
+          "support": 8,
+          "predicted": 8,
+          "recall": 1.0,
+          "precision": 1.0
+        }
+      }
+    },
+    "qwen/qwen3.8-27b": {
+      "accuracy": 0.7931034482758621,
+      "correct": 46,
+      "n": 58,
+      "unparseable": 0,
+      "confusion": {
+        "docs_howto": {
+          "docs_howto": 21,
+          "known_issue": 4
+        },
+        "known_issue": {
+          "known_issue": 17,
+          "docs_howto": 8
+        },
+        "billing_account_legal": {
+          "billing_account_legal": 8
+        }
+      },
+      "per_class": {
+        "docs_howto": {
+          "tp": 21,
+          "support": 25,
+          "predicted": 29,
+          "recall": 0.84,
+          "precision": 0.7241379310344828
+        },
+        "known_issue": {
+          "tp": 17,
+          "support": 25,
+          "predicted": 21,
+          "recall": 0.68,
+          "precision": 0.8095238095238095
+        },
+        "billing_account_legal": {
+          "tp": 8,
+          "support": 8,
+          "predicted": 8,
+          "recall": 1.0,
+          "precision": 1.0
+        }
+      }
+    }
+  }
+}
