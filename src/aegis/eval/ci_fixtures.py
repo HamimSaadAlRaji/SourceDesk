@@ -22,6 +22,8 @@ import json
 import shutil
 import sys
 import tempfile
+import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -34,6 +36,7 @@ CHUNKS_FILE = "chunks.jsonl.gz"
 MANIFEST_FILE = "MANIFEST.json"
 _HASHED_FILES = (SNAPSHOT_FILE, CHUNKS_FILE)
 _TIMEOUT_S = 600.0
+_GREEN_TIMEOUT_S = 600.0
 
 
 class FixtureError(RuntimeError):
@@ -84,6 +87,35 @@ def verify_fixtures(directory: Path) -> VerifiedFixtures:
     if fingerprint != manifest["fingerprint"]:
         raise FixtureError("manifest fingerprint is inconsistent with its own file hashes")
     return VerifiedFixtures(fingerprint=fingerprint, manifest=manifest)
+
+
+def wait_until_green(
+    fetch_info: Callable[[], dict],
+    expected_points: int,
+    timeout_s: float,
+    *,
+    sleep: Callable[[float], None] = time.sleep,
+    monotonic: Callable[[], float] = time.monotonic,
+    poll_s: float = 2.0,
+) -> dict:
+    """Block until the restored collection is green with the expected point count.
+    Right after a snapshot upload Qdrant can still be optimizing (status "yellow"):
+    instant on an M1, ~tens of seconds on a 2-core runner (first hosted run,
+    2026-10-24). Searching then would hit a different segment layout than the one
+    the baseline was measured on, so yellow is waited out, never accepted."""
+    deadline = monotonic() + timeout_s
+    while True:
+        info = fetch_info()
+        status = info["status"]
+        if status == "red":
+            raise FixtureError("restored collection is red (optimizer error)")
+        if status == "green":
+            if info["points_count"] != expected_points:
+                raise FixtureError(f"restored collection is green but has points={info['points_count']}, expected {expected_points}")
+            return info
+        if monotonic() >= deadline:
+            raise FixtureError(f"collection still {status} after {timeout_s:.0f}s (points={info['points_count']})")
+        sleep(poll_s)
 
 
 def _gzip_file(src: Path, dst: Path) -> None:
@@ -149,10 +181,11 @@ def restore_fixtures(src_dir: Path, qdrant_url: str | None = None) -> VerifiedFi
                 files={"snapshot": (raw_snapshot.name, f)},
             )
             resp.raise_for_status()
-            info = http.get(f"{base}/collections/{collection}").json()["result"]
-    if info["status"] != "green" or info["points_count"] != manifest["n_chunks"]:
-        raise FixtureError(f"restored {collection}: status={info['status']} points={info['points_count']}, "
-                           f"expected green/{manifest['n_chunks']}")
+            wait_until_green(
+                lambda: http.get(f"{base}/collections/{collection}").json()["result"],
+                manifest["n_chunks"],
+                _GREEN_TIMEOUT_S,
+            )
     dest = settings.paths.data_processed / "chunks.jsonl"
     dest.parent.mkdir(parents=True, exist_ok=True)
     _gunzip_file(src_dir / CHUNKS_FILE, dest)
