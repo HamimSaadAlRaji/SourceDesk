@@ -36,3 +36,6 @@ langfuse_data/
 
 # Phase 16: CI fixtures are a release asset, not repo content (design record 16c)
 ci-fixtures/
+
+# Phase 16: gate outputs are CI artifacts (anchored: docs/results/ is tracked)
+/results/
