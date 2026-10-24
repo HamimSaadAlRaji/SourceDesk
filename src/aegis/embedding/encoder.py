@@ -30,9 +30,7 @@ def _default_encode_fn(model_name: str, device: str, batch_size: int) -> EncodeF
         if key not in _MODEL_CACHE:
             from sentence_transformers import SentenceTransformer
 
-            model = SentenceTransformer(model_name, device=device)
-            model.max_seq_length = 384  # cap sequence length to speed up encoding
-            _MODEL_CACHE[key] = model
+            _MODEL_CACHE[key] = SentenceTransformer(model_name, device=device)
         model = _MODEL_CACHE[key]
         return np.asarray(
             model.encode(
