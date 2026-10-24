@@ -548,14 +548,24 @@ class GateSettings(BaseSettings):
     vectors perturbed at ~1e-7 (cached vs. live encoding): recall@10 0.0122,
     MRR 0.0034, NDCG@10 0.0089 (batch-size noise alone: 0.0 on all three). The
     recall band must stay below the 8% relative drop plan.md names as the
-    regression a gate exists to catch (0.08 x 0.432 = 0.035). Provisional until
-    the first hosted-runner run shows the x86-vs-M1 delta (design record 16d)."""
+    regression a gate exists to catch (0.08 x 0.432 = 0.035). Confirmed by the
+    hosted-runner run: x86 vs. the M1 baseline moved +0.0118 / -0.0033 / +0.0089
+    (design record 16d); the baseline has since been re-taken on the runner."""
 
     model_config = SettingsConfigDict(env_prefix="GATE_", env_file=".env", extra="ignore")
 
     retrieval_recall_tolerance: float = 0.025
     retrieval_mrr_tolerance: float = 0.01
     retrieval_ndcg_tolerance: float = 0.02
+    # Router (design record 16e). billing_recall is the safety metric: zero tolerance.
+    # accuracy: the served model flipped one of 58 queries between identical
+    # temperature-0 runs (0.7759 / 0.7586 / 0.7759, 1 query = 0.0172); band = 2x that,
+    # rounded up to 0.005, so it absorbs two flips and fails on three.
+    # billing_precision: one extra false billing prediction costs 0.111, so 0.05 fails
+    # on any single one -- an unnecessary human escalation is a policy change worth a look.
+    router_billing_recall_tolerance: float = 0.0
+    router_billing_precision_tolerance: float = 0.05
+    router_accuracy_tolerance: float = 0.035
     baseline_dir: Path = REPO_ROOT / "ci" / "baselines"
 
 
@@ -831,9 +841,16 @@ class OpenAISettings(BaseSettings):
     # prompt made it worse (15g2). Measured at max_completion_tokens 400;
     # served under GroqSettings.max_tokens (1000), as in the qwen era.
     generation_model: str = "gpt-5-mini"
-    router_model: str = "gpt-4.1-nano"
-    rewrite_model: str = "gpt-4.1-nano"
-    entailment_model: str = "gpt-4.1-nano"
+    # gpt-4.1-nano was removed from the API between Phase 15 and 2026-10-24 (404
+    # "deprecated", although /v1/models still listed it). Replaced by gpt-4.1-mini
+    # for all three small-model roles (user decision 2026-10-24, design record 16e).
+    # Evidence exists only for the router (58 labeled dev queries: accuracy 0.7759
+    # vs nano's 0.6379, billing 8/8 at precision 1.0, p50 724 ms); rewrite and
+    # entailment are unmeasured on the new model. gpt-4.1-nano stays in `prices`
+    # so historical ledger rows still cost out.
+    router_model: str = "gpt-4.1-mini"
+    rewrite_model: str = "gpt-4.1-mini"
+    entailment_model: str = "gpt-4.1-mini"
     judge_model: str = "gpt-5-mini"
     ragas_model: str = "gpt-4.1-mini"
     # gpt-5* are reasoning models: no temperature/top_p, hidden reasoning

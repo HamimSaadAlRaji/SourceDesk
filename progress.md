@@ -1,7 +1,7 @@
 # Aegis — Progress Log
 
 **Last updated:** 2026-10-22 (Phase 16 unit 16a)
-**Current phase:** Phase 16 — CI Evaluation Gate (🟡 in progress — unit 16a `test.yml` ✅ green on GitHub 2026-10-23; `eval.yml` not started). Phase 15 — Security Hardening (✅ complete 2026-10-22 — units 15, 15b-15e done: attack suite + before results, tenant partitioning, access control, input boundary, injection defenses, Qdrant lock-down + vector leakage, OpenAI provider + $10 spend guard (15g); generation bake-off (15g1: planned gpt-4.1-mini lost to qwen) + prompt fit (15g2: stricter prompt worse, negative result); gpt-5-mini ties qwen (15g3) and is now the served generator; router re-eval (15g4): nano kept, billing 8/8; real-stack security batch (15h): v3 served, poisoned obedience 5/50 -> 0/50; OQ #18/#19/#20 fixed (15k/15j/15l); wrap-up (15i) done, all 4 exit criteria met). Phase 14 — API, Streaming & UI (✅ complete 2026-10-17 — all 6 build items, all 5 exit criteria met). Phase 13 — Observability & the Latency Budget (🟡 in progress — build list complete, exit criteria 3 of 4 met -- p95 < 3 s unmet). Phase 12 — Caching, Delta Indexing & Cost (✅ complete — all 6 units, exit criteria met). Phase 11 — Generation Eval, RAGAS & Judging the Judge (🟡 **wrapped up for this session** — every unit, fix, and root-cause investigation that could be done without waiting on quota is done and documented; exactly 2 real measurements are left, both **explicitly deferred to the user** to run themselves whenever quota allows, not queued as a future session's task; see "Phase 11 wrap-up" note below).
+**Current phase:** Phase 16 — CI Evaluation Gate (🟡 in progress — 16a `test.yml` ✅, 16b-c ✅, 16d `eval.yml` retrieval gate ✅ green on the runner 2026-10-24; LLM-backed checks, p95 gate, PR comment, deliberate-regression demo remain). Phase 15 — Security Hardening (✅ complete 2026-10-22 — units 15, 15b-15e done: attack suite + before results, tenant partitioning, access control, input boundary, injection defenses, Qdrant lock-down + vector leakage, OpenAI provider + $10 spend guard (15g); generation bake-off (15g1: planned gpt-4.1-mini lost to qwen) + prompt fit (15g2: stricter prompt worse, negative result); gpt-5-mini ties qwen (15g3) and is now the served generator; router re-eval (15g4): nano kept, billing 8/8; real-stack security batch (15h): v3 served, poisoned obedience 5/50 -> 0/50; OQ #18/#19/#20 fixed (15k/15j/15l); wrap-up (15i) done, all 4 exit criteria met). Phase 14 — API, Streaming & UI (✅ complete 2026-10-17 — all 6 build items, all 5 exit criteria met). Phase 13 — Observability & the Latency Budget (🟡 in progress — build list complete, exit criteria 3 of 4 met -- p95 < 3 s unmet). Phase 12 — Caching, Delta Indexing & Cost (✅ complete — all 6 units, exit criteria met). Phase 11 — Generation Eval, RAGAS & Judging the Judge (🟡 **wrapped up for this session** — every unit, fix, and root-cause investigation that could be done without waiting on quota is done and documented; exactly 2 real measurements are left, both **explicitly deferred to the user** to run themselves whenever quota allows, not queued as a future session's task; see "Phase 11 wrap-up" note below).
 
 ## Phase 12 — Caching, Delta Indexing & Cost
 
@@ -396,6 +396,25 @@ graph (local 2-CPU: 0.2859 / 0.6306 / 0.4842). Fix: run the CI Qdrant with `QDRA
 disabled + exported segment count (`segments_count: 4` added to MANIFEST; fingerprint unchanged) held for 3 consecutive polls, and refuses otherwise
 (verified against real containers, both ways). 778 tests pass. **Needs from the user:** `gh release upload ci-fixtures-v1 ci-fixtures/MANIFEST.json
 --clobber` BEFORE pushing, then push; run 3 shows the true x86-vs-M1 delta and decides whether the provisional bands stand.
+
+**Unit 16d complete as of 2026-10-24** (design record 16d). Run 3 **green** (11m02s): same snapshot now preserved with the optimizer disabled;
+runner (x86) vs M1 baseline = recall@10 0.4435 (+0.0118), MRR 0.8640 (-0.0033), NDCG@10 0.7188 (+0.0089) -- 47/33/45% of the 0.025/0.010/0.020 bands,
+equal to the 16c benign delta, so the bands stand. **Baseline re-taken from the runner** (artifact of run 3; same fingerprint `e99f16de52c7d00f`).
+Runner costs: restore 12 s, 31 security tests 10.3 s, retrieval step 9m03s (encode 2.87 s/query vs M1 0.27; run 2 was 2.43), search p95 13.9 ms.
+CI budget: ~14 min per PR push (test 3 + eval 11) of 2,000 free min/month = ~140 pushes. Not yet measured: two identical runs on the runner (run 4, the
+one after rebaselining, is the first). **Next:** 16e LLM-backed checks (measure one run's real cost first; budget ~$0.15/run) + p95 gate; 16f PR comment; 16g
+deliberate regression screenshot. Exit criteria status: both workflows green on main -- test.yml yes, eval.yml (retrieval only) yes; regression demo and
+PR-diff comment not yet.
+
+**Unit 16e (router + model probe) written 2026-10-24, not yet run in CI** (design record 16e; `eval/router_gate.py`, `eval/model_probe.py`, `ci/baselines/router.json`,
+`llm-gate` job). **Production defect found: `gpt-4.1-nano` was removed from the OpenAI API** (404 "deprecated"; `/v1/models` still listed it) -- router, rewrite and
+citation-entailment were all failing (every query would escalate `provider_unavailable`). User chose **gpt-4.1-mini for all three** (config swapped). Router eval
+(58 labeled dev queries): gpt-4.1-mini 0.7759 / billing 8/8 precision 1.0 / p50 724 ms; gpt-4o-mini 0.7586 / 719 ms; gpt-5-nano 0.7759 / **13.6 s max** (rejected); old
+nano 0.6379. Same model, temp 0: 0.7759, 0.7586, 0.7759 (one query flips) -> bands accuracy 0.035, billing precision 0.05, **billing recall 0.0**. Per-run cap
+$0.15 via `OPENAI_BUDGET_USD`, verified real (tiny-cap test: 7 calls, $0.001534, then BudgetExceededError, no results written). Rewrite/entailment on mini are
+**unmeasured**. 789 tests pass. Spend this unit $0.0801; **project total ~$0.432 of $10**. **Needs from the user:** `gh secret set OPENAI_API_KEY`, push, then
+`gh workflow run eval.yml` (llm-gate runs only on PRs and manual dispatch). **Next:** generation-subset gate (measure cost first), escalation check as path-filtered
+job (CPU-bound, ~2 h on runner by extrapolation), p95 gate, PR comment, deliberate regression.
 
 ## Phase 15 — Security Hardening
 

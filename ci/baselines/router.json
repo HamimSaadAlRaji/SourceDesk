@@ -1,0 +1,12 @@
+{
+  "suite": "router",
+  "fingerprint": "cbe3e0b73f530ca3",
+  "n_queries": 58,
+  "metrics": {
+    "accuracy": 0.7758620689655172,
+    "billing_recall": 1.0,
+    "billing_precision": 1.0,
+    "docs_howto_recall": 0.84,
+    "known_issue_recall": 0.64
+  }
+}

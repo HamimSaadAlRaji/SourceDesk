@@ -25,7 +25,7 @@ from aegis.config import settings
 from aegis.embedding.encoder import Encoder
 from aegis.embedding.vector_store import get_client
 from aegis.eval.ci_fixtures import verify_fixtures
-from aegis.eval.gate import GateReport, MetricSpec, evaluate, render_markdown
+from aegis.eval.gate import GateReport, MetricSpec, compare_files, write_baseline
 from aegis.eval.harness import RetrievalConfig, run_eval
 from aegis.factory import load_chunks
 from aegis.retrieval.dense import DenseIndex
@@ -91,19 +91,9 @@ def _baseline_path() -> Path:
 
 
 def compare(current_path: Path, markdown_path: Path | None) -> int:
-    current = GateReport.model_validate_json(current_path.read_text())
-    baseline_path = _baseline_path()
-    if not baseline_path.exists():
-        print(f"no baseline at {baseline_path}: a gate with nothing to compare against cannot pass", file=sys.stderr)
-        return 1
-    baseline = GateReport.model_validate_json(baseline_path.read_text())
-    result = evaluate(current, baseline, gate_specs())
-    md = render_markdown("Retrieval (dense bge-large, 150 dev queries)", result)
-    print(md)
-    if markdown_path is not None:
-        markdown_path.parent.mkdir(parents=True, exist_ok=True)
-        markdown_path.write_text(md)
-    return 0 if result.passed else 1
+    return compare_files(
+        current_path, _baseline_path(), gate_specs(), "Retrieval (dense bge-large, 150 dev queries)", markdown_path
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -127,10 +117,8 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.cmd == "compare":
         return compare(args.current, args.markdown)
-    path = _baseline_path()
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(GateReport.model_validate_json(args.current.read_text()).model_dump_json(indent=2) + "\n")
-    print(f"baseline written to {path}")
+    write_baseline(args.current, _baseline_path())
+    print(f"baseline written to {_baseline_path()}")
     return 0
 
 

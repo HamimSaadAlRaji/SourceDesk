@@ -15,6 +15,8 @@ absolute band means the same thing at 0.44 recall as at 0.86 MRR.
 from __future__ import annotations
 
 import math
+import sys
+from pathlib import Path
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -125,3 +127,29 @@ def render_markdown(title: str, result: GateResult) -> str:
     if result.problems:
         lines += ["", "**Problems:**", *[f"- {p}" for p in result.problems]]
     return "\n".join(lines) + "\n"
+
+
+def compare_files(
+    current_path: Path, baseline_path: Path, specs: list[MetricSpec], title: str, markdown_path: Path | None = None
+) -> int:
+    """Shared CLI tail for every suite: 0 = gate passed, 1 = failed. A missing
+    baseline is a failure -- there is nothing to compare against, so no information."""
+    current = GateReport.model_validate_json(current_path.read_text())
+    if not baseline_path.exists():
+        print(f"no baseline at {baseline_path}: a gate with nothing to compare against cannot pass", file=sys.stderr)
+        return 1
+    baseline = GateReport.model_validate_json(baseline_path.read_text())
+    result = evaluate(current, baseline, specs)
+    md = render_markdown(title, result)
+    print(md)
+    if markdown_path is not None:
+        markdown_path.parent.mkdir(parents=True, exist_ok=True)
+        markdown_path.write_text(md)
+    return 0 if result.passed else 1
+
+
+def write_baseline(current_path: Path, baseline_path: Path) -> None:
+    """Deliberate rebaseline: validates the report, then overwrites. A reviewable diff in the PR."""
+    report = GateReport.model_validate_json(current_path.read_text())
+    baseline_path.parent.mkdir(parents=True, exist_ok=True)
+    baseline_path.write_text(report.model_dump_json(indent=2) + "\n")

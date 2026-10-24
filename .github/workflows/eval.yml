@@ -8,8 +8,11 @@
 #   pull_request      -> this workflow (full gate)
 #   push to main      -> this workflow, so "green on main" is a measured fact
 #   workflow_dispatch -> this workflow, on demand (baseline re-measurement, dry runs)
-# This version has no LLM-backed steps; they arrive in 16e and will be skipped on
-# push-to-main so merges never spend money.
+# Two jobs run in parallel:
+#   retrieval-gate  restored index, no LLM, $0
+#   llm-gate        real OpenAI calls (model-availability probe + router eval), capped at
+#                   $0.15 per run by the spend ledger. Never runs on push-to-main (merges
+#                   never spend money) and never on fork PRs (secrets are withheld there).
 name: eval
 
 on:
@@ -108,5 +111,70 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: eval-results
+          path: results/
+          if-no-files-found: warn
+
+  llm-gate:
+    # push-to-main: no spend. fork PRs: no secrets. workflow_dispatch and same-repo PRs: run.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      # The ledger refuses any call whose worst case would pass this, before the provider
+      # is contacted -- a hard per-run cap, not an after-the-fact alert. Fresh ledger per
+      # run (uploaded as an artifact), so the cap is per run, not per project.
+      OPENAI_BUDGET_USD: "0.15"
+      OPENAI_LEDGER_PATH: results/ci_spend.sqlite
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v10.3.2
+        with:
+          enable-cache: true
+          python-version: "3.12"
+
+      - name: Install
+        run: uv sync --frozen
+
+      - name: Require the API key
+        run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "OPENAI_API_KEY secret is not set (gh secret set OPENAI_API_KEY)" >&2
+            exit 1
+          fi
+
+      # One tiny real call per configured model (~$0.0001). gpt-4.1-nano was removed
+      # from the API while /v1/models still listed it; only a real call proves a model works.
+      - name: Model availability
+        run: uv run --frozen python -m aegis.eval.model_probe
+
+      - name: Router metrics
+        run: uv run --frozen python -m aegis.eval.router_gate run --out results/router.json
+
+      - name: Compare with baseline
+        run: uv run --frozen python -m aegis.eval.router_gate compare --current results/router.json --markdown results/router.md
+
+      - name: Job summary
+        if: always()
+        run: |
+          if [ -f results/router.md ]; then cat results/router.md >> "$GITHUB_STEP_SUMMARY"; fi
+          if [ -f results/ci_spend.sqlite ]; then
+            echo '' >> "$GITHUB_STEP_SUMMARY"
+            echo '**OpenAI spend this run:**' >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            uv run --frozen python -m aegis.cost >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: llm-results
           path: results/
           if-no-files-found: warn
