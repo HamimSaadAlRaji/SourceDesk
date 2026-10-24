@@ -386,6 +386,17 @@ the 0.035 = 8% relative example). Synthetic 8% drop -> FAIL exit 1. First tolera
 **provisional (M1)**; 16d checks the hosted-runner delta. `uv run pytest -q`: **771 passed**; ruff + mypy (21 files) clean. $0 spent.
 **Needs from the user:** upload `ci-fixtures/` as a release (`gh release create ci-fixtures-v1 ci-fixtures/*`). **Next:** 16d `eval.yml`.
 
+**Unit 16d in progress (2026-10-24) -- first two hosted-runner runs of `eval.yml` found a real defect, fixed, awaiting run 3.**
+Run 1 (2m24s): restore failed -- Qdrant status `yellow` right after the snapshot upload; my check demanded green. Run 2 (10m): restore + 31 security tests
+passed, retrieval ran (7m41s; **2.43 s/query CPU encode on the runner vs 0.27 on the M1**), compare FAILED: recall@10 **0.2687**, MRR **0.5842**, NDCG@10
+**0.4496** vs baseline 0.4317 / 0.8674 / 0.7100, same fingerprint `e99f16de52c7d00f`. Cause (reproduced locally with `docker run --cpus=2`): on a
+2-CPU host Qdrant's optimizer **merges the restored segments and rebuilds HNSW** (yellow ~21 s, segments 4->5->2); the gate then measures a *different*
+graph (local 2-CPU: 0.2859 / 0.6306 / 0.4842). Fix: run the CI Qdrant with `QDRANT__STORAGE__OPTIMIZERS__MAX_OPTIMIZATION_THREADS=0`; with it, a
+2-CPU container reproduces the baseline (0.4344 / 0.8674 / 0.7118; segments stay 4, status stays yellow permanently). Restore now requires the optimizer
+disabled + exported segment count (`segments_count: 4` added to MANIFEST; fingerprint unchanged) held for 3 consecutive polls, and refuses otherwise
+(verified against real containers, both ways). 778 tests pass. **Needs from the user:** `gh release upload ci-fixtures-v1 ci-fixtures/MANIFEST.json
+--clobber` BEFORE pushing, then push; run 3 shows the true x86-vs-M1 delta and decides whether the provisional bands stand.
+
 ## Phase 15 — Security Hardening
 
 **Scope** (plan.md, Day 18½, topic 36): the five attack classes (indirect injection, KB leakage, tenant separation,

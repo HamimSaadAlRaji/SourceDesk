@@ -36,7 +36,7 @@ CHUNKS_FILE = "chunks.jsonl.gz"
 MANIFEST_FILE = "MANIFEST.json"
 _HASHED_FILES = (SNAPSHOT_FILE, CHUNKS_FILE)
 _TIMEOUT_S = 600.0
-_GREEN_TIMEOUT_S = 600.0
+_READY_TIMEOUT_S = 300.0
 
 
 class FixtureError(RuntimeError):
@@ -62,11 +62,13 @@ def _fingerprint(file_hashes: dict[str, str]) -> str:
     return hashlib.sha256(joined.encode()).hexdigest()[:16]
 
 
-def build_manifest(directory: Path, *, collection: str, n_chunks: int, dim: int, qdrant_image: str) -> dict:
+def build_manifest(
+    directory: Path, *, collection: str, n_chunks: int, dim: int, qdrant_image: str, segments_count: int
+) -> dict:
     hashes = {name: _sha256(directory / name) for name in _HASHED_FILES}
     return {
         "collection": collection, "n_chunks": n_chunks, "dim": dim, "qdrant_image": qdrant_image,
-        "files": hashes, "fingerprint": _fingerprint(hashes),
+        "segments_count": segments_count, "files": hashes, "fingerprint": _fingerprint(hashes),
     }
 
 
@@ -89,32 +91,55 @@ def verify_fixtures(directory: Path) -> VerifiedFixtures:
     return VerifiedFixtures(fingerprint=fingerprint, manifest=manifest)
 
 
-def wait_until_green(
+def wait_until_restored(
     fetch_info: Callable[[], dict],
     expected_points: int,
+    expected_segments: int,
     timeout_s: float,
     *,
+    stable_polls: int = 3,
     sleep: Callable[[float], None] = time.sleep,
     monotonic: Callable[[], float] = time.monotonic,
-    poll_s: float = 2.0,
+    poll_s: float = 1.0,
 ) -> dict:
-    """Block until the restored collection is green with the expected point count.
-    Right after a snapshot upload Qdrant can still be optimizing (status "yellow"):
-    instant on an M1, ~tens of seconds on a 2-core runner (first hosted run,
-    2026-10-24). Searching then would hit a different segment layout than the one
-    the baseline was measured on, so yellow is waited out, never accepted."""
+    """Block until the restored collection is the snapshot's own index, untouched.
+
+    Why not "wait for green": on a 2-core runner Qdrant merged the snapshot's
+    segments after the restore (yellow for ~20 s, segments 4 -> 5 -> 2) and rebuilt
+    HNSW -- same snapshot, same queries, recall@10 0.2687 instead of 0.4317 (first
+    hosted run, 2026-10-24; reproduced locally with --cpus=2: 0.2859). The fix is
+    to run Qdrant with the optimizer disabled, which makes yellow permanent (merges
+    pending that can never run). So readiness is: optimizer disabled (checked first,
+    because without it the opening poll can see the original layout just before a
+    merge starts), all points present and indexed, the exported segment count, and
+    that state held for `stable_polls` consecutive polls."""
     deadline = monotonic() + timeout_s
+    steady = 0
     while True:
         info = fetch_info()
-        status = info["status"]
-        if status == "red":
+        threads = info["config"]["optimizer_config"].get("max_optimization_threads")
+        if threads != 0:
+            raise FixtureError(
+                f"Qdrant optimizer is enabled (max_optimization_threads={threads}): it can merge and rebuild the "
+                "restored HNSW graph. Start Qdrant with QDRANT__STORAGE__OPTIMIZERS__MAX_OPTIMIZATION_THREADS=0."
+            )
+        if info["status"] == "red":
             raise FixtureError("restored collection is red (optimizer error)")
-        if status == "green":
-            if info["points_count"] != expected_points:
-                raise FixtureError(f"restored collection is green but has points={info['points_count']}, expected {expected_points}")
+        ready = (
+            info["points_count"] == expected_points
+            and info["indexed_vectors_count"] == expected_points
+            and info["segments_count"] == expected_segments
+            and info["optimizer_status"] == "ok"
+        )
+        steady = steady + 1 if ready else 0
+        if steady >= stable_polls:
             return info
         if monotonic() >= deadline:
-            raise FixtureError(f"collection still {status} after {timeout_s:.0f}s (points={info['points_count']})")
+            raise FixtureError(
+                f"restored collection not ready after {timeout_s:.0f}s: status={info['status']}, "
+                f"points={info['points_count']} (expected {expected_points}), "
+                f"indexed={info['indexed_vectors_count']}, segments={info['segments_count']} (expected {expected_segments})"
+            )
         sleep(poll_s)
 
 
@@ -158,15 +183,18 @@ def export_fixtures(out_dir: Path, qdrant_image: str = "qdrant/qdrant:v1.18.3") 
     chunks_src = settings.paths.data_processed / "chunks.jsonl"
     _gzip_file(chunks_src, out_dir / CHUNKS_FILE)
     dim = info["config"]["params"]["vectors"]["dense"]["size"]
-    manifest = build_manifest(out_dir, collection=collection, n_chunks=info["points_count"], dim=dim, qdrant_image=qdrant_image)
+    manifest = build_manifest(
+        out_dir, collection=collection, n_chunks=info["points_count"], dim=dim, qdrant_image=qdrant_image,
+        segments_count=info["segments_count"],
+    )
     (out_dir / MANIFEST_FILE).write_text(json.dumps(manifest, indent=2))
     return manifest
 
 
 def restore_fixtures(src_dir: Path, qdrant_url: str | None = None) -> VerifiedFixtures:
     """Verify, then load the snapshot into the (empty, key-less) CI Qdrant and put
-    chunks.jsonl where the pipeline expects it. Fails if the restored collection
-    isn't green with the manifest's point count."""
+    chunks.jsonl where the pipeline expects it. Fails unless the restored collection
+    is the snapshot's own index (see wait_until_restored)."""
     verified = verify_fixtures(src_dir)
     manifest = verified.manifest
     base = qdrant_url or _qdrant_base()
@@ -181,10 +209,11 @@ def restore_fixtures(src_dir: Path, qdrant_url: str | None = None) -> VerifiedFi
                 files={"snapshot": (raw_snapshot.name, f)},
             )
             resp.raise_for_status()
-            wait_until_green(
+            wait_until_restored(
                 lambda: http.get(f"{base}/collections/{collection}").json()["result"],
                 manifest["n_chunks"],
-                _GREEN_TIMEOUT_S,
+                manifest["segments_count"],
+                _READY_TIMEOUT_S,
             )
     dest = settings.paths.data_processed / "chunks.jsonl"
     dest.parent.mkdir(parents=True, exist_ok=True)

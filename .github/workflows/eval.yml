@@ -35,6 +35,11 @@ jobs:
         image: qdrant/qdrant:v1.18.3 # same tag as docker-compose.yml and the fixtures' manifest
         ports:
           - 6333:6333
+        env:
+          # Without this, a 2-core runner merges the restored segments and rebuilds
+          # HNSW: recall@10 0.2687 instead of 0.4317 on the same snapshot (first
+          # hosted run). The restore step refuses to proceed if this is unset.
+          QDRANT__STORAGE__OPTIMIZERS__MAX_OPTIMIZATION_THREADS: "0"
 
     env:
       QDRANT_HOST: localhost

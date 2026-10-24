@@ -11,13 +11,13 @@ import json
 
 import pytest
 
-from aegis.eval.ci_fixtures import FixtureError, build_manifest, verify_fixtures, wait_until_green
+from aegis.eval.ci_fixtures import FixtureError, build_manifest, verify_fixtures, wait_until_restored
 
 
 def _make(tmp_path, snapshot=b"snapshot-bytes", chunks=b'{"id": "a"}\n'):
     (tmp_path / "collection.snapshot.gz").write_bytes(gzip.compress(snapshot))
     (tmp_path / "chunks.jsonl.gz").write_bytes(gzip.compress(chunks))
-    manifest = build_manifest(tmp_path, collection="c", n_chunks=1, dim=4, qdrant_image="qdrant/qdrant:v1.18.3")
+    manifest = build_manifest(tmp_path, collection="c", n_chunks=1, dim=4, qdrant_image="qdrant/qdrant:v1.18.3", segments_count=4)
     (tmp_path / "MANIFEST.json").write_text(json.dumps(manifest))
     return manifest
 
@@ -64,31 +64,68 @@ def test_the_fingerprint_depends_on_both_files(tmp_path):
     assert len({a, b, c}) == 3
 
 
-# --- waiting for the restored collection (first hosted-runner run, 2026-10-24) ---
-# Qdrant reported status=yellow (optimizer still running) right after the snapshot
-# upload on a 2-core runner, where it had been green instantly on an M1. Querying
-# during optimization searches a different segment layout than the baseline did, so
-# the restore must wait for green -- not accept yellow, and not hang forever.
-
-def _infos(*statuses, points=10):
-    it = iter(statuses)
-    return lambda: {"status": next(it), "points_count": points}
-
-
-def test_wait_returns_once_the_collection_turns_green():
-    sleeps: list[float] = []
-    info = wait_until_green(_infos("yellow", "yellow", "green"), expected_points=10, timeout_s=60, sleep=sleeps.append)
-    assert info["status"] == "green"
-    assert len(sleeps) == 2
+# --- readiness of the restored collection (first hosted-runner run, 2026-10-24) ---
+# On a 2-core runner Qdrant merged the snapshot's segments after the restore (status
+# yellow for ~20 s, segments 4 -> 5 -> 2) and rebuilt HNSW: same snapshot, same
+# queries, recall@10 0.2687 instead of 0.4317. The gate is only meaningful on the
+# snapshot's own graph, so the restore requires the optimizer to be disabled
+# (max_optimization_threads == 0) and the segment layout to equal the exported one.
+# "yellow" is then the normal, permanent state (pending merges that can never run),
+# so readiness cannot be "green".
 
 
-def test_wait_does_not_accept_yellow_when_the_clock_runs_out():
+def _info(status="yellow", points=10, indexed=10, segments=4, optimizer="ok", threads=0):
+    return {
+        "status": status, "points_count": points, "indexed_vectors_count": indexed,
+        "segments_count": segments, "optimizer_status": optimizer,
+        "config": {"optimizer_config": {"max_optimization_threads": threads}},
+    }
+
+
+def _wait(infos, **kw):
+    it = iter(infos)
+    return wait_until_restored(
+        lambda: next(it), expected_points=10, expected_segments=4, timeout_s=kw.pop("timeout_s", 60),
+        sleep=lambda s: None, stable_polls=kw.pop("stable_polls", 3), **kw,
+    )
+
+
+def test_ready_when_layout_matches_and_holds_steady_even_while_yellow():
+    assert _wait([_info(), _info(), _info()])["segments_count"] == 4
+
+
+def test_a_still_filling_collection_is_waited_out():
+    info = _wait([_info(indexed=3), _info(indexed=7), _info(), _info(), _info()])
+    assert info["indexed_vectors_count"] == 10
+
+
+def test_refuses_immediately_when_the_optimizer_is_enabled():
+    # Without this check the first poll can see the original segments just before a merge starts.
+    for threads in (None, 2):
+        with pytest.raises(FixtureError, match="optimizer"):
+            _wait([_info(threads=threads)])
+
+
+def test_a_changed_segment_layout_never_counts_as_ready():
     clock = iter(range(0, 1000, 10))
-    with pytest.raises(FixtureError, match="yellow"):
-        wait_until_green(lambda: {"status": "yellow", "points_count": 10}, expected_points=10, timeout_s=30,
-                         sleep=lambda s: None, monotonic=lambda: next(clock))
+    with pytest.raises(FixtureError, match="segments"):
+        _wait([_info(segments=2)] * 50, timeout_s=30, monotonic=lambda: next(clock))
 
 
-def test_wait_refuses_a_green_collection_with_the_wrong_point_count():
+def test_a_wrong_point_count_never_counts_as_ready():
+    clock = iter(range(0, 1000, 10))
     with pytest.raises(FixtureError, match="points"):
-        wait_until_green(_infos("green", points=9), expected_points=10, timeout_s=60, sleep=lambda s: None)
+        _wait([_info(points=9)] * 50, timeout_s=30, monotonic=lambda: next(clock))
+
+
+def test_a_red_collection_fails_at_once():
+    with pytest.raises(FixtureError, match="red"):
+        _wait([_info(status="red")])
+
+
+def test_stability_must_be_consecutive():
+    # A layout that flaps (4, 5, 4, ...) is a merge in progress, not a restored index.
+    clock = iter(range(0, 1000, 10))
+    flapping = [_info(), _info(), _info(segments=5)] * 20
+    with pytest.raises(FixtureError, match="segments"):
+        _wait(flapping, timeout_s=60, monotonic=lambda: next(clock))
