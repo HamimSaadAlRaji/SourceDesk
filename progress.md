@@ -406,7 +406,7 @@ one after rebaselining, is the first). **Next:** 16e LLM-backed checks (measure 
 deliberate regression screenshot. Exit criteria status: both workflows green on main -- test.yml yes, eval.yml (retrieval only) yes; regression demo and
 PR-diff comment not yet.
 
-**Unit 16e (router + model probe) written 2026-10-24, not yet run in CI** (design record 16e; `eval/router_gate.py`, `eval/model_probe.py`, `ci/baselines/router.json`,
+**Unit 16e (router + model probe) complete as of 2026-10-24 -- first CI run green (run 40068902808, workflow_dispatch): router = baseline exactly (0.7759 / billing 1.0 / 1.0), probe ok, real cost $0.01536 (60 calls, 1m16s), retrieval-gate also = runner baseline exactly (repeatable). CI spend not in local ledger: project ~$0.446 of $10.** Original notes: (design record 16e; `eval/router_gate.py`, `eval/model_probe.py`, `ci/baselines/router.json`,
 `llm-gate` job). **Production defect found: `gpt-4.1-nano` was removed from the OpenAI API** (404 "deprecated"; `/v1/models` still listed it) -- router, rewrite and
 citation-entailment were all failing (every query would escalate `provider_unavailable`). User chose **gpt-4.1-mini for all three** (config swapped). Router eval
 (58 labeled dev queries): gpt-4.1-mini 0.7759 / billing 8/8 precision 1.0 / p50 724 ms; gpt-4o-mini 0.7586 / 719 ms; gpt-5-nano 0.7759 / **13.6 s max** (rejected); old

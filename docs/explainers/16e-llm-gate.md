@@ -48,6 +48,8 @@ Verified locally: the flipped run (0.7586) **passes** (Δ −0.0172); a syntheti
 
 Spend this unit: **$0.0801** on the project ledger (three candidate-model runs $0.0286, served-model repeat runs including one that failed on a connection error, probes) plus **$0.0015** on the throwaway ledger of the cap test. Project total ≈ **$0.432 of $10**.
 
+**First CI run of the LLM tier** (run 40068902808, `workflow_dispatch` on main, 2026-10-24): both jobs green. `llm-gate` took 1 m 16 s; probe ok for `gpt-5-mini` and `gpt-4.1-mini`; router accuracy 0.7759, billing recall 1.0000, billing precision 1.0000: identical to the baseline. **Real cost $0.01536** (60 calls, 45,221 input / 501 output tokens; router $0.015314, probes $0.000047), about 20% under the local estimate of $0.019, presumably prompt caching on the long fixed router prompt (not verified). CI spend lives in each run's `results/ci_spend.sqlite` artifact and is **not** in the project's local ledger; project total ≈ $0.431 local + $0.015 CI = **$0.446 of $10**. The same run's `retrieval-gate` reproduced its runner-taken baseline exactly (Δ +0.0000 on recall@10, MRR, NDCG@10), which closes 16d's open question: the runner is repeatable run to run.
+
 ## 6. What surprised me / what to watch for
 
 - **A model can vanish between phases, silently, while still being listed.** No test or earlier gate could see it; an LLM-calling system needs a canary on every model it names. The probe is that canary.
@@ -56,6 +58,8 @@ Spend this unit: **$0.0801** on the project ledger (three candidate-model runs $
 - **Rewrite and entailment are unmeasured on `gpt-4.1-mini`.** Only the router role has evidence. They moved to the larger sibling of the model they were built on, which should not hurt, but the claim is "unmeasured", not "equivalent". Phase 11/19 should re-measure entailment (it feeds the citation validity numbers).
 - **Historical results still say `gpt-4.1-nano`** (15g, 15g1-15g4 records, `v2c.py` prompt note). They describe what was measured then; the config comment records the swap.
 - **Not gated yet:** generation quality (citation validity, code-block syntax) and the escalation confusion matrix. The latter needs the cross-encoder on CPU: 4.09 s per query on the M1 (736 s for 180 queries), and the runner encodes ~10× slower than the M1, so a full pass is on the order of two hours there. It cannot run on every PR; see §7.
+
+- **A manual dispatch cancelled the push-to-main run** because both shared the concurrency group `eval-<ref>`. The group now includes the event name.
 
 ## 7. Where this fits and what's next
 

@@ -22,7 +22,9 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: eval-${{ github.ref }}
+  # Per event type: a manual dispatch must not cancel the push-to-main run that proves
+  # green-on-main (it did, on 2026-10-24), and a later push must not cancel a dispatch.
+  group: eval-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
