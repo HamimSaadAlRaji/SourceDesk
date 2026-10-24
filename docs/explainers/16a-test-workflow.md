@@ -62,11 +62,11 @@ The first pass under the project config found 36: 33 fixed by `ruff --fix` (impo
 | Same, empty HF cache + `HF_HUB_OFFLINE=1` | 743 passed, 3 errors (the 3 infra tests, then fixed/skipped as above) | pytest |
 | Gate discriminates | probe file with an unused import and `def f(x: int) -> str: return x` → ruff `F401`, mypy `return-value` (2 and 1 errors); probe deleted afterwards | ruff, mypy |
 
-**Not measured:** the workflow has not run on GitHub yet. I validated it with `actionlint` (clean) and by running its steps by hand, which is a rehearsal, not a green run. The first real run also decides whether `uv sync` pulling the CUDA build of torch (the lockfile has 15 `nvidia-*` packages) is acceptable on a hosted runner or needs a CPU-only torch.
+**First green run on GitHub** (run 39984838107, `ubuntu-24.04`, cold cache, 2026-10-23): **3 m 27 s** total; Install 57 s (190 packages, CUDA torch wheels included -- acceptable, no CPU-only torch needed), ruff 3 s, mypy 13 s, Tests 62 s (**744 passed, 2 skipped, 57.4 s**; the skips are the corpus tests, reason printed), post-job cache save 47 s. The hand rehearsal's 109 s test time was a local-venv artifact, not a property of the workflow. Not yet measured: a warm-cache run (the post-step saved the cache; the next push shows the saving).
 
 ## 6. What surprised me / what to watch for
 
-- **The rehearsal took 109 s against 18 s locally.** I did not isolate why (cold bytecode/numba caches in a fresh venv is the likely candidate, unverified). It matters because CI minutes are the budget on a private repo.
+- **The local rehearsal took 109 s; the hosted runner took 57 s for the same 744 tests.** I never isolated the local cause (cold caches in a fresh venv is the likely candidate, unverified). On the runner it is a non-issue; CI minutes are still the budget on a private repo.
 - **ruff's defaults changed under me.** 103 vs 45 findings is the same code with different rules. That is the whole argument for the explicit list.
 - **`known-first-party = ["aegis"]` changed the count**: 45 findings with the explicit list under `--isolated`, 36 once the project config (which includes it) was in effect. I did not isolate which files moved; I set it so `aegis` sorts as first-party consistently in `src/` and `tests/`.
 - **CI only sees committed code.** 119 files are uncommitted at this moment, including all of Phase 15. The first push will lint and type-check code no human has looked at through CI before; expect the first run to find something the local run didn't (a platform difference, a dependency drift).

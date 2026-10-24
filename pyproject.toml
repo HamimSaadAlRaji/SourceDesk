@@ -71,6 +71,9 @@ files = [
     "src/aegis/guardrails/citations.py",
     "src/aegis/router/policy.py",
     "src/aegis/eval/metrics.py",
+    "src/aegis/eval/gate.py",
+    "src/aegis/eval/ci_index.py",
+    "src/aegis/eval/ci_fixtures.py",
 ]
 ignore_missing_imports = true
 warn_unused_ignores = true

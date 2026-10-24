@@ -1,7 +1,7 @@
 # Aegis — Progress Log
 
 **Last updated:** 2026-10-22 (Phase 16 unit 16a)
-**Current phase:** Phase 16 — CI Evaluation Gate (🟡 in progress — unit 16a `test.yml` written and rehearsed locally, not yet run on GitHub; `eval.yml` not started). Phase 15 — Security Hardening (✅ complete 2026-10-22 — units 15, 15b-15e done: attack suite + before results, tenant partitioning, access control, input boundary, injection defenses, Qdrant lock-down + vector leakage, OpenAI provider + $10 spend guard (15g); generation bake-off (15g1: planned gpt-4.1-mini lost to qwen) + prompt fit (15g2: stricter prompt worse, negative result); gpt-5-mini ties qwen (15g3) and is now the served generator; router re-eval (15g4): nano kept, billing 8/8; real-stack security batch (15h): v3 served, poisoned obedience 5/50 -> 0/50; OQ #18/#19/#20 fixed (15k/15j/15l); wrap-up (15i) done, all 4 exit criteria met). Phase 14 — API, Streaming & UI (✅ complete 2026-10-17 — all 6 build items, all 5 exit criteria met). Phase 13 — Observability & the Latency Budget (🟡 in progress — build list complete, exit criteria 3 of 4 met -- p95 < 3 s unmet). Phase 12 — Caching, Delta Indexing & Cost (✅ complete — all 6 units, exit criteria met). Phase 11 — Generation Eval, RAGAS & Judging the Judge (🟡 **wrapped up for this session** — every unit, fix, and root-cause investigation that could be done without waiting on quota is done and documented; exactly 2 real measurements are left, both **explicitly deferred to the user** to run themselves whenever quota allows, not queued as a future session's task; see "Phase 11 wrap-up" note below).
+**Current phase:** Phase 16 — CI Evaluation Gate (🟡 in progress — unit 16a `test.yml` ✅ green on GitHub 2026-10-23; `eval.yml` not started). Phase 15 — Security Hardening (✅ complete 2026-10-22 — units 15, 15b-15e done: attack suite + before results, tenant partitioning, access control, input boundary, injection defenses, Qdrant lock-down + vector leakage, OpenAI provider + $10 spend guard (15g); generation bake-off (15g1: planned gpt-4.1-mini lost to qwen) + prompt fit (15g2: stricter prompt worse, negative result); gpt-5-mini ties qwen (15g3) and is now the served generator; router re-eval (15g4): nano kept, billing 8/8; real-stack security batch (15h): v3 served, poisoned obedience 5/50 -> 0/50; OQ #18/#19/#20 fixed (15k/15j/15l); wrap-up (15i) done, all 4 exit criteria met). Phase 14 — API, Streaming & UI (✅ complete 2026-10-17 — all 6 build items, all 5 exit criteria met). Phase 13 — Observability & the Latency Budget (🟡 in progress — build list complete, exit criteria 3 of 4 met -- p95 < 3 s unmet). Phase 12 — Caching, Delta Indexing & Cost (✅ complete — all 6 units, exit criteria met). Phase 11 — Generation Eval, RAGAS & Judging the Judge (🟡 **wrapped up for this session** — every unit, fix, and root-cause investigation that could be done without waiting on quota is done and documented; exactly 2 real measurements are left, both **explicitly deferred to the user** to run themselves whenever quota allows, not queued as a future session's task; see "Phase 11 wrap-up" note below).
 
 ## Phase 12 — Caching, Delta Indexing & Cost
 
@@ -362,12 +362,29 @@ container): ruff clean, mypy clean (18 files), **744 passed, 2 skipped, 109 s** 
 tenant-bypass tests; they skip with a reason on a bare checkout and **fail** under `AEGIS_REQUIRE_CORPUS=1` (to be set by `eval.yml`).
 Gates verified to discriminate with a probe file (unused import -> F401; `-> str` returning `int` -> mypy return-value). Fixed along the
 way: 36 ruff findings (33 autofix, 3 by hand), 1 mypy error (`chunking/semantic.py` `_MODEL_CACHE`). Ruff 0.17.1 *defaults* report 103
-findings vs 45 with the explicit list, hence pinned + explicit. **Not yet run on GitHub** (actionlint clean + manual rehearsal only).
-**Open risks:** (a) 119 files are uncommitted incl. all of Phase 15 -- CI only sees committed code, and the user must commit/push (I cannot);
-(b) `uv sync` on Linux pulls CUDA torch (15 `nvidia-*` locked pkgs) -- first run decides if CPU-only torch is needed;
-(c) GitHub repo is private (2,000 free Linux min/month), so CI minutes are a budget.
-**Next:** 16b -- measure what `eval.yml` can do on a hosted runner (index restore, BM25 rebuild, CPU query-encode + rerank time for 180
-queries), then pick thresholds from the Phase 6/10/11 baselines with tolerance bands.
+findings vs 45 with the explicit list, hence pinned + explicit. **GitHub run 1 failed in 7 s** (`setup-uv@v10` is not a real tag; setup-uv publishes exact tags only -> pinned `v10.3.2`); **run 2 green: 3 m 27 s, 744 passed / 2 skipped in 57.4 s, install 57 s with CUDA torch (acceptable).**
+**Resolved:** uncommitted Phase 15 (user pushed b5e97c2, b9b4a7b); CUDA torch (fine). **Open:** GitHub repo is private (2,000 free Linux min/month), so CI minutes are a budget.
+**Unit 16b measured 2026-10-23 -- the original restore plan does not work; decision pending** (design record 16b, `src/aegis/eval/ci_index.py` +
+6 tests, `experiments/16a-16c`). Rebuilding the index from `vectors_bge_large.npy` scores recall@10 0.252/0.256, MRR 0.644/0.668 vs the live
+index's 0.437/0.864 (two rebuilds agree on only 54% of top-10s). Diagnosed (not ties: 4% of exact top-10; not the filter: Qdrant `exact=True`
+with filter = 98.7% of numpy exact): the served HNSW returns only **~67% of the true cosine top-10** (id overlap 0.671, score recall 0.682),
+and the golden labels came from this specific graph, so exact cosine scores *lower* on it (recall@10 0.320, MRR 0.708). A Qdrant snapshot of the
+live collection (334 MB, 103 MB gzipped, restore 3.3 s) restores deterministically (150/150 repeat) and lands near live (recall@10 0.4439, MRR
+0.864, 130/150 identical top-10s). Other costs: CPU query encode 269 ms/query (150 queries 40.3 s, cache bypassed), bge-large load 13.9 s.
+Added to `docs/future-work.md` for Phase 19. `uv run pytest -q`: 752 passed. $0 spent. **Next:** user picks the gate's index source
+(snapshot recommended), then thresholds + `eval.yml` (16c).
+
+**Decision (user, 2026-10-23): gate on a Qdrant snapshot of the live collection** (release asset, ~106 MB: gzipped snapshot 102.9 MB + chunks 3.9 MB).
+
+**Unit 16c complete as of 2026-10-23** (design record 16c; `eval/gate.py` 13 tests, `eval/ci_fixtures.py` 6 tests, `eval/retrieval_gate.py`,
+`GateSettings`, `ci/baselines/retrieval.json`, `experiments/16d_encoder_noise.py`). Gate fails on anything but a clean in-band comparison
+(missing/NaN metric, fingerprint or n_queries mismatch, empty spec list). Export 16 s, restore 5.8 s, restored chunks byte-identical.
+Gate run on restored snapshot (M1 CPU, live encode, cache bypassed), repeated twice -> identical to all digits: **recall@10 0.4317, MRR 0.8674,
+NDCG@10 0.7100**; search p95 ~17 ms; encode 0.271 s/query. Tolerance set from a noise measurement: benign delta (cached vs live query vectors,
+<=3.4e-7 apart) = recall 0.0122 / MRR 0.0034 / NDCG 0.0089, batch-size noise = 0 -> bands **0.025 / 0.01 / 0.02** (2x, rounded up; recall band <
+the 0.035 = 8% relative example). Synthetic 8% drop -> FAIL exit 1. First tolerance guess (0.02, from 0.0067) was wrong, corrected. Baseline is
+**provisional (M1)**; 16d checks the hosted-runner delta. `uv run pytest -q`: **771 passed**; ruff + mypy (21 files) clean. $0 spent.
+**Needs from the user:** upload `ci-fixtures/` as a release (`gh release create ci-fixtures-v1 ci-fixtures/*`). **Next:** 16d `eval.yml`.
 
 ## Phase 15 — Security Hardening
 

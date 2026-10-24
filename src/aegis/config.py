@@ -541,6 +541,24 @@ class EvalSettings(BaseSettings):
     generation_batch_raw_path: Path = REPO_ROOT / "docs" / "results" / "judge-agreement-batch-raw.json"
 
 
+class GateSettings(BaseSettings):
+    """The CI evaluation gate (plan.md Phase 16, design record 16c). Tolerances are
+    absolute bands around a committed baseline: 2x the largest *benign* delta
+    measured, rounded up to 0.005. Benign = same index, same code, only the query
+    vectors perturbed at ~1e-7 (cached vs. live encoding): recall@10 0.0122,
+    MRR 0.0034, NDCG@10 0.0089 (batch-size noise alone: 0.0 on all three). The
+    recall band must stay below the 8% relative drop plan.md names as the
+    regression a gate exists to catch (0.08 x 0.432 = 0.035). Provisional until
+    the first hosted-runner run shows the x86-vs-M1 delta (design record 16d)."""
+
+    model_config = SettingsConfigDict(env_prefix="GATE_", env_file=".env", extra="ignore")
+
+    retrieval_recall_tolerance: float = 0.025
+    retrieval_mrr_tolerance: float = 0.01
+    retrieval_ndcg_tolerance: float = 0.02
+    baseline_dir: Path = REPO_ROOT / "ci" / "baselines"
+
+
 class CacheSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="CACHE_", env_file=".env", extra="ignore")
 
@@ -844,6 +862,7 @@ class Settings(BaseSettings):
     confidence: ConfidenceSettings = ConfidenceSettings()
     judge: JudgeSettings = JudgeSettings()
     eval: EvalSettings = EvalSettings()
+    gate: GateSettings = GateSettings()
     cache: CacheSettings = CacheSettings()
     langfuse: LangfuseSettings = LangfuseSettings()
     api: ApiSettings = ApiSettings()
