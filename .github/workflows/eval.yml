@@ -8,11 +8,13 @@
 #   pull_request      -> this workflow (full gate)
 #   push to main      -> this workflow, so "green on main" is a measured fact
 #   workflow_dispatch -> this workflow, on demand (baseline re-measurement, dry runs)
-# Two jobs run in parallel:
+# Three jobs: two run in parallel, then a third reports on a PR:
 #   retrieval-gate  restored index, no LLM, $0
 #   llm-gate        real OpenAI calls (model-availability probe + router eval), capped at
 #                   $0.15 per run by the spend ledger. Never runs on push-to-main (merges
 #                   never spend money) and never on fork PRs (secrets are withheld there).
+#   report          PRs only: one sticky comment with both gates' tables diffed against
+#                   baseline, updated in place on every push (design record 16f).
 name: eval
 
 on:
@@ -180,3 +182,66 @@ jobs:
           name: llm-results
           path: results/
           if-no-files-found: warn
+
+  report:
+    needs: [retrieval-gate, llm-gate]
+    # always(): the comment matters most when a gate FAILED. Same-repo PRs only: a fork PR's
+    # token is read-only and could not post; its numbers are still in the job summaries.
+    if: >-
+      always() && github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # A gate that died early uploaded nothing; that must not stop the report.
+      - name: Retrieval results
+        uses: actions/download-artifact@v8.0.2
+        continue-on-error: true
+        with:
+          name: eval-results
+          path: results-retrieval
+
+      - name: LLM results
+        uses: actions/download-artifact@v8.0.2
+        continue-on-error: true
+        with:
+          name: llm-results
+          path: results-llm
+
+      # Standard library only, run by path: no dependency install to go wrong.
+      - name: Build comment
+        env:
+          SHA: ${{ github.event.pull_request.head.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          RETRIEVAL_RESULT: ${{ needs.retrieval-gate.result }}
+          ROUTER_RESULT: ${{ needs.llm-gate.result }}
+        run: |
+          python3 src/aegis/eval/pr_comment.py \
+            --sha "$SHA" --run-url "$RUN_URL" \
+            --retrieval-result "$RETRIEVAL_RESULT" --router-result "$ROUTER_RESULT" \
+            --retrieval-md results-retrieval/retrieval.md --router-md results-llm/router.md \
+            --spend-db results-llm/ci_spend.sqlite --out comment.md
+
+      # Update the existing comment (found by its hidden marker) or create the first one.
+      - name: Post or update the PR comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          MARKER='<!-- aegis-eval-gate -->'
+          ID=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
+                 --jq ".[] | select(.body | startswith(\"$MARKER\")) | .id" | head -n1)
+          if [ -n "$ID" ]; then
+            gh api -X PATCH "repos/$REPO/issues/comments/$ID" -F body=@comment.md > /dev/null
+            echo "updated comment $ID"
+          else
+            gh api -X POST "repos/$REPO/issues/$PR/comments" -F body=@comment.md > /dev/null
+            echo "created comment"
+          fi

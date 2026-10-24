@@ -416,6 +416,12 @@ $0.15 via `OPENAI_BUDGET_USD`, verified real (tiny-cap test: 7 calls, $0.001534,
 `gh workflow run eval.yml` (llm-gate runs only on PRs and manual dispatch). **Next:** generation-subset gate (measure cost first), escalation check as path-filtered
 job (CPU-bound, ~2 h on runner by extrapolation), p95 gate, PR comment, deliberate regression.
 
+**Unit 16f written 2026-10-24, not yet seen on a real PR** (design record 16f; `eval/pr_comment.py` stdlib-only + 8 tests; `report` job: `always()`, same-repo PRs,
+sticky comment found by hidden marker, `startswith` so a human quoting it is not overwritten). Verdicts: failure -> red, cancelled -> incomplete, skipped -> "N gates not run"
+(never "passed"). Comment rendered from real run 40068902808 artifacts; jq marker filter checked on sample JSON. Also this session: `eval` concurrency group now per event
+(a manual dispatch had cancelled the push-to-main run). 797 tests pass. **Needs from the user:** push, then open a smoke PR (commands in chat) to watch the comment appear
+and update in place. **Next:** 16g deliberate regression (screenshot), then generation-subset / escalation / p95 tiers.
+
 ## Phase 15 — Security Hardening
 
 **Scope** (plan.md, Day 18½, topic 36): the five attack classes (indirect injection, KB leakage, tenant separation,
