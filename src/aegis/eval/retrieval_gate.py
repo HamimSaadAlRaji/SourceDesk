@@ -14,7 +14,9 @@ CPU encoding on an M1 Pro, measured in design record 16b.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import platform
 import sys
 import time
 from pathlib import Path
@@ -33,6 +35,33 @@ from aegis.types import GoldenQuery
 
 TOP_K = 10
 BASELINE_NAME = "retrieval.json"
+
+
+_SIMD_LEVELS = ("avx", "avx2", "avx512f")
+
+
+def parse_cpuinfo(text: str) -> tuple[str, str]:
+    """(model name, SIMD levels present) from /proc/cpuinfo text; ("unknown", "") when
+    absent or unparseable -- provenance must never be able to fail a gate run."""
+    model, flags = "unknown", set()
+    for line in text.splitlines():
+        key, sep, value = line.partition(":")
+        if not sep:
+            continue
+        key, value = key.strip(), value.strip()
+        if key == "model name" and model == "unknown":
+            model = value
+        elif key == "flags" and not flags:
+            flags = set(value.split())
+    return model, ",".join(level for level in _SIMD_LEVELS if level in flags)
+
+
+def host_info() -> dict[str, str]:
+    try:
+        model, simd = parse_cpuinfo(Path("/proc/cpuinfo").read_text())
+    except OSError:  # not Linux (e.g. macOS)
+        model, simd = platform.processor() or "unknown", ""
+    return {"machine": platform.machine(), "cpu_model": model, "simd": simd}
 
 
 def gate_specs() -> list[MetricSpec]:
@@ -83,7 +112,10 @@ def run(fixtures_dir: Path) -> GateReport:
     metrics = dict(result.overall)
     metrics["search_p95_ms"] = float(np.percentile(latencies, 95))  # recorded, not gated (16d decides)
     metrics["encode_s_per_query"] = encode_s / len(queries)
-    return GateReport(suite="retrieval", fingerprint=fingerprint, n_queries=result.n_queries, metrics=metrics)
+    # If two runs differ, the vector hash says whether the encoder or the search moved:
+    # different hash = encoder numerics (hardware), same hash but different metrics = search.
+    info = {**host_info(), "query_vectors_sha256": hashlib.sha256(vectors.tobytes()).hexdigest()[:16]}
+    return GateReport(suite="retrieval", fingerprint=fingerprint, n_queries=result.n_queries, metrics=metrics, info=info)
 
 
 def _baseline_path() -> Path:

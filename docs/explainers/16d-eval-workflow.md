@@ -55,6 +55,8 @@ Runner costs (run 3): restore 12 s, tenant-bypass tests 31 passed in 10.3 s, ret
 - **CI minutes.** `test.yml` ≈ 3 min plus `eval.yml` ≈ 11 min per PR push is ~14 min; 2,000 free minutes a month is about 140 PR pushes. Encoding dominates and cannot use the embedding cache without hiding encoder regressions (16c).
 - **A local developer running the gate needs the same Qdrant setting**, e.g. `docker run -e QDRANT__STORAGE__OPTIMIZERS__MAX_OPTIMIZATION_THREADS=0 …`; the restore will say so if they forget.
 
+- **Correction, 2026-10-24 (see 16h):** the claim in 16e that run 4 "closes 16d's open question: the runner is repeatable" held for three consecutive runs only. A later run returned results bit-identical to the M1 (0.4317 / 0.8674 / 0.7100) instead of the runner baseline (0.4435 / 0.8640 / 0.7188). The runner is repeatable within a hardware class, not across the ones GitHub assigns.
+
 ## 7. Where this fits and what's next
 
 The retrieval half of the gate is live and green. Remaining Phase 16 work: 16e — the LLM-backed checks (router confusion matrix, escalation on negatives, a generation subset) with the real cost of one run measured before wiring, plus the p95 latency gate; 16f — results as a PR comment; 16g — the deliberate regression, screenshotted. Open design question for 16e: the plan's "p95 latency budget" gate needs an end-to-end number, and the Phase 13 p95 (5.6 s against the 3 s target) is still unmet, so the latency gate can only guard against getting worse, not assert the target is met.

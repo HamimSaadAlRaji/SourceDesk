@@ -43,6 +43,9 @@ class GateReport(BaseModel):
     fingerprint: str
     n_queries: int
     metrics: dict[str, float] = Field(default_factory=dict)
+    # Provenance (host CPU, query-vector hash). Never gated and never compared: it exists so a
+    # metric that moved can be traced to hardware instead of guessed at.
+    info: dict[str, str] = Field(default_factory=dict)
 
 
 class MetricCheck(BaseModel):
@@ -141,6 +144,8 @@ def compare_files(
     baseline = GateReport.model_validate_json(baseline_path.read_text())
     result = evaluate(current, baseline, specs)
     md = render_markdown(title, result)
+    if current.info:
+        md += "\n<sub>" + " · ".join(f"{k}: {v}" for k, v in current.info.items()) + "</sub>\n"
     print(md)
     if markdown_path is not None:
         markdown_path.parent.mkdir(parents=True, exist_ok=True)

@@ -422,6 +422,22 @@ sticky comment found by hidden marker, `startswith` so a human quoting it is not
 (a manual dispatch had cancelled the push-to-main run). 797 tests pass. **Needs from the user:** push, then open a smoke PR (commands in chat) to watch the comment appear
 and update in place. **Next:** 16g deliberate regression (screenshot), then generation-subset / escalation / p95 tiers.
 
+**Unit 16f verified on a real PR (2026-10-24, PR #1 `ci-smoke-pr`):** smoke run 40073021376 green; `report` job 8 s; sticky comment posted with both tables at +0.0000, spend $0.0161.
+**Unit 16g (deliberate regression) -- red phase done, recovery pending** (design record 16g). Encoder `max_seq_length = 384` ("speed up CI encoding"), 3 lines, pushed to the PR
+branch (commit `b886a9d`): unit tests, ruff, mypy green (797 tests); `retrieval-gate` **failed** (run 40076908719): recall@10 0.3902 (-0.0534, -12.0% rel.), MRR 0.8307 (-0.0333),
+NDCG@10 0.6590 (-0.0599), all outside bands (2.1x / 3.3x / 3.0x); router gate green; `report` green and the existing comment **edited in place**. Prediction (local sweep) was
+right on outcome, off by 0.014 recall / ~0.01 NDCG (MRR exact). Cap sweep for the record: 512 -> 0.4372, 384 -> 0.3976, 256 -> 0.3346, 128 -> 0.2830, 32 -> 0.1336 recall@10.
+Screenshots saved: `docs/results/ci-gate-regression-{checks,comment,run}.png`. **Pending:** revert commit pushed to `ci-smoke-pr` -> comment returns to green -> screenshot
+`ci-gate-recovered-comment.png`; then close PR #1 without merging. Exit criteria now: both workflows green on main YES; deliberate regression fails the gate, screenshotted YES (recovery
+pending); metric diffs on PRs YES. **Remaining Phase 16 items:** generation-subset gate, escalation check (CPU-bound), p95 gate.
+
+**Unit 16g recovery verified (2026-10-24):** revert `d5a1c84` pushed -> run 40084720757 green, same comment edited back to "All evaluation gates passed" (1 comment on PR). **Unit 16h (found
+while checking it): the hosted runner is not numerically constant.** That run's retrieval numbers (recall@10 0.4317 / MRR 0.8674 / NDCG 0.7100) were *bit-identical to the M1*, not the 0.4435 / 0.8640 /
+0.7188 that three earlier runner runs reproduced exactly; deltas 0.0118 / 0.0033 / 0.0089 = 47/33/45% of the bands (passed; a 0.01 band would have been a false red). Cause unrecorded (no CPU data
+existed); also confirmed locally that Qdrant's search varies with its CPU limit (0.4317 vs 0.4344 recall, same graph and vectors). Added run provenance (`GateReport.info`: CPU model, SIMD levels, query-vector
+SHA-256) shown under the table; corrected the "runner is repeatable" claim in 16d/16e. 19 gate/host tests pass. **Screenshot still to take:** `docs/results/ci-gate-recovered-comment.png`.
+Then close PR #1 without merging and commit docs on main.
+
 ## Phase 15 — Security Hardening
 
 **Scope** (plan.md, Day 18½, topic 36): the five attack classes (indirect injection, KB leakage, tenant separation,

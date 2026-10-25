@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import math
 
-from aegis.eval.gate import GateReport, MetricSpec, evaluate, render_markdown
+from aegis.eval.gate import GateReport, MetricSpec, compare_files, evaluate, render_markdown
 
 SPECS = [
     MetricSpec(name="recall@10", tolerance=0.02),
@@ -117,3 +117,36 @@ def test_markdown_shows_each_metric_its_delta_and_the_problems():
     assert "-0.1400" in md
     assert "FAIL" in md
     assert "fingerprint" in md
+
+
+# --- run provenance (2026-10-24): the hosted runner returned two different numeric
+# outcomes on identical inputs (0.4435 vs the M1's bit-identical 0.4317 recall@10) and
+# nothing recorded which hardware produced which. `info` carries that provenance. It is
+# metadata: it must round-trip, be shown, and never influence the verdict. ---
+
+
+def test_info_round_trips_and_never_changes_the_verdict():
+    a = _report()
+    a.info = {"cpu_model": "AMD EPYC", "query_vectors_sha256": "abc"}
+    b = _report()
+    b.info = {"cpu_model": "Intel Xeon", "query_vectors_sha256": "def"}
+    assert evaluate(a, b, SPECS).passed
+    assert GateReport.model_validate_json(a.model_dump_json()).info == a.info
+
+
+def test_a_report_without_info_still_loads():
+    # baselines written before `info` existed must keep working
+    raw = '{"suite": "retrieval", "fingerprint": "f", "n_queries": 1, "metrics": {"recall@10": 0.5}}'
+    assert GateReport.model_validate_json(raw).info == {}
+
+
+def test_compare_files_shows_the_host_of_the_current_run(tmp_path):
+    base = _report()
+    cur = _report()
+    cur.info = {"cpu_model": "AMD EPYC 7763", "query_vectors_sha256": "deadbeef"}
+    (tmp_path / "base.json").write_text(base.model_dump_json())
+    (tmp_path / "cur.json").write_text(cur.model_dump_json())
+    md_path = tmp_path / "out.md"
+    assert compare_files(tmp_path / "cur.json", tmp_path / "base.json", SPECS, "T", md_path) == 0
+    md = md_path.read_text()
+    assert "AMD EPYC 7763" in md and "deadbeef" in md
