@@ -457,6 +457,9 @@ batches ran 0.12 -> 1.09 s/pair, last 26 pairs = half the time). Cache `ci/cache
 index: air_canada_fn 3, negative recall 0.90, deflection 0.84; 540 hits / 0 misses, **4 s wall**, deterministic. Mutation tests: tau 0.30 -> 6 Air Canada slips (FAIL; deflection "improved" to 0.89), tau 0.65 -> deflection
 0.50 (FAIL). Bands: air_canada_fn 0 (zero tolerance), deflection 0.03 (placeholder), max 60 uncached pairs. New `escalation-gate` CI job (no secrets, runs on every event); PR comment now has 4 sections. 347 top-5
 margin pairs left unscored (do it if CI shows misses). Kaggle script `16f` unused. **Every Phase 16 build item now has a gate.** `uv run pytest -q`: 829 passed; ruff clean; mypy clean (23 files).
+**First CI run of the full 5-job workflow (2026-10-25, runs 40152792264 push + 40152793947 dispatch): all green.** Router 0.7759 / billing 1.0 / 1.0 / p95 1,853 ms ($0.0189); generation 0.8176 citations / 0.95 cited / 0 empty ($0.0336);
+escalation 3 slips / 0.84 deflection; retrieval 0.4439 / 0.8640 / 0.7189 on an AMD EPYC 9V74 (AVX-512). **Escalation had 539 hits + 1 miss** (the runner's CPU reordered one top-3 pair; cost 51-86 s of reranker download/load, no decision change).
+Scored the 347 margin pairs locally afterwards (463 s, 8m03 wall; my 6.3 min estimate was 22% low): cache = **885 scores / 80 KB**; local gate unchanged. Gate now records missed keys (`rerank_cache_missed_keys`) so the next run proves or names it. Per-run LLM cost $0.0525 of the $0.15 cap.
 **Pending decision (not answered):** the earlier `skillOverrides` proposal (80 unused skills; option 1 literal off / 2 user-invocable-only for built-in commands / 3 edit list) -- nothing in ~/.claude/settings.json has been changed.
 
 ## Phase 15 — Security Hardening

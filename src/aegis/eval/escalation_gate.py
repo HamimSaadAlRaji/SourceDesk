@@ -84,6 +84,8 @@ def run(fixtures_dir: Path, save_cache: bool = False, max_uncached: int | None =
     metrics = score_escalation(escalated, [q.is_negative for q in queries])
     info = {"tau": str(settings.confidence.tau), "rerank_cache_hits": str(cache.hits),
             "rerank_cache_misses": str(cache.misses), "rerank_cache_size": str(len(cache.scores))}
+    if cache.missed:  # first 12 hex chars of each key (the export file maps keys back to query and chunk)
+        info["rerank_cache_missed_keys"] = ",".join(k[:12] for k in cache.missed[:10])
     return GateReport(suite="escalation", fingerprint=fingerprint, n_queries=len(queries),
                       metrics={k: v for k, v in metrics.items() if v == v}, info=info)  # NaN omitted: a gated metric then fails
 

@@ -4,8 +4,8 @@ Run once instead of the Kaggle handoff (16f), by the user's explicit waiver of t
 local compute rule for this single job (2026-10-25; CLAUDE.md section 10 otherwise sends it to
 Kaggle). Projected from a real 12-pair benchmark: 1.32 s/pair x 538 pairs = ~11.8 min on the M1.
 
-Scores only the pairs the gate needs (min_rank < rerank_pool_size, 538), not the top-5 margin
-pairs in the export. Uses the served code path (CrossEncoderReranker's score function, CPU).
+Scores only the pairs the gate needs by default (min_rank < rerank_pool_size, 538); `--rank-below 5`
+adds the top-5 margin pairs (rank 3-4), which cover near-tie reordering on other CPUs. Uses the served code path (CrossEncoderReranker's score function, CPU).
 Resumable: results are checkpointed after every batch and already-scored keys are skipped.
 
     uv run python experiments/16g_score_rerank_pairs_local.py
@@ -14,6 +14,7 @@ Output: ci/caches/rerank_scores.json (committed; a PR diff shows when a score ch
 
 from __future__ import annotations
 
+import argparse
 import json
 import time
 
@@ -30,10 +31,15 @@ BATCH = 32
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--rank-below", type=int, default=settings.confidence.rerank_pool_size,
+                        help="score pairs whose best candidate rank is below this (default: the pool size the gate uses; "
+                             "5 adds the top-5 margin pairs that cover near-tie reordering on other CPUs)")
+    args = parser.parse_args()
     export = json.loads(EXPORT.read_text(encoding="utf-8"))
     model = export["model_name"]
     assert model == settings.rerank.model_name, "export was made for a different reranker model"
-    needed = [p for p in export["pairs"] if p["min_rank"] < settings.confidence.rerank_pool_size]
+    needed = [p for p in export["pairs"] if p["min_rank"] < args.rank_below]
     cache = ScoreCache.load(OUT)
     todo = [p for p in needed if p["key"] not in cache.scores]
     # Similar lengths per batch pad less (the same trick the corpus embedding run needed).

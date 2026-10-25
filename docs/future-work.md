@@ -22,6 +22,6 @@ Ideas that are not in `plan.md` and therefore are not built (CLAUDE.md §9).
 
 ## Escalation check follow-ups (Phase 16, design record 16i)
 
-- **347 margin pairs (top-5 beyond top-3) are exported but unscored.** If CI runs on other hardware show reranker cache misses, score them with `experiments/16g_score_rerank_pairs_local.py` after adding a rank-threshold option (it is currently fixed to `rerank_pool_size`, so it selects `min_rank < 3` only) and recommit the cache.
+- **Verify the margin scores removed the CI miss.** The first CI run had 1 uncached pair (539/540 hits) on the AMD EPYC runner; the 347 margin pairs were scored afterwards (cache = 885 scores). If the next CI run still shows a miss, `rerank_cache_missed_keys` in the escalation job summary names it: look the key up in `ci-fixtures/rerank_pairs_export.json`, and if absent, add its (query, chunk) to the cache by running the gate once with `--save-cache`.
 - **Cache refresh is manual.** After a deliberate reranker or chunking change, run the gate with `--save-cache --max-uncached 1000` and re-baseline; there is no automation, by design (a silent refresh would defeat the check).
 - **tau itself is unchanged and unimproved**: 3 of 30 negatives still pass at tau 0.5; the gate pins it. Improving it is Phase 19 failure-analysis work.

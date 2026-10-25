@@ -81,3 +81,12 @@ def test_save_and_load_round_trip(tmp_path):
 
 def test_a_missing_cache_file_is_empty_not_an_error(tmp_path):
     assert ScoreCache.load(tmp_path / "nope.json").scores == {}
+
+
+def test_misses_record_which_pairs_were_not_in_the_cache():
+    # A miss on a CI runner (a different CPU reordered a near-tie) must say WHICH pair, or the
+    # cache cannot be repaired without guessing.
+    cache = ScoreCache({pair_key("m", "q1", "c1"): 0.5})
+    fn = make_score_fn("m", lambda pairs: [0.0] * len(pairs), cache, max_uncached=10)
+    fn([("q1", "c1"), ("q2", "c2")])
+    assert cache.missed == [pair_key("m", "q2", "c2")]

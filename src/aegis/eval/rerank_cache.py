@@ -40,6 +40,7 @@ class ScoreCache:
         self.meta: dict[str, str] = dict(meta or {})
         self.hits = 0
         self.misses = 0
+        self.missed: list[str] = []  # keys computed live this run, so a miss can be traced and repaired
 
     @classmethod
     def load(cls, path: Path) -> ScoreCache:
@@ -75,6 +76,7 @@ def make_score_fn(model_name: str, inner: ScoreFn, cache: ScoreCache, max_uncach
             for key, value in zip(missing, inner(list(missing.values()))):
                 cache.scores[key] = float(value)
             cache.misses += len(missing)
+            cache.missed.extend(missing)
         cache.hits += len(pairs) - len(missing)
         return [cache.scores[key] for key in keys]
 
