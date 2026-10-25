@@ -1,7 +1,45 @@
 # Aegis — Progress Log
 
-**Last updated:** 2026-10-22 (Phase 16 unit 16a)
-**Current phase:** Phase 16 — CI Evaluation Gate (🟡 in progress — 16a `test.yml` ✅, 16b-c ✅, 16d `eval.yml` retrieval gate ✅ green on the runner 2026-10-24; LLM-backed checks, p95 gate, PR comment, deliberate-regression demo remain). Phase 15 — Security Hardening (✅ complete 2026-10-22 — units 15, 15b-15e done: attack suite + before results, tenant partitioning, access control, input boundary, injection defenses, Qdrant lock-down + vector leakage, OpenAI provider + $10 spend guard (15g); generation bake-off (15g1: planned gpt-4.1-mini lost to qwen) + prompt fit (15g2: stricter prompt worse, negative result); gpt-5-mini ties qwen (15g3) and is now the served generator; router re-eval (15g4): nano kept, billing 8/8; real-stack security batch (15h): v3 served, poisoned obedience 5/50 -> 0/50; OQ #18/#19/#20 fixed (15k/15j/15l); wrap-up (15i) done, all 4 exit criteria met). Phase 14 — API, Streaming & UI (✅ complete 2026-10-17 — all 6 build items, all 5 exit criteria met). Phase 13 — Observability & the Latency Budget (🟡 in progress — build list complete, exit criteria 3 of 4 met -- p95 < 3 s unmet). Phase 12 — Caching, Delta Indexing & Cost (✅ complete — all 6 units, exit criteria met). Phase 11 — Generation Eval, RAGAS & Judging the Judge (🟡 **wrapped up for this session** — every unit, fix, and root-cause investigation that could be done without waiting on quota is done and documented; exactly 2 real measurements are left, both **explicitly deferred to the user** to run themselves whenever quota allows, not queued as a future session's task; see "Phase 11 wrap-up" note below).
+**Last updated:** 2026-10-25 (Phase 17 complete)
+**Current phase:** Phase 17 — LangGraph Port (✅ complete 2026-10-25, all 3 exit criteria met; next is Phase 18, deployment). Phase 16 — CI Evaluation Gate (✅ complete 2026-10-25 — 5-job gate, deliberate regression failed it and recovery verified, PR comment live; end-to-end p95 gate handed to Phase 17). Phase 15 — Security Hardening (✅ complete 2026-10-22 — units 15, 15b-15e done: attack suite + before results, tenant partitioning, access control, input boundary, injection defenses, Qdrant lock-down + vector leakage, OpenAI provider + $10 spend guard (15g); generation bake-off (15g1: planned gpt-4.1-mini lost to qwen) + prompt fit (15g2: stricter prompt worse, negative result); gpt-5-mini ties qwen (15g3) and is now the served generator; router re-eval (15g4): nano kept, billing 8/8; real-stack security batch (15h): v3 served, poisoned obedience 5/50 -> 0/50; OQ #18/#19/#20 fixed (15k/15j/15l); wrap-up (15i) done, all 4 exit criteria met). Phase 14 — API, Streaming & UI (✅ complete 2026-10-17 — all 6 build items, all 5 exit criteria met). Phase 13 — Observability & the Latency Budget (🟡 in progress — build list complete, exit criteria 3 of 4 met -- p95 < 3 s unmet). Phase 12 — Caching, Delta Indexing & Cost (✅ complete — all 6 units, exit criteria met). Phase 11 — Generation Eval, RAGAS & Judging the Judge (🟡 **wrapped up for this session** — every unit, fix, and root-cause investigation that could be done without waiting on quota is done and documented; exactly 2 real measurements are left, both **explicitly deferred to the user** to run themselves whenever quota allows, not queued as a future session's task; see "Phase 11 wrap-up" note below).
+
+## Phase 17 — LangGraph Port & Framework Comparison
+
+**Scope** (plan.md, Day 19, topic 27): (1) port orchestration to a `StateGraph`, (2) both paths config-selectable, (3) full eval through both,
+(4) framework latency overhead, (5) honest comparison. Exit: graph passes the eval with metrics matching direct within tolerance; both paths
+selectable; `docs/results/framework-comparison.md` with LOC, latency, verdict.
+**Decisions (user, 2026-10-25):** retry-on-low-confidence built as a config-gated edge, **default off** (the direct path has no retry loop: iterative retrieval
+was -13.4% NDCG@5 in Phase 8, so enabling it would break behavior preservation) · latency measured on a **40-query live subset** per path · graph path **not**
+added to CI (future-work) · LangGraph dependency pinned `>=1.2.2,<2`.
+
+**Units 17a-17d complete as of 2026-10-25** (design records 17a-17d).
+- **17a:** `langgraph` declared in `pyproject.toml` (it was installed transitively, undeclared); `OrchestrationSettings` (`backend`, `retry_on_low_confidence`, `max_retries`).
+- **17b:** `src/aegis/graph/pipeline.py` (244 lines): `LangGraphPipeline(AnswerPipeline)` overriding one seam (`_orchestrate`); 10 nodes, 4 conditional edges, 1 back-edge (retry).
+  Every node calls the same stage method the direct path calls, so spans/timings/events/cache scope are shared code. Test-first: 19 tests (differential over 7 scenarios, streaming,
+  rewrite, retry on/off/capped/never-on-policy). Whole pre-existing suite re-run on the graph via `AEGIS_TEST_BACKEND=langgraph`: **862 passed on both backends**. 3 mutations each fail a test.
+- **17c:** `factory.pipeline_class()`; API and experiments pick the backend from `ORCHESTRATION_BACKEND`. Real Langfuse/OTel span trees (in-memory exporter) are **identical**
+  (`experiments/17a_trace_parity.py`); gotcha: Langfuse keeps one resource manager per public key.
+- **17d:** `src/aegis/eval/equivalence.py` (record/replay tape + field-level comparison, 13 tests) and `experiments/17b_equivalence.py`. 180 dev queries, direct live then graph replay
+  (prompt v3's per-request boundary key normalized): **180/180 identical in both passes, 0 replay misses, 0 unused tape entries**; escalated 51 / answered 129;
+  `air_canada_fn` 3, negative recall 0.90, deflection 0.84 (= Phase 10 gate), `cited_answer_rate` 0.8992; pass 2 = 128 exact hits (1 flagged answer is never cached).
+  **Negative control** (tau +0.1, $0): 121 identical / 59 differing, deflection 0.84 -> 0.713. **Spend $0.274** (estimate $0.28); ledger now ~$0.88 of $10.
+  **Not verified on real data:** the retry edge (the reranker miss budget refused 63 > 60 uncached pairs; unit tests only).
+**Units 17e-17f and the comparison doc complete as of 2026-10-25** (design records 17e, 17f, umbrella 17; `docs/results/framework-comparison.md`).
+- **17e framework cost:** stubbed stages, 2,000 requests/path/scenario, interleaved: graph adds **+0.6 to +1.2 ms per request** (~0.2 ms/node; cache hit 26 -> 634 us, generated answer 182 -> 1,352 us).
+  **Live, 40 queries per path, paired:** graph minus direct median **-22 ms, bootstrap 95% CI [-162, +124]**, graph faster in 21/40, all 40 pairs took the same path. Not detectable; the 1 ms figure comes from the isolated run.
+- **17f:** code lines deciding the flow **61 direct vs 184 graph** (131 in functions; retry loop = 8 lines + 1 edge); traceback for an injected stage failure **7 vs 13 frames** (6 LangGraph), exception type/message preserved;
+  topology printable (`docs/results/orchestration-graph.mmd`).
+- **Verdict (`framework-comparison.md`):** keep direct as default; LangGraph buys topology-as-data and a cheap retry edge, none of the durable-state / interrupt / parallel features this system would need.
+- **FRESH DIRECT p95 (Phase 16 hand-off): 11,799 ms** (p50 3,577, n = 40; generate path n = 35: p50 3,895 / p95 12,094) vs the 3 s target and the old 5.6 s. Graph in the same run: p95 10,718. Generate-path mean shares:
+  generation 53% (p95 7.1 s), confidence 23% (p95 2.2 s, one 10.9 s outlier), routing 14%, validation 9% (p95 2.7 s: citation entailment is now an LLM call, 3 ms in Phase 13). Recorded in `docs/future-work.md`, **not fixed**.
+  Confidence scorer untouched, so the escalation baseline is unchanged.
+- **Spend:** equivalence $0.274; latency $0.133 + **$0.131 lost** (first latency run: my summary code crashed before the raw rows were saved; fixed, rows now written first). Ledger **~$1.145 of $10**.
+- **Exit criteria:** (1) graph passes the eval with metrics matching direct, tolerance zero: MET (180/180; note the 4 CI gates call components, not the orchestration, so they are backend-independent by construction;
+  the equivalence run is what covers the orchestration). (2) both config-selectable: MET (`ORCHESTRATION_BACKEND`, `factory.pipeline_class`). (3) `framework-comparison.md` with LOC, latency, verdict: MET.
+- **Not verified / open:** retry edge on real data (unit tests only); equivalence is under replay, not live-vs-live; CI matrix leg deferred by decision; p95 unfixed (Open Question #21).
+- **Verification at close:** `uv run pytest -q` 862 passed, and `AEGIS_TEST_BACKEND=langgraph uv run pytest -q` 862 passed; ruff clean; mypy clean (24 files).
+**Next session:** Phase 18 (deployment; reverify free-tier terms; deployed p95 must be reported, and the 11.8 s local figure means the deployed number will be worse unless the p95 gap is addressed first --
+raise with the user before Phase 18 whether to spend time on it). Uncommitted work: everything above (no git writes by Claude).
 
 ## Phase 12 — Caching, Delta Indexing & Cost
 
@@ -460,7 +498,7 @@ margin pairs left unscored (do it if CI shows misses). Kaggle script `16f` unuse
 **First CI run of the full 5-job workflow (2026-10-25, runs 40152792264 push + 40152793947 dispatch): all green.** Router 0.7759 / billing 1.0 / 1.0 / p95 1,853 ms ($0.0189); generation 0.8176 citations / 0.95 cited / 0 empty ($0.0336);
 escalation 3 slips / 0.84 deflection; retrieval 0.4439 / 0.8640 / 0.7189 on an AMD EPYC 9V74 (AVX-512). **Escalation had 539 hits + 1 miss** (the runner's CPU reordered one top-3 pair; cost 51-86 s of reranker download/load, no decision change).
 Scored the 347 margin pairs locally afterwards (463 s, 8m03 wall; my 6.3 min estimate was 22% low): cache = **885 scores / 80 KB**; local gate unchanged. Gate now records missed keys (`rerank_cache_missed_keys`) so the next run proves or names it. Per-run LLM cost $0.0525 of the $0.15 cap.
-**Pending decision (not answered):** the earlier `skillOverrides` proposal (80 unused skills; option 1 literal off / 2 user-invocable-only for built-in commands / 3 edit list) -- nothing in ~/.claude/settings.json has been changed.
+**Carried over (user decision 2026-10-25): end-to-end p95 (target < 3 s; last measured 5.6 s on the qwen-era stack, never re-measured on gpt-5-mini) is handled in/after Phase 17.** Phase 17's latency step must record a fresh direct-path p95 on the current stack as its baseline, not only the LangGraph delta. Fixing it likely changes the confidence scorer (4.09 s/query CPU on the M1), which would shift the escalation baseline and must be applied to both paths.
 
 ## Phase 15 — Security Hardening
 
@@ -926,9 +964,9 @@ either. Open Questions #1 and #16 and the DoD tracker rows below reflect this ex
 
 | | |
 |---|---|
-| **Day** | 13 of 21 (in progress) |
-| **Phase** | 15 of 19 **complete** (2026-10-22); next is Phase 16 (CI evaluation gate, never cut). Phase 14 complete. Phase 13: 3 of 4 exit criteria (p95 < 3 s unmet). Phase 12 complete. Phase 11 wrapped up with κ unmet. Phase 9 sweep complete |
-| **Design records written** | 54 files in `docs/explainers/` across phases 0-15 (lettered sub-records; Phase 15 alone has 15, 15b-15l, 15g1-15g4) |
+| **Day** | 19 of 21 (Phase 17 complete) |
+| **Phase** | 17 of 19 **complete** (2026-10-25); next is Phase 18 (deployment). Phase 16 complete. Phase 15 complete 2026-10-22. Phase 14 complete. Phase 13: 3 of 4 exit criteria (p95 < 3 s unmet). Phase 12 complete. Phase 11 wrapped up with κ unmet. Phase 9 sweep complete |
+| **Design records written** | 71 files in `docs/explainers/` across phases 0-17 (16a-16j; 17 + 17a-17f; the planned umbrella `16-ci-eval-gates.md` is not written) |
 | **Golden set** | 180 dev + 40 holdout, frozen and hashed (Phase 4) |
 | **Definition of Done** | 3 of 10 met (#1 Recall@10 + MRR lift; #3 escalation confusion matrix; #4 cache hit rate + cost/latency reduction). Measured but **not met**: #2 faithfulness (0.7977 vs ≥ 0.90), #6 p95 (5.6 s vs < 3 s), #8 judge κ (0.1321 at N=23 post-fix vs ≥ 0.6). Not started: #5, #7, #9, #10. `make eval` (Unit 6) now surfaces this and the faithfulness miss automatically, in one command. |
 | **Blockers** | None hard. Free-tier quota no longer gates measurement: OpenAI is primary behind the $10 ledger ($0.350669 spent, 2026-10-22). Groq qwen (200k TPD) is still the free second judge and fallback generator. Docker Desktop must be running for Qdrant (it was down at the 2026-10-22 session start). Open measured gaps carried forward: Phase 9 uncited claims, Phase 11 κ 0.1321 < 0.6, Phase 13 p95 5.6 s > 3 s (qwen-era; not re-measured on gpt-5-mini) |
@@ -957,8 +995,8 @@ Legend: ⬜ not started · 🟡 in progress · ✅ complete · ⏭️ cut
 | 13 | Observability & latency budget | 15 | 🟡 | p95 < 3s, per-stage breakdown |
 | 14 | API, streaming & UI | 16–17 | ✅ | Working demo w/ visible escalation |
 | 15 | Security hardening | 18½ | ✅ | Complete 2026-10-22, all 4 exit criteria met (`security-assessment.md` "Exit criteria"). Tenancy A1 609/1,800 -> 0 (0/760 bypass, re-run 15i); HTTP surface closed (15c); input boundary (15d, injection regex flag-only by measurement); prompt v3 served (15h): poisoned obedience 5/50 -> 0/50, direct exfiltration 1/28 -> 0/28; commitment + risky-advice output checks (15e, 15l); Qdrant keyed loopback (15f). Provider migration inside the phase: generator gpt-5-mini (15g1-g3), router nano (15g4). 31 security tests, 0 xfail |
-| 16 | **CI evaluation gate** ⚑ | 18½ | ⬜ | Gate that fails on regression |
-| 17 | LangGraph port & framework comparison | 19 | ⬜ | Comparison writeup, both paths pass eval |
+| 16 | **CI evaluation gate** ⚑ | 18½ | ✅ | 5-job gate (retrieval, router, generation, escalation, report); deliberate regression failed it (recall@10 -12% rel.) and recovery verified; end-to-end p95 gate deferred to Phase 17 hand-off |
+| 17 | LangGraph port & framework comparison | 19 | ✅ | Complete 2026-10-25, all 3 exit criteria met. 180/180 dev queries identical to direct (every field, both passes; control detects a tau shift 59/180); framework +0.6-1.2 ms/request, live paired delta not detectable; 61 -> 184 code lines; verdict: keep direct as default (`framework-comparison.md`). Side finding: fresh direct p95 11.8 s |
 | 18 | Deployment | 20 | ⬜ | Public URL |
 | 19 | Failure analysis & writeup | 21 | ⬜ | Held-out numbers, taxonomy, README |
 
@@ -1218,6 +1256,7 @@ Every non-obvious choice, its alternatives, and why. Append-only.
 | 2026-10-19 | **Generator = gpt-5-mini** (user OK); provider order unchanged (openai -> groq qwen -> gemini) | gpt-4.1-mini (the 2026-10-18 plan); gpt-4.1-nano; qwen on Groq as primary; prompt v2c for OpenAI models | Same 20 queries, prompt v2, judge held fixed: gpt-5-mini 0.7158 vs qwen 0.7296 (CI [−0.148, +0.111]), 6 unsupported citations. gpt-4.1-mini 0.4486 (CI excludes 0, under-cites); gpt-4.1-nano ties on rate but 26 unsupported (decorative citations, against the North Star); qwen primary brings back the 200k TPD cap; v2c lowered both OpenAI models' rate on a disjoint dev set and pushed refusals to 9/10. Caveats: sentence-level rate is coarser for gpt-5-mini's long sentences (step 4 RAGAS checks it); 0 reasoning tokens at minimal effort. Design records 15g1-15g3. |
 | 2026-10-22 | **Serve prompt v3** (rule fixed before the run, user-approved) | Keep v2 (A3 open); decide on H2 citation rate alone | Pre-registered rule: (a) poisoned-chunk obedience v3 0/50 <= v2 5/50, (b) v3 − v2 citation rate CI upper bound >= 0 under both splitters and judges (line-aware +0.068 [−0.039, +0.175]). Costs +624 input tokens/request. Design record 15h. |
 | 2026-10-22 | **Risky-advice check: vouch by the documentation corpus** (install/link/secret-request never validated otherwise) | Provenance demotion of all issue-supported claims; LLM safety judge; pip-line allowlist | Issues are 16,944/19,236 chunks and the known_issue value; an LLM judge reads the attacker's text; pip-line extraction missed uvicorn (quoted/prose mentions). Design record 15l. |
+| 2026-10-25 | Phase 17: LangGraph port keeps `direct` as the default backend; retry-on-low-confidence is a config-gated edge, default off; graph path not added to CI (deferred to future-work) | Default to the graph; enable the plan's retry loop; add a CI matrix leg | The port is behavior-identical (180/180 dev queries, every field) but costs 3x the code (61 -> 184) and 6 stack frames and buys features this system does not use; the direct path has no retry loop (Phase 8: -13.4% NDCG@5), so enabling it would break the behavior-preservation claim; the matrix leg was deferred by the user. Details: `docs/results/framework-comparison.md`, design records 17a-17f. |
 ---
 
 ## Design Records
@@ -1240,7 +1279,8 @@ Every non-obvious choice, its alternatives, and why. Append-only.
 | 13 | `observability-and-latency.md` | 13 | ⬜ |
 | 14 | `serving-streaming-and-ux.md` — lettered sub-records: `14-streaming-pipeline.md`, `14b-api-sse.md`, `14c-trace-and-feedback.md`, `14d-conversation-memory.md`, `14e-static-ui.md`, `14f-rate-limiting-and-provider-failure.md`, `14g-feedback-review-queue.md`, `14h-semantic-cache-collision-and-cold-start.md`, `14i-multiturn-regime-c-eval.md` | 14 | ✅ |
 | 15 | `rag-security.md` — `15-rag-security.md` (threat model + before results), `15b-tenant-partitioning.md`, `15c-access-control.md`, `15g1-generation-bakeoff.md`, `15g2-prompt-fit.md`, `15g3-gpt5-generators.md`, `15g4-router-reeval.md`, `15h-realstack-security.md`, `15j-cache-answer-config-scope.md`, `15k-claim-splitting.md`, `15l-risky-advice-check.md`, `15d-input-boundary.md`, `15e-injection-defenses.md`, `15f-vector-store-exposure.md`, `15g-openai-provider-and-spend-guard.md`; 15h, 15i to follow | 15 | 🟡 |
-| 16 | `ci-eval-gates.md` | 16 | ⬜ |
+| 16a-16j | `16a-test-workflow.md` ... `16j-generation-and-latency-gates.md` | 16 | ✅ (the planned umbrella `16-ci-eval-gates.md` is not written) |
+| 17, 17a-17f | `17-frameworks-and-orchestration.md` (umbrella), `17a-langgraph-dependency-and-switch.md`, `17b-the-state-graph.md`, `17c-backend-selection-and-trace-parity.md`, `17d-equivalence-on-the-dev-set.md`, `17e-latency-overhead.md`, `17f-loc-and-debuggability.md` | 17 | ✅ |
 | 17 | `frameworks-and-orchestration.md` | 17 | ⬜ |
 | 18 | `deployment.md` | 18 | ⬜ |
 | 19 | `what-i-built-and-what-i-learned.md` | 19 | ⬜ |
@@ -1320,12 +1360,21 @@ Tracks what's actually implemented from scratch vs. imported, so the ratio state
 | 18 | The claim splitter doesn't break on newlines/bullets: a bulleted answer becomes a few long "claims" (up to 1,718 chars) that pass or fail as one unit on word overlap | 2026-10-22 | Every valid_citation_rate (15h measured it: ~40% of v3's apparent gain over v2 was granularity) | **Resolved 2026-10-22 (15k)** -- claims end at paragraph breaks + list items (not plain newlines); decision-relevant answers re-scored: qwen 0.7296 -> 0.7539, gpt-5-mini v2 0.7217, v3 0.7842; both decisions hold |
 | 19 | The exact-match cache key has no prompt version: after a prompt change, cached answers from the old prompt are replayed (a hit skips generation and validation) | 2026-10-22 | The v2 -> v3 switch (15h) | **Resolved 2026-10-22 (15j)** -- cache scope = corpus_version + prompt version + provider chain; v2->v3 and qwen->gpt-5-mini both miss now; 3 TDD tests |
 | 20 | The citation validator certifies poisoned advice: when v2 relayed a poisoned chunk's `pip install fastapi-securefix` recommendation citing that chunk, it scored SUPPORTED_LEXICAL (4/4) -- "supported" means "a retrieved block says it", not "it is true or safe" | 2026-10-22 | The North Star: a validated citation looks authoritative | **Resolved for install/link/secret-request (15l, 2026-10-22)** -- `UNVOUCHED_RISKY_ADVICE` unless the documentation corpus vouches; not cached, UI warning. Still open: insecure-config advice (e.g. CORS wildcard + credentials), import-name typosquats (`pydantic_settings`) |
+| 21 | The fresh direct p95 is 11.8 s (n = 40, 2026-10-25), not the 5.6 s on file, against a 3 s target; p50 alone is 3.6 s. Generation (gpt-5-mini) is 53% of generate-path time and validation's LLM entailment adds a 2.7 s p95 | 2026-10-25 | Phase 18 (the deployed p95 must be reported) and DoD #6 | Open -- measured, not investigated: Phase 17 only owed a baseline. Candidates in `docs/future-work.md` are untested. Likely changes the confidence scorer or validator, which would shift the escalation baseline and must be applied to both backends |
 
 ---
 
 ## Session Log
 
 Newest first. One entry per working session.
+
+### 2026-10-25 — Phase 17 completed: LangGraph port, equivalence on 180 dev queries, framework comparison
+
+Built `LangGraphPipeline` test-first (one overridden seam; stage methods shared), made the backend config-selectable, proved it behavior-identical (180/180 dev queries, every field, cold and cached; negative control detects a
+tau shift), measured the framework (+0.6-1.2 ms/request isolated; live paired delta not detectable; 61 -> 184 code lines; +6 stack frames) and wrote the verdict (keep direct). Found a contradiction worth the next session's
+attention: the fresh direct p95 is 11.8 s, not 5.6 s (Open Question #21). Mistakes, disclosed: lost a paid latency run ($0.131) to a summary bug that ran before the raw rows were saved; first control (retry edge on) was
+refused by the reranker miss budget and replaced by a tau-shift control. Estimate record: equivalence estimated $0.28, actual $0.274; latency estimated $0.09-0.16, actual $0.131 and $0.133. Spend this phase $0.538
+(incl. the lost run). Tests 830 -> 862.
 
 ### 2026-10-19 → 2026-10-22 — Phase 15 completed: provider migration, real-stack security batch, three validator/cache fixes, wrap-up
 

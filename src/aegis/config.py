@@ -11,6 +11,7 @@ Each settings group reads from `.env` via its own `env_prefix`, e.g.
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Literal
 
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -878,6 +879,22 @@ class OpenAISettings(BaseSettings):
     reasoning_effort: str = "minimal"
 
 
+class OrchestrationSettings(BaseSettings):
+    """Phase 17: which implementation runs the request flow. Both produce the
+    same `PipelineResult` (design record 17b); the choice is a deployment knob,
+    not a behavior switch."""
+
+    model_config = SettingsConfigDict(env_prefix="ORCHESTRATION_", env_file=".env", extra="ignore")
+
+    backend: Literal["direct", "langgraph"] = "direct"
+    # Plan.md Phase 17 describes "the retry loop on low confidence". The direct
+    # path has none: iterative retrieval was measured in Phase 8 (-13.4% NDCG@5)
+    # and shipped off. The graph can express it as an edge; it stays off so the
+    # port is behavior-preserving, and `max_retries` caps it at one like Phase 8.
+    retry_on_low_confidence: bool = False
+    max_retries: int = 1
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
@@ -906,6 +923,7 @@ class Settings(BaseSettings):
     input_boundary: InputBoundarySettings = InputBoundarySettings()
     commitment: CommitmentSettings = CommitmentSettings()
     risky_advice: RiskyAdviceSettings = RiskyAdviceSettings()
+    orchestration: OrchestrationSettings = OrchestrationSettings()
 
 
 settings = Settings()

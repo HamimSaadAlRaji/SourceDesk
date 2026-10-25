@@ -20,6 +20,7 @@ from aegis.embedding.encoder import Encoder
 from aegis.embedding.vector_store import get_client
 from aegis.generation.llm import default_client
 from aegis.generation.pipeline import GenerationPipeline
+from aegis.graph.pipeline import LangGraphPipeline
 from aegis.guardrails.citations import CitationValidator
 from aegis.guardrails.confidence import ConfidenceScorer
 from aegis.observability.tracing import get_tracer
@@ -41,21 +42,34 @@ def load_chunks() -> list[Chunk]:
         return [Chunk(**json.loads(line)) for line in f]
 
 
+def pipeline_class(backend: str | None = None) -> type[AnswerPipeline]:
+    """Which orchestration runs the request flow (Phase 17). `None` reads the
+    setting at call time, so an env override or a test patch takes effect."""
+    backend = backend or settings.orchestration.backend
+    if backend == "direct":
+        return AnswerPipeline
+    if backend == "langgraph":
+        return LangGraphPipeline
+    raise ValueError(f"unknown orchestration backend {backend!r}; expected 'direct' or 'langgraph'")
+
+
 def build_pipeline(
     cache_dir: Path | None = None,
     corpus_version: str = DEFAULT_CORPUS_VERSION,
     partition: str = settings.tenancy.default_partition,
+    backend: str | None = None,
 ) -> AnswerPipeline:
     """`cache_dir=None` uses the real cache paths from settings; pass a directory
     for isolated (throwaway) caches. `partition` binds retrieval and both caches
     to one partition for the pipeline's lifetime (design record 15b)."""
-    return build_pipelines([partition], cache_dir, corpus_version)[partition]
+    return build_pipelines([partition], cache_dir, corpus_version, backend)[partition]
 
 
 def build_pipelines(
     partitions: Iterable[str],
     cache_dir: Path | None = None,
     corpus_version: str = DEFAULT_CORPUS_VERSION,
+    backend: str | None = None,
 ) -> dict[str, AnswerPipeline]:
     """One pipeline per partition (design record 15c: a principal selects a
     pipeline, never a filter). Models, LLM clients, caches and the corpus are
@@ -83,8 +97,9 @@ def build_pipelines(
     generation = GenerationPipeline(llm=default_client(), validator=CitationValidator())  # openai -> groq -> gemini (15g)
     rewriter = QueryRewriter() if settings.query.rewrite_enabled else None
     tracer = get_tracer()
+    cls = pipeline_class(backend)
     return {
-        name: AnswerPipeline(
+        name: cls(
             exact_cache=exact_cache,
             semantic_cache=semantic_cache,
             router=router,

@@ -1,0 +1,38 @@
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	rewrite(rewrite)
+	cache(cache)
+	serve_cached(serve_cached)
+	route(route)
+	escalate_route(escalate_route)
+	retrieve(retrieve)
+	confidence(confidence)
+	reformulate(reformulate)
+	escalate_confidence(escalate_confidence)
+	generate(generate)
+	__end__([<p>__end__</p>]):::last
+	__start__ -.-> cache;
+	__start__ -.-> rewrite;
+	cache -.-> route;
+	cache -.-> serve_cached;
+	confidence -.-> escalate_confidence;
+	confidence -.-> generate;
+	confidence -.-> reformulate;
+	reformulate --> retrieve;
+	retrieve --> confidence;
+	rewrite --> cache;
+	route -. &nbsp;done&nbsp; .-> __end__;
+	route -.-> escalate_route;
+	route -.-> retrieve;
+	escalate_confidence --> __end__;
+	escalate_route --> __end__;
+	generate --> __end__;
+	serve_cached --> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc

@@ -284,11 +284,8 @@ class AnswerPipeline:
             log_event(_log, logging.INFO, "pipeline.request_start", query_id=query.id)
             timings: dict[str, float] = {}
             try:
-                effective = query
-                if history and self.rewriter is not None:
-                    with _timed(timings, "rewrite"):
-                        effective = self._rewrite(query, history)
-                result = self._answer(effective, timings, on_event).model_copy(
+                answered, effective = self._orchestrate(query, history, timings, on_event)
+                result = answered.model_copy(
                     update={
                         "trace_id": trace_id,
                         "stage_latencies_ms": timings,
@@ -321,22 +318,40 @@ class AnswerPipeline:
             )
         return result
 
+    def _orchestrate(
+        self, query: Query, history: History | None, timings: dict[str, float], emit: EventSink | None
+    ) -> tuple[PipelineResult, Query]:
+        """The request flow itself: rewrite a follow-up, then answer. Returns the
+        result and the query the later stages saw. This is the one seam
+        `graph.pipeline.LangGraphPipeline` replaces (design record 17b); every
+        stage method below is shared by both implementations."""
+        effective = query
+        if history and self.rewriter is not None:
+            with _timed(timings, "rewrite"):
+                effective = self._rewrite(query, history)
+        return self._answer(effective, timings, emit), effective
+
+    def _serve_cached(
+        self, query: Query, cached: CachedAnswer, status: CacheStatus, emit: EventSink | None
+    ) -> PipelineResult:
+        if emit is not None:
+            emit(TokenEvent(text=cached.text))
+            for c in cached.cited:
+                emit(CitationEvent(**c.model_dump()))
+        return PipelineResult(
+            query=query,
+            cache_status=status,
+            escalate=False,
+            text=cached.text,
+            citations=cached.citations,
+            provider=cached.provider,
+        )
+
     def _answer(self, query: Query, timings: dict[str, float], emit: EventSink | None) -> PipelineResult:
         with _timed(timings, "cache_lookup"):
             cached, status = self._check_cache(query)
         if cached is not None:
-            if emit is not None:
-                emit(TokenEvent(text=cached.text))
-                for c in cached.cited:
-                    emit(CitationEvent(**c.model_dump()))
-            return PipelineResult(
-                query=query,
-                cache_status=status,
-                escalate=False,
-                text=cached.text,
-                citations=cached.citations,
-                provider=cached.provider,
-            )
+            return self._serve_cached(query, cached, status, emit)
 
         try:
             with _timed(timings, "routing"):

@@ -7,6 +7,7 @@ generation, and (2) an escalation (hard route or low confidence) never
 reaches generation.
 """
 
+import os
 from contextlib import contextmanager
 
 from aegis.cache.exact_match import CachedAnswer
@@ -157,6 +158,17 @@ def _generation_pipeline(llm) -> GenerationPipeline:
     return GenerationPipeline(llm=llm, validator=validator, prompt=V1)
 
 
+def _default_pipeline_class() -> type[AnswerPipeline]:
+    """`AEGIS_TEST_BACKEND=langgraph pytest` re-runs every pipeline, stream, history and
+    audit test against the graph (Phase 17, design record 17b): the existing suite is the
+    equivalence harness, so the port is held to the behavior already pinned down."""
+    if os.environ.get("AEGIS_TEST_BACKEND") == "langgraph":
+        from aegis.graph.pipeline import LangGraphPipeline
+
+        return LangGraphPipeline
+    return AnswerPipeline
+
+
 def _pipeline(
     router=None,
     retriever=None,
@@ -166,9 +178,11 @@ def _pipeline(
     semantic_cache=None,
     tau: float = 0.5,
     rewriter=None,
+    cls: type[AnswerPipeline] | None = None,
+    **extra,
 ) -> tuple[AnswerPipeline, NullTracer]:
     tracer = NullTracer()
-    pipeline = AnswerPipeline(
+    pipeline = (cls or _default_pipeline_class())(
         exact_cache=exact_cache or _FakeCache(hit=None),
         semantic_cache=semantic_cache or _FakeCache(hit=None),
         router=router or _FixedRouter(Route.DOCS_HOWTO),
@@ -179,6 +193,7 @@ def _pipeline(
         corpus_version="test-corpus-v1",
         tau=tau,
         rewriter=rewriter,
+        **extra,
     )
     return pipeline, tracer
 

@@ -1,0 +1,30 @@
+{
+  "direct_orchestration_code_lines": 61,
+  "direct_by_function": {
+    "_orchestrate": 8,
+    "_serve_cached": 15,
+    "_answer": 38
+  },
+  "graph_module_code_lines": 184,
+  "graph_by_function": {
+    "__init__": 13,
+    "_orchestrate": 8,
+    "_build_graph": 28,
+    "_after_start": 2,
+    "_after_cache": 2,
+    "_after_route": 4,
+    "_after_confidence": 6,
+    "_n_rewrite": 4,
+    "_n_cache": 5,
+    "_n_serve_cached": 4,
+    "_n_route": 13,
+    "_n_escalate_route": 9,
+    "_n_retrieve": 4,
+    "_n_confidence": 4,
+    "_n_reformulate": 8,
+    "_n_escalate_confidence": 9,
+    "_n_generate": 8
+  },
+  "graph_functions_total": 131,
+  "graph_without_retry": 176
+}

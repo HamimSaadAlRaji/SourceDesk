@@ -1,0 +1,1551 @@
+{
+  "n": 40,
+  "seed": 17,
+  "spent_usd": 0.133343,
+  "rows": [
+    {
+      "query_id": "golden::issue::3349",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 0,
+      "wall_ms": 2244.320833007805,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.21841700072400272,
+        "routing": 683.5870420036372,
+        "retrieval": 17.59874999697786,
+        "confidence": 388.20929199573584,
+        "generation": 1150.234000000637,
+        "validation": 0.7287920016096905
+      }
+    },
+    {
+      "query_id": "golden::issue::3349",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 0,
+      "wall_ms": 2493.1118749955203,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.345124994055368,
+        "routing": 868.7706659984542,
+        "retrieval": 21.224042007816024,
+        "confidence": 476.067540992517,
+        "generation": 1116.7020830034744,
+        "validation": 0.7632500055478886
+      }
+    },
+    {
+      "query_id": "golden::issue::3155",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 1,
+      "wall_ms": 5708.7943329970585,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.35791700065601617,
+        "routing": 732.4917090008967,
+        "retrieval": 32.65675000147894,
+        "confidence": 435.7215000054566,
+        "generation": 3780.454500010819,
+        "validation": 719.4783329905476
+      }
+    },
+    {
+      "query_id": "golden::issue::3155",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 1,
+      "wall_ms": 3082.1986249939073,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 1.2187500105937943,
+        "routing": 736.3593750051223,
+        "retrieval": 18.952333004563116,
+        "confidence": 541.0140419990057,
+        "generation": 1779.6796250040643,
+        "validation": 0.9622919897083193
+      }
+    },
+    {
+      "query_id": "golden::issue::11104",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 2,
+      "wall_ms": 3478.091500001028,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.3336669906275347,
+        "routing": 932.0543750072829,
+        "retrieval": 23.43995800765697,
+        "confidence": 476.9672910042573,
+        "generation": 1341.884209003183,
+        "validation": 701.1150000034831
+      }
+    },
+    {
+      "query_id": "golden::issue::11104",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 2,
+      "wall_ms": 3161.6903340036515,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.2362079976592213,
+        "routing": 660.8696670009522,
+        "retrieval": 21.77500000107102,
+        "confidence": 426.7321249935776,
+        "generation": 1387.10095899296,
+        "validation": 658.0886659940006
+      }
+    },
+    {
+      "query_id": "golden::issue::2791",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 3,
+      "wall_ms": 9155.418625014136,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.4080840008100495,
+        "routing": 745.5896250030492,
+        "retrieval": 24.99916701344773,
+        "confidence": 1474.2628749954747,
+        "generation": 5438.941791988327,
+        "validation": 1462.765792006394
+      }
+    },
+    {
+      "query_id": "golden::issue::2791",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 3,
+      "wall_ms": 12920.847291999962,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.4004579968750477,
+        "routing": 727.5161249999655,
+        "retrieval": 22.218250000150874,
+        "confidence": 1463.299666007515,
+        "generation": 7211.406124988571,
+        "validation": 3492.2802910004975
+      }
+    },
+    {
+      "query_id": "golden::issue::938",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 4,
+      "wall_ms": 5776.569207999273,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.24500000290572643,
+        "routing": 828.4923749888549,
+        "retrieval": 24.046582999289967,
+        "confidence": 554.1887920117006,
+        "generation": 4362.868500000332,
+        "validation": 2.7522080054041
+      }
+    },
+    {
+      "query_id": "golden::issue::938",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 4,
+      "wall_ms": 2579.1448749951087,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.37158299528528005,
+        "routing": 773.5928339970997,
+        "retrieval": 21.186917001614347,
+        "confidence": 409.84354200190865,
+        "generation": 1365.6612500053598,
+        "validation": 0.6076249992474914
+      }
+    },
+    {
+      "query_id": "golden::issue::1264",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 5,
+      "wall_ms": 2832.673666009214,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.32341599580831826,
+        "routing": 823.6016249866225,
+        "retrieval": 28.34316701046191,
+        "confidence": 511.2668340007076,
+        "generation": 1459.9706669978332,
+        "validation": 1.0681669955374673
+      }
+    },
+    {
+      "query_id": "golden::issue::1264",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 5,
+      "wall_ms": 2679.0535839973018,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.31791700166650116,
+        "routing": 709.8166249925271,
+        "retrieval": 19.14483300060965,
+        "confidence": 533.8223330036271,
+        "generation": 1411.3508330046898,
+        "validation": 0.8590420038672164
+      }
+    },
+    {
+      "query_id": "golden::issue::3053",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 6,
+      "wall_ms": 11739.76287500409,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.3794999938691035,
+        "routing": 735.4144579876447,
+        "retrieval": 13.426542005618103,
+        "confidence": 1242.77254199842,
+        "generation": 9741.181833000155,
+        "validation": 2.5219159870175645
+      }
+    },
+    {
+      "query_id": "golden::issue::3053",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 6,
+      "wall_ms": 8450.437042003614,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.36337500205263495,
+        "routing": 730.298499998753,
+        "retrieval": 18.232083995826542,
+        "confidence": 1237.7914999960922,
+        "generation": 6455.9280409885105,
+        "validation": 2.00379200396128
+      }
+    },
+    {
+      "query_id": "negative::billing_legal::8",
+      "is_negative": true,
+      "backend": "langgraph",
+      "order": 7,
+      "wall_ms": 735.6825419992674,
+      "path": "escalate_policy",
+      "provider": null,
+      "stages": {
+        "cache_lookup": 0.20329200197011232,
+        "routing": 732.9221249965485,
+        "escalation": 0.5052089982200414
+      }
+    },
+    {
+      "query_id": "negative::billing_legal::8",
+      "is_negative": true,
+      "backend": "direct",
+      "order": 7,
+      "wall_ms": 693.5222500032978,
+      "path": "escalate_policy",
+      "provider": null,
+      "stages": {
+        "cache_lookup": 0.18329200975131243,
+        "routing": 686.0566660034237,
+        "escalation": 6.800457995268516
+      }
+    },
+    {
+      "query_id": "golden::issue::2937",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 8,
+      "wall_ms": 2374.9903330026427,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.33558299764990807,
+        "routing": 725.6283750029979,
+        "retrieval": 21.379500001785345,
+        "confidence": 463.032583007589,
+        "generation": 1159.680541997659,
+        "validation": 0.9818749967962503
+      }
+    },
+    {
+      "query_id": "golden::issue::2937",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 8,
+      "wall_ms": 5180.851791999885,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.326834007864818,
+        "routing": 890.5681670003105,
+        "retrieval": 23.035457998048514,
+        "confidence": 308.08124999748543,
+        "generation": 3948.957792003057,
+        "validation": 1.9244170107413083
+      }
+    },
+    {
+      "query_id": "golden::issue::2618",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 9,
+      "wall_ms": 6433.725166993099,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.31370899523608387,
+        "routing": 746.3330419996055,
+        "retrieval": 25.994291005190462,
+        "confidence": 790.9713749977527,
+        "generation": 4858.5321249993285,
+        "validation": 3.752000004169531
+      }
+    },
+    {
+      "query_id": "golden::issue::2618",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 9,
+      "wall_ms": 9160.927791992435,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.35325001226738095,
+        "routing": 765.2172909874935,
+        "retrieval": 19.345458000316285,
+        "confidence": 771.7419170076028,
+        "generation": 6823.20100000652,
+        "validation": 777.3333329969319
+      }
+    },
+    {
+      "query_id": "golden::issue::3212",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 10,
+      "wall_ms": 1119.8760830011452,
+      "path": "escalate_confidence",
+      "provider": null,
+      "stages": {
+        "cache_lookup": 0.26758399326354265,
+        "routing": 686.6638749925187,
+        "retrieval": 21.59383299294859,
+        "confidence": 407.68316699541174,
+        "escalation": 2.349416012293659
+      }
+    },
+    {
+      "query_id": "golden::issue::3212",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 10,
+      "wall_ms": 943.105625003227,
+      "path": "escalate_confidence",
+      "provider": null,
+      "stages": {
+        "cache_lookup": 0.19454200810287148,
+        "routing": 652.4756669969065,
+        "retrieval": 20.37983399350196,
+        "confidence": 262.04274999327026,
+        "escalation": 1.068790996214375
+      }
+    },
+    {
+      "query_id": "golden::issue::2967",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 11,
+      "wall_ms": 2794.889915996464,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.4859159962506965,
+        "routing": 700.224000000162,
+        "retrieval": 22.828417000710033,
+        "confidence": 586.5215840021847,
+        "generation": 1474.4459169887705,
+        "validation": 1.331499996013008
+      }
+    },
+    {
+      "query_id": "golden::issue::2967",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 11,
+      "wall_ms": 2931.5232500084676,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.32033400202635676,
+        "routing": 764.9938339891378,
+        "retrieval": 17.55099999718368,
+        "confidence": 659.9945000052685,
+        "generation": 1483.6899579968303,
+        "validation": 1.1468330048955977
+      }
+    },
+    {
+      "query_id": "golden::issue::809",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 12,
+      "wall_ms": 2648.8545829924988,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 5.112832994200289,
+        "routing": 809.9104159919079,
+        "retrieval": 23.48987500590738,
+        "confidence": 617.3799580137711,
+        "generation": 1184.555833999184,
+        "validation": 4.7371249966090545
+      }
+    },
+    {
+      "query_id": "golden::issue::809",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 12,
+      "wall_ms": 4935.294041002635,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.3436249971855432,
+        "routing": 721.4801249938319,
+        "retrieval": 20.936291010002606,
+        "confidence": 602.9734170006122,
+        "generation": 2759.137125001871,
+        "validation": 823.3167080034036
+      }
+    },
+    {
+      "query_id": "golden::issue::4475",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 13,
+      "wall_ms": 3408.0141670128796,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.43620800715871155,
+        "routing": 675.7779159961501,
+        "retrieval": 14.134375000139698,
+        "confidence": 1361.2811249913648,
+        "generation": 1348.5784160002368,
+        "validation": 0.428374987677671
+      }
+    },
+    {
+      "query_id": "golden::issue::4475",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 13,
+      "wall_ms": 4079.467374991509,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.49995799781754613,
+        "routing": 975.5157079925993,
+        "retrieval": 18.435499994666316,
+        "confidence": 1359.971833997406,
+        "generation": 1719.9952499940991,
+        "validation": 0.806957992608659
+      }
+    },
+    {
+      "query_id": "golden::issue::1329",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 14,
+      "wall_ms": 4463.834875001339,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.3097079897997901,
+        "routing": 731.4222919958411,
+        "retrieval": 27.982583997072652,
+        "confidence": 675.2209160040366,
+        "generation": 3023.1907079869416,
+        "validation": 1.8322499963687733
+      }
+    },
+    {
+      "query_id": "golden::issue::1329",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 14,
+      "wall_ms": 4476.523792007356,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.389458000427112,
+        "routing": 730.8824170031585,
+        "retrieval": 20.09916699898895,
+        "confidence": 621.5059160022065,
+        "generation": 2341.643624997232,
+        "validation": 753.7113330035936
+      }
+    },
+    {
+      "query_id": "golden::issue::1653",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 15,
+      "wall_ms": 5239.395667013014,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.38404199585784227,
+        "routing": 761.5890840097563,
+        "retrieval": 20.65983299689833,
+        "confidence": 630.9907089889748,
+        "generation": 3816.237250008271,
+        "validation": 1.9534160092007369
+      }
+    },
+    {
+      "query_id": "golden::issue::1653",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 15,
+      "wall_ms": 4576.139291995787,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.25391599046997726,
+        "routing": 746.5294170106063,
+        "retrieval": 22.714999999152496,
+        "confidence": 721.8403330043657,
+        "generation": 3081.9753329997184,
+        "validation": 0.7259999983943999
+      }
+    },
+    {
+      "query_id": "golden::issue::5602",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 16,
+      "wall_ms": 3076.4205409941496,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.22441700275521725,
+        "routing": 665.7237089966657,
+        "retrieval": 19.108749998849817,
+        "confidence": 1027.520833988092,
+        "generation": 1358.6507499858271,
+        "validation": 1.0817089932970703
+      }
+    },
+    {
+      "query_id": "golden::issue::5602",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 16,
+      "wall_ms": 3211.204708000878,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.5095420056022704,
+        "routing": 771.528874989599,
+        "retrieval": 17.416999995475635,
+        "confidence": 1040.0420840014704,
+        "generation": 1371.3030829967465,
+        "validation": 1.7220409936271608
+      }
+    },
+    {
+      "query_id": "golden::issue::581",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 17,
+      "wall_ms": 11013.739416011958,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.35954100894741714,
+        "routing": 831.8523339985404,
+        "retrieval": 19.003875000635162,
+        "confidence": 803.565084002912,
+        "generation": 9343.08137500193,
+        "validation": 6.7371249897405505
+      }
+    },
+    {
+      "query_id": "golden::issue::581",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 17,
+      "wall_ms": 10618.339749998995,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.6369170005200431,
+        "routing": 701.689958004863,
+        "retrieval": 31.08045800763648,
+        "confidence": 1937.2437080019154,
+        "generation": 7079.766666007345,
+        "validation": 863.2822920044418
+      }
+    },
+    {
+      "query_id": "golden::issue::1490",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 18,
+      "wall_ms": 4768.435667006997,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.33512499067001045,
+        "routing": 710.5649589939276,
+        "retrieval": 53.13404099433683,
+        "confidence": 620.3972500079544,
+        "generation": 2479.0972499904456,
+        "validation": 901.3551670068409
+      }
+    },
+    {
+      "query_id": "golden::issue::1490",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 18,
+      "wall_ms": 2685.7280419935705,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.3275419876445085,
+        "routing": 710.0817500031553,
+        "retrieval": 34.66199999093078,
+        "confidence": 573.2599170005415,
+        "generation": 1357.2899160062661,
+        "validation": 0.7196670048870146
+      }
+    },
+    {
+      "query_id": "golden::issue::2884",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 19,
+      "wall_ms": 7090.077540997299,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.3393340011825785,
+        "routing": 730.4653750034049,
+        "retrieval": 28.342208999674767,
+        "confidence": 647.4839589936892,
+        "generation": 3266.7051659955177,
+        "validation": 2404.7647080005845
+      }
+    },
+    {
+      "query_id": "golden::issue::2884",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 19,
+      "wall_ms": 2958.150625010603,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.6878340063849464,
+        "routing": 695.9051669982728,
+        "retrieval": 22.605249992921017,
+        "confidence": 646.5142090019071,
+        "generation": 1588.4108339960221,
+        "validation": 0.6653340096818283
+      }
+    },
+    {
+      "query_id": "golden::issue::129",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 20,
+      "wall_ms": 3894.534958002623,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.21408300381153822,
+        "routing": 831.1582500027725,
+        "retrieval": 27.994165997370146,
+        "confidence": 305.7022079883609,
+        "generation": 2724.3211660097586,
+        "validation": 1.4746249944437295
+      }
+    },
+    {
+      "query_id": "golden::issue::129",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 20,
+      "wall_ms": 5013.9393330027815,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.36833299964200705,
+        "routing": 655.8996250096243,
+        "retrieval": 17.52154200221412,
+        "confidence": 427.85379200358875,
+        "generation": 3025.6720000033965,
+        "validation": 875.5635840061586
+      }
+    },
+    {
+      "query_id": "negative::billing_legal::2",
+      "is_negative": true,
+      "backend": "langgraph",
+      "order": 21,
+      "wall_ms": 851.3140409922926,
+      "path": "escalate_policy",
+      "provider": null,
+      "stages": {
+        "cache_lookup": 0.21858300897292793,
+        "routing": 847.4039579887176,
+        "escalation": 1.053582993336022
+      }
+    },
+    {
+      "query_id": "negative::billing_legal::2",
+      "is_negative": true,
+      "backend": "direct",
+      "order": 21,
+      "wall_ms": 891.5255419997266,
+      "path": "escalate_policy",
+      "provider": null,
+      "stages": {
+        "cache_lookup": 0.3787500027101487,
+        "routing": 889.7214169992367,
+        "escalation": 0.7526669942308217
+      }
+    },
+    {
+      "query_id": "golden::issue::753",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 22,
+      "wall_ms": 6340.141541993944,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.3760410036193207,
+        "routing": 1023.8672090054024,
+        "retrieval": 23.470000000088476,
+        "confidence": 1881.5132919989992,
+        "generation": 3404.5988750003744,
+        "validation": 2.273833000799641
+      }
+    },
+    {
+      "query_id": "golden::issue::753",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 22,
+      "wall_ms": 3404.398874990875,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.39191699761431664,
+        "routing": 824.6801659988705,
+        "retrieval": 23.79604199086316,
+        "confidence": 757.2150829946622,
+        "generation": 1790.122166989022,
+        "validation": 0.8016669889912009
+      }
+    },
+    {
+      "query_id": "golden::issue::763",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 23,
+      "wall_ms": 9878.601207994507,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.2116249961545691,
+        "routing": 802.8892079892103,
+        "retrieval": 26.02720800496172,
+        "confidence": 903.3947910065763,
+        "generation": 5800.277041998925,
+        "validation": 2340.2151670015883
+      }
+    },
+    {
+      "query_id": "golden::issue::763",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 23,
+      "wall_ms": 6211.102541012224,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.2826249983627349,
+        "routing": 842.1778749907389,
+        "retrieval": 18.278917006682605,
+        "confidence": 932.9682089883136,
+        "generation": 3759.3825420044595,
+        "validation": 655.7517500041286
+      }
+    },
+    {
+      "query_id": "golden::issue::1240",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 24,
+      "wall_ms": 11327.702417009277,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.17858399951364845,
+        "routing": 726.8372079997789,
+        "retrieval": 34.87954201409593,
+        "confidence": 393.8107919966569,
+        "generation": 5658.295707995421,
+        "validation": 4511.0017499973765
+      }
+    },
+    {
+      "query_id": "golden::issue::1240",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 24,
+      "wall_ms": 2521.4934999967227,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.2514169900678098,
+        "routing": 824.8822500027018,
+        "retrieval": 21.925749999354593,
+        "confidence": 407.8690419992199,
+        "generation": 1257.3317080095876,
+        "validation": 0.6959579914109781
+      }
+    },
+    {
+      "query_id": "golden::issue::3065",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 25,
+      "wall_ms": 10702.043625002261,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.4199999966658652,
+        "routing": 864.2752090090653,
+        "retrieval": 30.537915998138487,
+        "confidence": 867.7236670046113,
+        "generation": 6462.5061670085415,
+        "validation": 2468.155417009257
+      }
+    },
+    {
+      "query_id": "golden::issue::3065",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 25,
+      "wall_ms": 9308.989750003093,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.3742910048458725,
+        "routing": 730.8415000006789,
+        "retrieval": 24.887999999918975,
+        "confidence": 870.4382090072613,
+        "generation": 5283.070459001465,
+        "validation": 2396.6977079981007
+      }
+    },
+    {
+      "query_id": "golden::issue::219",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 26,
+      "wall_ms": 5019.367333006812,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.3742090048035607,
+        "routing": 712.6476249977713,
+        "retrieval": 34.447666999767534,
+        "confidence": 2973.021500001778,
+        "generation": 1295.1968330016825,
+        "validation": 0.6400830025086179
+      }
+    },
+    {
+      "query_id": "golden::issue::219",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 26,
+      "wall_ms": 3628.206124994904,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.4725829930976033,
+        "routing": 678.0044170009205,
+        "retrieval": 24.08362500136718,
+        "confidence": 1065.03816699842,
+        "generation": 1853.3813749963883,
+        "validation": 0.44845799857284874
+      }
+    },
+    {
+      "query_id": "golden::issue::5646",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 27,
+      "wall_ms": 3598.749583004974,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.3310839965706691,
+        "routing": 686.753875008435,
+        "retrieval": 23.636041005374864,
+        "confidence": 1557.0154579909286,
+        "generation": 1321.9154590042308,
+        "validation": 0.7809579983586445
+      }
+    },
+    {
+      "query_id": "golden::issue::5646",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 27,
+      "wall_ms": 4437.392708990956,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.5646249919664115,
+        "routing": 681.1037920124363,
+        "retrieval": 87.18291700643022,
+        "confidence": 1773.0994159937836,
+        "generation": 1224.6265419962583,
+        "validation": 668.0314160039416
+      }
+    },
+    {
+      "query_id": "negative::adversarial_injection::9",
+      "is_negative": true,
+      "backend": "direct",
+      "order": 28,
+      "wall_ms": 830.9999589982908,
+      "path": "escalate_policy",
+      "provider": null,
+      "stages": {
+        "cache_lookup": 0.18962498870678246,
+        "routing": 829.4887090014527,
+        "escalation": 0.8387499983655289
+      }
+    },
+    {
+      "query_id": "negative::adversarial_injection::9",
+      "is_negative": true,
+      "backend": "langgraph",
+      "order": 28,
+      "wall_ms": 1025.703125007567,
+      "path": "escalate_policy",
+      "provider": null,
+      "stages": {
+        "cache_lookup": 0.42808399302884936,
+        "routing": 1018.2706670020707,
+        "escalation": 0.38920898805372417
+      }
+    },
+    {
+      "query_id": "golden::issue::744",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 29,
+      "wall_ms": 5326.125250008772,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.37650000012945384,
+        "routing": 817.1103329950711,
+        "retrieval": 51.075875002425164,
+        "confidence": 1735.1102920074482,
+        "generation": 1978.98291599995,
+        "validation": 734.8454580060206
+      }
+    },
+    {
+      "query_id": "golden::issue::744",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 29,
+      "wall_ms": 8916.23304199311,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.4453329893294722,
+        "routing": 744.8319169925526,
+        "retrieval": 20.746499998494983,
+        "confidence": 1810.4175409971504,
+        "generation": 4131.176958006108,
+        "validation": 2203.9946670120116
+      }
+    },
+    {
+      "query_id": "golden::issue::4478",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 30,
+      "wall_ms": 3499.295792003977,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.39674999425187707,
+        "routing": 808.4567500045523,
+        "retrieval": 21.222999988822266,
+        "confidence": 1177.374000006239,
+        "generation": 1486.2844169983873,
+        "validation": 1.7079579993151128
+      }
+    },
+    {
+      "query_id": "golden::issue::4478",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 30,
+      "wall_ms": 3351.6827909916174,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.47870801063254476,
+        "routing": 677.0833329937886,
+        "retrieval": 22.38070899329614,
+        "confidence": 1157.2584169916809,
+        "generation": 1484.5913750032196,
+        "validation": 1.5578339953208342
+      }
+    },
+    {
+      "query_id": "golden::issue::15764",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 31,
+      "wall_ms": 8210.449165999307,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.5234160053078085,
+        "routing": 777.465207997011,
+        "retrieval": 29.875041989726014,
+        "confidence": 1099.4925830018474,
+        "generation": 5567.838375005522,
+        "validation": 726.4890000078594
+      }
+    },
+    {
+      "query_id": "golden::issue::15764",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 31,
+      "wall_ms": 3655.1845829962986,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.506583004607819,
+        "routing": 796.8307910050498,
+        "retrieval": 12.220375007018447,
+        "confidence": 1047.8507500083651,
+        "generation": 1792.3130839917576,
+        "validation": 1.1898339871549979
+      }
+    },
+    {
+      "query_id": "golden::issue::1266",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 32,
+      "wall_ms": 2798.7387500033947,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.33304200042039156,
+        "routing": 726.0526250029216,
+        "retrieval": 26.868833010667004,
+        "confidence": 877.8103340009693,
+        "generation": 1162.9783749958733,
+        "validation": 0.9400420094607398
+      }
+    },
+    {
+      "query_id": "golden::issue::1266",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 32,
+      "wall_ms": 2802.4631249863887,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.3922079922631383,
+        "routing": 689.1099589993246,
+        "retrieval": 18.6687920067925,
+        "confidence": 882.8707919892622,
+        "generation": 1201.994500006549,
+        "validation": 0.9818749967962503
+      }
+    },
+    {
+      "query_id": "golden::issue::1005",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 33,
+      "wall_ms": 2723.42533399933,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.3893329994753003,
+        "routing": 671.7832920112414,
+        "retrieval": 21.506459001102485,
+        "confidence": 573.8018330011982,
+        "generation": 1447.0876669947756,
+        "validation": 1.1113750078948215
+      }
+    },
+    {
+      "query_id": "golden::issue::1005",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 33,
+      "wall_ms": 2768.825666003977,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.30779199732933193,
+        "routing": 691.9526660058182,
+        "retrieval": 21.96025000012014,
+        "confidence": 572.2377080091974,
+        "generation": 1478.1335410079919,
+        "validation": 1.0177079966524616
+      }
+    },
+    {
+      "query_id": "golden::issue::3587",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 34,
+      "wall_ms": 3084.525250000297,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.24066699552349746,
+        "routing": 695.80762500118,
+        "retrieval": 26.768333002110012,
+        "confidence": 1032.3099169909256,
+        "generation": 1324.6095409995178,
+        "validation": 0.9129160025622696
+      }
+    },
+    {
+      "query_id": "golden::issue::3587",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 34,
+      "wall_ms": 3079.938458002289,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.47199999971780926,
+        "routing": 810.8030409930507,
+        "retrieval": 22.185583002283238,
+        "confidence": 970.9052910038736,
+        "generation": 1266.5848750039004,
+        "validation": 0.6987910019233823
+      }
+    },
+    {
+      "query_id": "golden::issue::125",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 35,
+      "wall_ms": 1257.5493340118555,
+      "path": "escalate_confidence",
+      "provider": null,
+      "stages": {
+        "cache_lookup": 0.2532090002205223,
+        "routing": 643.2230409991462,
+        "retrieval": 30.827499998849817,
+        "confidence": 577.1783329983009,
+        "escalation": 0.7804579945513979
+      }
+    },
+    {
+      "query_id": "golden::issue::125",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 35,
+      "wall_ms": 1181.0659170005238,
+      "path": "escalate_confidence",
+      "provider": null,
+      "stages": {
+        "cache_lookup": 0.2328749978914857,
+        "routing": 691.5646660054335,
+        "retrieval": 25.79229199909605,
+        "confidence": 462.0262919925153,
+        "escalation": 0.35429200215730816
+      }
+    },
+    {
+      "query_id": "golden::issue::1719",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 36,
+      "wall_ms": 3697.1539170044707,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.27654100267682225,
+        "routing": 792.4977090005996,
+        "retrieval": 23.354541990556754,
+        "confidence": 1425.3803749888903,
+        "generation": 1449.5473340066383,
+        "validation": 1.883958000689745
+      }
+    },
+    {
+      "query_id": "golden::issue::1719",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 36,
+      "wall_ms": 3563.8639999961015,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.440332994912751,
+        "routing": 684.4810829934431,
+        "retrieval": 16.558958988753147,
+        "confidence": 1558.4720829938306,
+        "generation": 1294.2706670000916,
+        "validation": 0.6490420055342838
+      }
+    },
+    {
+      "query_id": "golden::issue::244",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 37,
+      "wall_ms": 3075.6590830133064,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.2553749945946038,
+        "routing": 1016.7659589933464,
+        "retrieval": 22.837084005004726,
+        "confidence": 814.5865410042461,
+        "generation": 1211.9134579988895,
+        "validation": 0.8437920041615143
+      }
+    },
+    {
+      "query_id": "golden::issue::244",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 37,
+      "wall_ms": 2962.603875013883,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.3920410090358928,
+        "routing": 773.4325829951558,
+        "retrieval": 23.901583001133986,
+        "confidence": 840.6225420039846,
+        "generation": 1320.4614580026828,
+        "validation": 0.6654999888269231
+      }
+    },
+    {
+      "query_id": "golden::issue::1649",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 38,
+      "wall_ms": 2314.314083996578,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.8105839951895177,
+        "routing": 804.991416996927,
+        "retrieval": 20.69041700451635,
+        "confidence": 321.5643339935923,
+        "generation": 1163.279041997157,
+        "validation": 0.571750002563931
+      }
+    },
+    {
+      "query_id": "golden::issue::1649",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 38,
+      "wall_ms": 2242.1017089945963,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.17654200200922787,
+        "routing": 725.3599170071539,
+        "retrieval": 20.9165409905836,
+        "confidence": 303.98941700696014,
+        "generation": 1185.555125004612,
+        "validation": 0.6977080047363415
+      }
+    },
+    {
+      "query_id": "golden::issue::9780",
+      "is_negative": false,
+      "backend": "langgraph",
+      "order": 39,
+      "wall_ms": 14358.350875001634,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.8492500055581331,
+        "routing": 704.4952919968637,
+        "retrieval": 24.556082993512973,
+        "confidence": 8635.709417008911,
+        "generation": 4195.0083340052515,
+        "validation": 789.3627919984283
+      }
+    },
+    {
+      "query_id": "golden::issue::9780",
+      "is_negative": false,
+      "backend": "direct",
+      "order": 39,
+      "wall_ms": 16344.067958998494,
+      "path": "generate",
+      "provider": "openai",
+      "stages": {
+        "cache_lookup": 0.6367500027408823,
+        "routing": 834.3882079934701,
+        "retrieval": 41.65258399734739,
+        "confidence": 10911.450540996157,
+        "generation": 4549.4596250064205,
+        "validation": 1.4082920097280294
+      }
+    }
+  ],
+  "summary": {
+    "direct": {
+      "all": {
+        "wall": {
+          "n": 40,
+          "mean": 4871.87729797588,
+          "p50": 3577.240187500138,
+          "p95": 11798.81709585388,
+          "p99": 15009.011898869065,
+          "max": 16344.067958998494
+        }
+      },
+      "by_path": {
+        "escalate_confidence": {
+          "wall": {
+            "n": 2,
+            "mean": 1150.4710000008345,
+            "p50": 1150.4710000008345,
+            "p95": 1178.0064253005548,
+            "p99": 1180.45401866053,
+            "max": 1181.0659170005238
+          }
+        },
+        "escalate_policy": {
+          "wall": {
+            "n": 3,
+            "mean": 805.3492503337717,
+            "p50": 830.9999589982908,
+            "p95": 885.472983699583,
+            "p99": 890.3150303396978,
+            "max": 891.5255419997266
+          }
+        },
+        "generate": {
+          "wall": {
+            "n": 35,
+            "mean": 5433.088633372348,
+            "p50": 3894.534958002623,
+            "p95": 12094.088200102848,
+            "p99": 15180.172932218982,
+            "max": 16344.067958998494
+          }
+        }
+      },
+      "stages": {
+        "cache_lookup": {
+          "n": 40,
+          "mean": 0.503656274304376,
+          "p50": 0.33535399415995926,
+          "p95": 0.8309922959597305,
+          "p99": 3.594140630593754,
+          "max": 5.112832994200289
+        },
+        "routing": {
+          "n": 40,
+          "mean": 766.1928145989805,
+          "p50": 735.8869164963835,
+          "p95": 934.2274416565486,
+          "p99": 1005.0101236104092,
+          "max": 1023.8672090054024
+        },
+        "retrieval": {
+          "n": 37,
+          "mean": 25.77211935194272,
+          "p50": 22.714999999152496,
+          "p95": 43.94887539674523,
+          "p99": 74.92532164207661,
+          "max": 87.18291700643022
+        },
+        "confidence": {
+          "n": 37,
+          "mean": 1208.605760189695,
+          "p50": 771.7419170076028,
+          "p95": 2144.3992664018833,
+          "p99": 8053.616086238185,
+          "max": 10911.450540996157
+        },
+        "generation": {
+          "n": 35,
+          "mean": 2891.101564285262,
+          "p50": 1719.9952499940991,
+          "p95": 7119.2585037017125,
+          "p99": 8881.058092276207,
+          "max": 9741.181833000155
+        },
+        "validation": {
+          "n": 35,
+          "mean": 491.5809201999634,
+          "p50": 1.4746249944437295,
+          "p95": 2725.3724828988165,
+          "p99": 4164.636453938434,
+          "max": 4511.0017499973765
+        },
+        "escalation": {
+          "n": 5,
+          "mean": 2.219116600463167,
+          "p50": 0.8387499983655289,
+          "p95": 5.910249598673544,
+          "p99": 6.622416315949522,
+          "max": 6.800457995268516
+        }
+      }
+    },
+    "langgraph": {
+      "all": {
+        "wall": {
+          "n": 40,
+          "mean": 4578.639042651048,
+          "p50": 3406.2065210018773,
+          "p95": 10717.628414552746,
+          "p99": 13053.952405995658,
+          "max": 14358.350875001634
+        }
+      },
+      "by_path": {
+        "escalate_confidence": {
+          "wall": {
+            "n": 2,
+            "mean": 1100.3274795075413,
+            "p50": 1100.3274795075413,
+            "p95": 1241.827148561424,
+            "p99": 1254.4048969217693,
+            "max": 1257.5493340118555
+          }
+        },
+        "escalate_policy": {
+          "wall": {
+            "n": 3,
+            "mean": 870.8999026663756,
+            "p50": 851.3140409922926,
+            "p95": 1008.2642166060396,
+            "p99": 1022.2153433272615,
+            "max": 1025.703125007567
+          }
+        },
+        "generate": {
+          "wall": {
+            "n": 35,
+            "mean": 5095.205915400792,
+            "p50": 3598.749583004974,
+            "p95": 10795.55236230517,
+            "p99": 13221.182978945133,
+            "max": 14358.350875001634
+          }
+        }
+      },
+      "stages": {
+        "cache_lookup": {
+          "n": 40,
+          "mean": 0.3679948244098341,
+          "p50": 0.365854000847321,
+          "p95": 0.5102357055875473,
+          "p99": 0.7221747454605063,
+          "max": 0.8492500055581331
+        },
+        "routing": {
+          "n": 40,
+          "mean": 760.3033833991503,
+          "p50": 732.7069169987226,
+          "p95": 896.878056599962,
+          "p99": 1017.6838308786682,
+          "max": 1018.2706670020707
+        },
+        "retrieval": {
+          "n": 37,
+          "mean": 23.914233189095064,
+          "p50": 22.38070899329614,
+          "p95": 33.0577999993693,
+          "p99": 45.16687999828719,
+          "max": 51.075875002425164
+        },
+        "confidence": {
+          "n": 37,
+          "mean": 1013.4024347557774,
+          "p50": 757.2150829946622,
+          "p95": 1593.7997247965534,
+          "p99": 6151.493732008388,
+          "max": 8635.709417008911
+        },
+        "generation": {
+          "n": 35,
+          "mean": 2835.305836914839,
+          "p50": 1790.122166989022,
+          "p95": 6457.90147879452,
+          "p99": 8363.685804284169,
+          "max": 9343.08137500193
+        },
+        "validation": {
+          "n": 35,
+          "mean": 422.54387974348253,
+          "p50": 1.7220409936271608,
+          "p95": 2359.580029301287,
+          "p99": 2446.602575946308,
+          "max": 2468.155417009257
+        },
+        "escalation": {
+          "n": 5,
+          "mean": 0.759449994075112,
+          "p50": 0.7804579945513979,
+          "p95": 1.0657493956387043,
+          "p99": 1.0681826760992408,
+          "max": 1.068790996214375
+        }
+      }
+    }
+  }
+}
