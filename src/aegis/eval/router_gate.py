@@ -21,9 +21,12 @@ import argparse
 import hashlib
 import json
 import sys
+import time
 from collections.abc import Sequence
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
+import numpy as np
 
 from aegis.config import settings
 from aegis.eval.gate import GateReport, MetricSpec, compare_files, write_baseline
@@ -87,6 +90,7 @@ def gate_specs() -> list[MetricSpec]:
         MetricSpec(name="billing_recall", tolerance=g.router_billing_recall_tolerance),
         MetricSpec(name="billing_precision", tolerance=g.router_billing_precision_tolerance),
         MetricSpec(name="accuracy", tolerance=g.router_accuracy_tolerance),
+        MetricSpec(name="router_p95_ms", tolerance=g.router_p95_tolerance_ms, direction="lower"),
     ]
 
 
@@ -97,9 +101,20 @@ def run(model: str | None = None) -> GateReport:
     classifier = RouterClassifier(model=model)
     # A provider outage raises RouterUnavailableError and fails the job: an outage is
     # not a prediction, and must never be scored as one.
+    latencies_ms: list[float] = []
+
+    def timed(pair: tuple[GoldenQuery, Route]) -> Route:
+        start = time.perf_counter()
+        route = classifier.classify(pair[0].text)
+        latencies_ms.append((time.perf_counter() - start) * 1000)
+        return route
+
     with ThreadPoolExecutor(max_workers=_MAX_WORKERS) as pool:
-        predicted = list(pool.map(lambda pair: classifier.classify(pair[0].text), labeled))
+        predicted = list(pool.map(timed, labeled))
     metrics = score_routes([(true, pred) for (_, true), pred in zip(labeled, predicted)])
+    # The router sits on every query's critical path. Per-call API latency is what CI can measure
+    # honestly; end-to-end p95 cannot be (the CPU-bound confidence scorer would measure the runner).
+    metrics["router_p95_ms"] = float(np.percentile(latencies_ms, 95))
     return GateReport(suite="router", fingerprint=query_set_fingerprint(labeled), n_queries=len(labeled), metrics=metrics)
 
 

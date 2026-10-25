@@ -1,0 +1,16 @@
+{
+  "suite": "escalation",
+  "fingerprint": "e99f16de52c7d00f",
+  "n_queries": 180,
+  "metrics": {
+    "air_canada_fn": 3.0,
+    "negative_recall": 0.9,
+    "deflection_rate": 0.84
+  },
+  "info": {
+    "tau": "0.5",
+    "rerank_cache_hits": "540",
+    "rerank_cache_misses": "0",
+    "rerank_cache_size": "538"
+  }
+}

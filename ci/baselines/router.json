@@ -7,6 +7,10 @@
     "billing_recall": 1.0,
     "billing_precision": 1.0,
     "docs_howto_recall": 0.84,
-    "known_issue_recall": 0.64
+    "known_issue_recall": 0.64,
+    "router_p95_ms": 2179.8098226136062
+  },
+  "info": {
+    "baseline": "accuracy/billing from the 2026-10-24 modal run; router_p95_ms = mean of 3 runs on 2026-10-25 (8 threads)"
   }
 }

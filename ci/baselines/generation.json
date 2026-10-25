@@ -1,0 +1,20 @@
+{
+  "suite": "generation",
+  "fingerprint": "b70505a214e6bf05",
+  "n_queries": 20,
+  "metrics": {
+    "valid_citation_rate": 0.7980652218152218,
+    "cited_answer_rate": 0.9,
+    "empty_answer_rate": 0.0,
+    "generation_p95_ms": 6367.603035215145
+  },
+  "info": {
+    "generator": "gpt-5-mini",
+    "prompt": "v3",
+    "entailment_model": "gpt-4.1-mini",
+    "entailment_calls": "6",
+    "entailment_unparseable": "0",
+    "code_blocks_checked": "0",
+    "baseline": "mean of 3 identical-input runs (2026-10-25); gpt-5-mini has no temperature control"
+  }
+}

@@ -8,11 +8,17 @@
 #   pull_request      -> this workflow (full gate)
 #   push to main      -> this workflow, so "green on main" is a measured fact
 #   workflow_dispatch -> this workflow, on demand (baseline re-measurement, dry runs)
-# Three jobs: two run in parallel, then a third reports on a PR:
+# Five jobs: four gates run in parallel, then one reports on a PR:
 #   retrieval-gate  restored index, no LLM, $0
+#   escalation-gate Phase 10's escalate-or-answer decision over 180 dev queries (the Air Canada
+#                   metric), $0: reranker scores come from a committed content-addressed cache
+#                   (ci/caches/rerank_scores.json), so a run takes seconds, not an hour of CPU.
 #   llm-gate        real OpenAI calls (model-availability probe + router eval), capped at
-#                   $0.15 per run by the spend ledger. Never runs on push-to-main (merges
-#                   never spend money) and never on fork PRs (secrets are withheld there).
+#                   $0.05 per run by its own spend ledger (actual ~$0.02).
+#   generation-gate real OpenAI calls (generator + entailment) on 20 dev queries against the
+#                   restored index, capped at $0.10 (actual ~$0.03). Both LLM jobs: never on
+#                   push-to-main (merges never spend money), never on fork PRs (no secrets).
+#                   Worst case per PR run: $0.15 (the approved cap).
 #   report          PRs only: one sticky comment with both gates' tables diffed against
 #                   baseline, updated in place on every push (design record 16f).
 name: eval
@@ -131,7 +137,7 @@ jobs:
       # The ledger refuses any call whose worst case would pass this, before the provider
       # is contacted -- a hard per-run cap, not an after-the-fact alert. Fresh ledger per
       # run (uploaded as an artifact), so the cap is per run, not per project.
-      OPENAI_BUDGET_USD: "0.15"
+      OPENAI_BUDGET_USD: "0.05"
       OPENAI_LEDGER_PATH: results/ci_spend.sqlite
 
     steps:
@@ -183,8 +189,158 @@ jobs:
           path: results/
           if-no-files-found: warn
 
+  generation-gate:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    services:
+      qdrant:
+        image: qdrant/qdrant:v1.18.3
+        ports:
+          - 6333:6333
+        env:
+          QDRANT__STORAGE__OPTIMIZERS__MAX_OPTIMIZATION_THREADS: "0" # see retrieval-gate
+
+    env:
+      QDRANT_HOST: localhost
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_BUDGET_USD: "0.10"
+      OPENAI_LEDGER_PATH: results/ci_spend.sqlite
+      FIXTURES_TAG: ci-fixtures-v1
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v10.3.2
+        with:
+          enable-cache: true
+          python-version: "3.12"
+
+      - name: Install
+        run: uv sync --frozen
+
+      - name: Require the API key
+        run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "OPENAI_API_KEY secret is not set (gh secret set OPENAI_API_KEY)" >&2
+            exit 1
+          fi
+
+      - name: Download CI fixtures (release asset)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download "$FIXTURES_TAG" --dir ci-fixtures
+
+      - name: Wait for Qdrant
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:6333/healthz && exit 0
+            sleep 2
+          done
+          echo "Qdrant did not become healthy" >&2
+          exit 1
+
+      - name: Restore index
+        run: uv run --frozen python -m aegis.eval.ci_fixtures restore --src ci-fixtures
+
+      # Query vectors come from the tracked embedding cache: retrieval is not under test here
+      # (retrieval-gate owns it), so no 1.3 GB model download and no CPU encoding.
+      - name: Generation metrics
+        run: uv run --frozen python -m aegis.eval.generation_gate run --out results/generation.json
+
+      - name: Compare with baseline
+        run: uv run --frozen python -m aegis.eval.generation_gate compare --current results/generation.json --markdown results/generation.md
+
+      - name: Job summary
+        if: always()
+        run: |
+          if [ -f results/generation.md ]; then cat results/generation.md >> "$GITHUB_STEP_SUMMARY"; fi
+          if [ -f results/ci_spend.sqlite ]; then
+            echo '' >> "$GITHUB_STEP_SUMMARY"
+            echo '**OpenAI spend this job:**' >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            uv run --frozen python -m aegis.cost >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: generation-results
+          path: results/
+          if-no-files-found: warn
+
+  escalation-gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30 # seconds when the cache covers every pair; headroom for the capped misses
+
+    services:
+      qdrant:
+        image: qdrant/qdrant:v1.18.3
+        ports:
+          - 6333:6333
+        env:
+          QDRANT__STORAGE__OPTIMIZERS__MAX_OPTIMIZATION_THREADS: "0" # see retrieval-gate
+
+    env:
+      QDRANT_HOST: localhost
+      FIXTURES_TAG: ci-fixtures-v1
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v10.3.2
+        with:
+          enable-cache: true
+          python-version: "3.12"
+
+      - name: Install
+        run: uv sync --frozen
+
+      - name: Download CI fixtures (release asset)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download "$FIXTURES_TAG" --dir ci-fixtures
+
+      - name: Wait for Qdrant
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:6333/healthz && exit 0
+            sleep 2
+          done
+          echo "Qdrant did not become healthy" >&2
+          exit 1
+
+      - name: Restore index
+        run: uv run --frozen python -m aegis.eval.ci_fixtures restore --src ci-fixtures
+
+      # Fails loudly past 60 uncached reranker pairs (settings.gate.escalation_max_uncached_pairs):
+      # that means the reranker's inputs or model changed broadly and the cache must be refreshed.
+      - name: Escalation metrics
+        run: uv run --frozen python -m aegis.eval.escalation_gate run --fixtures ci-fixtures --out results/escalation.json
+
+      - name: Compare with baseline
+        run: uv run --frozen python -m aegis.eval.escalation_gate compare --current results/escalation.json --markdown results/escalation.md
+
+      - name: Job summary
+        if: always()
+        run: |
+          if [ -f results/escalation.md ]; then cat results/escalation.md >> "$GITHUB_STEP_SUMMARY"; fi
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: escalation-results
+          path: results/
+          if-no-files-found: warn
+
   report:
-    needs: [retrieval-gate, llm-gate]
+    needs: [retrieval-gate, llm-gate, generation-gate, escalation-gate]
     # always(): the comment matters most when a gate FAILED. Same-repo PRs only: a fork PR's
     # token is read-only and could not post; its numbers are still in the job summaries.
     if: >-
@@ -214,6 +370,20 @@ jobs:
           name: llm-results
           path: results-llm
 
+      - name: Generation results
+        uses: actions/download-artifact@v8.0.2
+        continue-on-error: true
+        with:
+          name: generation-results
+          path: results-gen
+
+      - name: Escalation results
+        uses: actions/download-artifact@v8.0.2
+        continue-on-error: true
+        with:
+          name: escalation-results
+          path: results-esc
+
       # Standard library only, run by path: no dependency install to go wrong.
       - name: Build comment
         env:
@@ -221,12 +391,16 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           RETRIEVAL_RESULT: ${{ needs.retrieval-gate.result }}
           ROUTER_RESULT: ${{ needs.llm-gate.result }}
+          GENERATION_RESULT: ${{ needs.generation-gate.result }}
+          ESCALATION_RESULT: ${{ needs.escalation-gate.result }}
         run: |
           python3 src/aegis/eval/pr_comment.py \
             --sha "$SHA" --run-url "$RUN_URL" \
             --retrieval-result "$RETRIEVAL_RESULT" --router-result "$ROUTER_RESULT" \
+            --generation-result "$GENERATION_RESULT" --escalation-result "$ESCALATION_RESULT" \
             --retrieval-md results-retrieval/retrieval.md --router-md results-llm/router.md \
-            --spend-db results-llm/ci_spend.sqlite --out comment.md
+            --generation-md results-gen/generation.md --escalation-md results-esc/escalation.md \
+            --spend-db results-llm/ci_spend.sqlite --spend-db results-gen/ci_spend.sqlite --out comment.md
 
       # Update the existing comment (found by its hidden marker) or create the first one.
       - name: Post or update the PR comment

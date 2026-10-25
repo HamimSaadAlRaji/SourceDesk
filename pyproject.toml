@@ -74,6 +74,8 @@ files = [
     "src/aegis/eval/gate.py",
     "src/aegis/eval/ci_index.py",
     "src/aegis/eval/ci_fixtures.py",
+    "src/aegis/eval/rerank_cache.py",
+    "src/aegis/eval/pr_comment.py",
 ]
 ignore_missing_imports = true
 warn_unused_ignores = true

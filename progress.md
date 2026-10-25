@@ -438,6 +438,27 @@ existed); also confirmed locally that Qdrant's search varies with its CPU limit 
 SHA-256) shown under the table; corrected the "runner is repeatable" claim in 16d/16e. 19 gate/host tests pass. **Screenshot still to take:** `docs/results/ci-gate-recovered-comment.png`.
 Then close PR #1 without merging and commit docs on main.
 
+**Units 16i-16j (2026-10-25): generation + latency gates built and measured; escalation check waiting on a Kaggle handoff.** `main` has the 16g-h commit (PR #1 closed, branch deleted).
+**16j (design record 16j):** `generation-gate` job (20 seeded dev positives, gpt-5-mini + gpt-4.1-mini entailment, OpenAI-only, strict entailment that raises rather than fails closed) -- metrics
+valid_citation_rate, cited_answer_rate, empty_answer_rate (an empty answer scores 0, not the vacuous 1), generation p95; `router_p95_ms` added to the router gate; PR comment now has 3 sections. **Noise is large:** 4 identical
+runs gave valid_citation_rate 0.6744 / 0.7339 / 0.8488 / 0.8710 (spread 0.197) -> bands 0.25 / 0.20 / 0.0 / 2,000 ms: this gate catches GROSS regressions only (synthetic "citations broke" fails; a 10-pt drop
+would not). code_syntax_valid_rate has no support in this sample (0 code blocks) so is recorded, not gated. Router p95 2.10-2.28 s (3 runs, 8 threads), band 1,000 ms. Costs: generation $0.0295-0.034/run (estimate was
+$0.08), router $0.019; caps split so the worst case per PR run is $0.15 (router job $0.05, generation job $0.10). 822 tests pass. **No end-to-end p95 gate**: unmeasurable in CI (CPU-bound scorer), the 3 s target
+stays unmet/ungated -> future-work.
+**16i (design record 16i):** escalation check (Phase 10 confusion at tau) is CPU-bound, not LLM-bound. Measured on real data: 180/180 query vectors and 1,352/1,352 candidate embeddings already cached; 538 distinct
+reranker pairs x 1.32 s/pair = **11.8 min on the M1 (> the 10-min local rule)** and far worse on the runner. Built a content-addressed score cache (`eval/rerank_cache.py`, 9 tests; keyed by model+query+chunk
+hash, miss budget fails loudly) and exported **886 pairs** (top-5 from live + CI-style index; the 538 top-3 pairs are identical across both) to `ci-fixtures/rerank_pairs_export.json` with 12 local reference
+scores. **BLOCKED ON USER: run `experiments/16f_kaggle_rerank_pairs.py` on Kaggle (manual handoff) and put the output at `ci/caches/rerank_scores.json`.** Then build `escalation_gate.py`, baseline, workflow step.
+Spend: local ledger **$0.607 of $10** + ~$0.066 across 4 CI runs (their own ledgers) = ~$0.673. Open: the CPU/vector-hash line from the first `main` run with provenance (16h) has not been read yet.
+
+**Unit 16i COMPLETE (2026-10-25) -- escalation gate built, measured, verified** (design record 16i, rewritten). User waived the 10-minute local rule for this one job, so the 538 reranker pairs
+were scored locally instead of on Kaggle: **584 s of scoring, 9 min 57 s wall** (my 11.8 min projection was 18% high: the benchmark put 12 mixed-length pairs in one batch, which pads to the longest; length-sorted
+batches ran 0.12 -> 1.09 s/pair, last 26 pairs = half the time). Cache `ci/caches/rerank_scores.json` (538 scores, 49 KB, committed). **Gate reproduces Phase 10 exactly** on the live index and on a CI-style restored
+index: air_canada_fn 3, negative recall 0.90, deflection 0.84; 540 hits / 0 misses, **4 s wall**, deterministic. Mutation tests: tau 0.30 -> 6 Air Canada slips (FAIL; deflection "improved" to 0.89), tau 0.65 -> deflection
+0.50 (FAIL). Bands: air_canada_fn 0 (zero tolerance), deflection 0.03 (placeholder), max 60 uncached pairs. New `escalation-gate` CI job (no secrets, runs on every event); PR comment now has 4 sections. 347 top-5
+margin pairs left unscored (do it if CI shows misses). Kaggle script `16f` unused. **Every Phase 16 build item now has a gate.** `uv run pytest -q`: 829 passed; ruff clean; mypy clean (23 files).
+**Pending decision (not answered):** the earlier `skillOverrides` proposal (80 unused skills; option 1 literal off / 2 user-invocable-only for built-in commands / 3 edit list) -- nothing in ~/.claude/settings.json has been changed.
+
 ## Phase 15 — Security Hardening
 
 **Scope** (plan.md, Day 18½, topic 36): the five attack classes (indirect injection, KB leakage, tenant separation,

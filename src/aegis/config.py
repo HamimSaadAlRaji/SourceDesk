@@ -566,6 +566,25 @@ class GateSettings(BaseSettings):
     router_billing_recall_tolerance: float = 0.0
     router_billing_precision_tolerance: float = 0.05
     router_accuracy_tolerance: float = 0.035
+    # Latency bands are judgment, not 2x-benign: 3 samples cannot characterize an API's heavy tail
+    # (observed router p95 2.10-2.28 s; an earlier single call hit 1.77 s sequentially, gpt-5-nano 13.6 s).
+    router_p95_tolerance_ms: float = 1000.0
+    # Generation (design record 16j). Three identical runs gave valid_citation_rate 0.6744 / 0.8488 / 0.8710
+    # (spread 0.197) and cited_answer_rate 0.80 / 0.90 / 1.00: gpt-5-mini has no temperature control and n=20 is
+    # small. Bands = 2x the largest deviation from the 3-run mean (0.124 -> 0.25; 0.10 -> 0.20), so this gate
+    # catches GROSS regressions only (citations breaking outright), not a quiet 8% drop. empty_answer_rate has
+    # zero tolerance: an empty answer is never noise. p95 is judgment (see router).
+    generation_citation_tolerance: float = 0.25
+    generation_cited_answer_tolerance: float = 0.2
+    generation_empty_answer_tolerance: float = 0.0
+    generation_p95_tolerance_ms: float = 2000.0
+    # Escalation (design record 16i). air_canada_fn = negatives answered anyway: zero tolerance, always.
+    # deflection band is a PLACEHOLDER until run-to-run behavior on real hardware is measured.
+    escalation_fn_tolerance: float = 0.0
+    escalation_deflection_tolerance: float = 0.03
+    # More uncached reranker pairs than this means the reranker's inputs or model changed broadly; refresh
+    # the cache (it is ~1.3 s/pair on an M1, far slower on a runner) instead of scoring them on CPU in CI.
+    escalation_max_uncached_pairs: int = 60
     baseline_dir: Path = REPO_ROOT / "ci" / "baselines"
 
 

@@ -13,3 +13,15 @@ Ideas that are not in `plan.md` and therefore are not built (CLAUDE.md §9).
 
 - **The served HNSW graph returns only ~67% of the true cosine top-10** (ID overlap 0.671, score recall 0.682 vs exact, 150 dev queries, 2026-10-23), unchanged by `ef_search` (Phase 3 sweep). Hypothesis, untested: 41.8% of chunks are in exact-duplicate groups, which can make a node's neighbor list all copies of itself. Test: deduplicate before indexing and re-measure ANN recall.
 - **The golden set's labels came from this specific index's candidates**, so exact cosine (the better retriever) scores recall@10 0.320 vs 0.437 live. Re-labeling against exact search would change every retrieval number in the project; for Phase 19's failure analysis to discuss, not to fix inside Phase 16.
+
+## CI gate sensitivity (found in Phase 16, design record 16j)
+
+- **The generation gate only sees gross regressions.** Four identical runs gave `valid_citation_rate` 0.6744 / 0.7339 / 0.8488 / 0.8710 (spread 0.197), so its band is 0.25. Tightening needs more samples: N = 60 would cut the spread by about 1.7x for ~$0.10 per run. Not done; the retrieval and router gates are much sharper.
+- **No end-to-end p95 gate.** The 3 s target is unmet and unmeasured on the current stack (5.6 s from the qwen era); the confidence scorer's CPU cost makes any CI number a measurement of the runner. Needs a local Phase 13 re-run on gpt-5-mini.
+- **Rewrite and entailment are unmeasured on gpt-4.1-mini** (16e); the generation gate's entailment calls are the first live use, with 0 unparseable verdicts over 48 calls (four runs).
+
+## Escalation check follow-ups (Phase 16, design record 16i)
+
+- **347 margin pairs (top-5 beyond top-3) are exported but unscored.** If CI runs on other hardware show reranker cache misses, score them with `experiments/16g_score_rerank_pairs_local.py` after adding a rank-threshold option (it is currently fixed to `rerank_pool_size`, so it selects `min_rank < 3` only) and recommit the cache.
+- **Cache refresh is manual.** After a deliberate reranker or chunking change, run the gate with `--save-cache --max-uncached 1000` and re-baseline; there is no automation, by design (a silent refresh would defeat the check).
+- **tau itself is unchanged and unimproved**: 3 of 30 negatives still pass at tau 0.5; the gate pins it. Improving it is Phase 19 failure-analysis work.

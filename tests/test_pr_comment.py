@@ -17,22 +17,25 @@ pr_comment = importlib.util.module_from_spec(_SPEC)
 _SPEC.loader.exec_module(pr_comment)
 
 RET = "### Retrieval: ✅ passed\n\n| Metric | Baseline | Current |\n|---|---|---|\n| recall@10 | 0.4435 | 0.4435 |\n"
+GEN = "### Generation: ✅ passed\n\n| Metric | Baseline | Current |\n|---|---|---|\n| valid_citation_rate | 0.7981 | 0.8000 |\n"
+ESC = "### Escalation: ✅ passed\n\n| Metric | Baseline | Current |\n|---|---|---|\n| air_canada_fn | 3.0000 | 3.0000 |\n"
 RTR = "### Router: ✅ passed\n\n| Metric | Baseline | Current |\n|---|---|---|\n| accuracy | 0.7759 | 0.7759 |\n"
 
 
-def _build(retrieval="success", llm="success", ret_md=RET, rtr_md=RTR, spend=0.01536):
+def _build(retrieval="success", llm="success", ret_md=RET, rtr_md=RTR, spend=0.01536, generation="success", gen_md=GEN,
+           escalation="success", esc_md=ESC):
     return pr_comment.build_comment(
         sha="a1b2c3d4e5f6", run_url="https://example.test/run/1",
-        jobs={"retrieval": retrieval, "router": llm},
-        sections={"retrieval": ret_md, "router": rtr_md}, spend_usd=spend,
+        jobs={"retrieval": retrieval, "router": llm, "generation": generation, "escalation": escalation},
+        sections={"retrieval": ret_md, "router": rtr_md, "generation": gen_md, "escalation": esc_md}, spend_usd=spend,
     )
 
 
-def test_all_green_says_so_and_includes_both_tables_the_link_and_the_sha():
+def test_all_green_says_so_and_includes_every_table_the_link_and_the_sha():
     body = _build()
     assert body.startswith(pr_comment.MARKER)
     assert "✅ All evaluation gates passed" in body
-    assert "recall@10" in body and "accuracy" in body
+    assert "recall@10" in body and "accuracy" in body and "valid_citation_rate" in body and "air_canada_fn" in body
     assert "https://example.test/run/1" in body and "a1b2c3d" in body
     assert "$0.0154" in body
 
@@ -85,3 +88,43 @@ def test_spend_is_read_from_the_ledger_file(tmp_path):
     con.close()
     assert abs(pr_comment.read_spend(db) - 0.015) < 1e-12
     assert pr_comment.read_spend(tmp_path / "missing.sqlite") is None
+
+
+def test_a_failed_generation_gate_is_named_in_the_headline():
+    body = _build(generation="failure", gen_md=GEN.replace("passed", "FAILED"))
+    assert "❌" in body.splitlines()[1]
+    assert "Generation" in body.splitlines()[1]
+
+
+def test_two_skipped_gates_are_counted_in_the_plural():
+    # a fork PR skips both LLM-backed gates
+    body = _build(llm="skipped", rtr_md=None, generation="skipped", gen_md=None)
+    assert "2 gates not run" in body
+    assert "✅ All" not in body
+
+
+def test_total_spend_sums_every_ledger_that_exists(tmp_path):
+    def ledger(name, costs):
+        db = tmp_path / name
+        con = sqlite3.connect(db)
+        con.execute("CREATE TABLE spend (id TEXT, ts REAL, model TEXT, purpose TEXT, input_tokens INT, "
+                    "cached_input_tokens INT, output_tokens INT, cost_usd REAL)")
+        con.executemany("INSERT INTO spend VALUES (?,?,?,?,?,?,?,?)", [(str(i), 0, "m", "p", 1, 0, 1, c) for i, c in enumerate(costs)])
+        con.commit()
+        con.close()
+        return db
+
+    a, b = ledger("a.sqlite", [0.01, 0.02]), ledger("b.sqlite", [0.04])
+    assert abs(pr_comment.total_spend([a, b, tmp_path / "missing.sqlite"]) - 0.07) < 1e-12
+    assert pr_comment.total_spend([tmp_path / "missing.sqlite"]) is None
+
+
+def test_a_failed_escalation_gate_is_named_in_the_headline():
+    body = _build(escalation="failure", esc_md=ESC.replace("passed", "FAILED"))
+    assert "❌" in body.splitlines()[1]
+    assert "Escalation" in body.splitlines()[1]
+
+
+def test_two_failed_gates_are_both_named():
+    body = _build(retrieval="failure", escalation="failure", ret_md=None, esc_md=None)
+    assert "Retrieval" in body.splitlines()[1] and "Escalation" in body.splitlines()[1]
